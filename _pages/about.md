@@ -15,10 +15,10 @@ redirect_from:
 <p style='text-align: justify;'> Prevalence of mental health disorders has not significantly increased. However, this does not mean mental health disorders are any less pressing. Their prevalence remains high, even if they are not increasingly significantly. In fact, as we make progress in combating other health aspects, mental health will become increasingly important in overall health burden on relative terms. As a share of total disease burden, mental health disorders are increasing, even if not in absolute terms. </p>
 
 **Mental health disorders as a share of total disease burden**
-<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="files/Share_of_mental_disorders_amongst_other_disorders.html" height="500" width="100%"></iframe>
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="parthbhatt05.github.io/files/Share_of_mental_disorders_amongst_other_disorders.html" height="500" width="100%"></iframe>
 
 **Share of population with mental health disorders**
-<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="files/Percent_People_in_world_suffering_from_mental_disorders.html" height="500" width="100%"></iframe>
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="parthbhatt05.github.io/files/Percent_People_in_world_suffering_from_mental_disorders.html" height="500" width="100%"></iframe>
 
 
 ## There are in general five major types of mental disorders
@@ -35,10 +35,10 @@ Eating disorders	|0.20% [0.1-1%]	|16 million	|0.13% males 0.29% females|
 Schizophrenia	|0.30% [0.2-0.4%]	|20 million	|0.26% males 0.25% females|
 
 **Prevalence of mental health disorders by disorder type**
-<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="files/Share_of_mental_healh_disorders.html" height="500" width="100%"></iframe>
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="parthbhatt05.github.io/files/Share_of_mental_healh_disorders.html" height="500" width="100%"></iframe>
 
 **Prevalence of mental health disorders by gender**
-<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="files/Gender_distribution_of_People_suffering_from_mental_disorders.html" height="500" width="100%"></iframe>
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="parthbhatt05.github.io/files/Gender_distribution_of_People_suffering_from_mental_disorders.html" height="500" width="100%"></iframe>
 
 [Depression](files/Gender_distribution_of_People_suffering_from_depression.html) [Anxiety Disorders](files/Gender_distribution_of_People_suffering_from_anxiety_disorders.html) [Eating Disorders](files/Gender_distribution_of_People_suffering_from_eating_disorders.html) [Schizophrenia](files/Gender_distribution_of_People_suffering_from_schizophrenia.html) [Bipolar Disorders](files/Gender_distribution_of_People_suffering_from_bipolar_disorder.html)
 
@@ -47,22 +47,22 @@ Schizophrenia	|0.30% [0.2-0.4%]	|20 million	|0.26% males 0.25% females|
 <p style='text-align: justify;'>The direct death toll from mental health disorders is typically low, however, mental health disorders are also attributed to significant number of indirect deaths through suicide and self-harm. Suicide deaths are strongly linked - although not always attributed to - mental health disorders.</p>
 
 **Suicide death rates vs. prevalence of mental & substance use disorders**
-<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="files/Mental_Disorder_vs_Suicide_Rate.html" height="500" width="100%"></iframe>
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="parthbhatt05.github.io/files/Mental_Disorder_vs_Suicide_Rate.html" height="500" width="100%"></iframe>
 
 <p style='text-align: justify;'>Disability Adjusted Life Years (DALYs) for a disease or health condition are calculated as the sum of the Years of Life Lost (YLL) due to premature mortality in the population and the Years Lost due to Disability (YLD) for people living with the health condition or its consequences.</p>
 
 **Disability adjusted life years of people having Mental Disorders (per 100,000)**
-<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="files/Disability_Adjusted_life_years_of_people_suffering_from_mental_disorders.html" height="500" width="100%"></iframe>
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="parthbhatt05.github.io/files/Disability_Adjusted_life_years_of_people_suffering_from_mental_disorders.html" height="500" width="100%"></iframe>
 
 ## Depression
 
 <p style='text-align: justify;'>Currently, Depression, a common psychological disorder, affects about 121 million people worldwide, and WHO has projected Depression to reach second place in the ranking of Disability Adjusted Life Years calculated for all ages, while it currently stands second for ages 15-44. And other mental illnesses as well have collectively been responsible for the bourgeois of the suicide rate, making mental disorder to be the second leading cause of death amongst 15-29 years old.</p>
 
 **Population suffering from Depression**
-<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="files/Population_with_Depression.html" height="500" width="100%"></iframe>
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="parthbhatt05.github.io/files/Population_with_Depression.html" height="500" width="100%"></iframe>
 
 **DALY of people suffering from Depression**
-<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="files/Disability_Adjusted_life_years_of_people_suffering_from_depression.html" height="500" width="100%"></iframe>
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="parthbhatt05.github.io/files/Disability_Adjusted_life_years_of_people_suffering_from_depression.html" height="500" width="100%"></iframe>
 
 <p style='text-align: justify;'>Depressive disorders occur with varying severity. The WHO’s International Classification of Diseases (ICD-10) define this set of disorders ranging from mild to moderate to severe. The IHME adopt such definitions by disaggregating to mild, persistent depression (dysthymia) and major depressive disorder (severe).</p>
 
