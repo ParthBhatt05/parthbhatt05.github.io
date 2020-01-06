@@ -98,8 +98,6 @@ All forms of depressive disorder experience some of the following symptoms:
 [DALY Age Distribution for Eating Disorders](files/Age_distribution_of_Disability_Adjusted_life_years_of_people_suffering_from_eating_disorders.html) |
 [DALY Age Distribution for Schizophrenia](files/Age_distribution_of_Disability_Adjusted_life_years_of_people_suffering_from_schizophrenia.html) 
 
-<> ([DALY Across various Disorders](files/DALYS_across_various_disorders.html))
-
 
 ## Data Sources
 
