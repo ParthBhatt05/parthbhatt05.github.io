@@ -7,7 +7,7 @@
 
 # Site Settings
 locale                   : "en-US"
-title                    : "Parth Bhatt / World in Mental health Crisis"
+title                    : "World in Mental Health Crisis"
 title_separator          : "-"
 name                     : &name "Parth Bhatt"
 description              : &description "Budding Data Scientist"
