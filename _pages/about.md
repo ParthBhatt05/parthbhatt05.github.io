@@ -40,6 +40,8 @@ Schizophrenia	|0.30% [0.2-0.4%]	|20 million	|0.26% males 0.25% females|
 **Prevalence of mental health disorders by gender**
 <iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="parthbhatt05.github.io/files/Gender_distribution_of_People_suffering_from_mental_disorders.html" height="500" width="100%"></iframe>
 
+<p style='text-align: justify;'>Taken together, in most countries mental disorders are more common in women than for men. However, this varies significantly by disorder type: on average, depression, anxiety, eating disorders, and bipolar disorder is more prevalent in women. Gender differences in schizophrenia are mixed across countries, but it is typically more common in men.</p>
+
 [Depression](files/Gender_distribution_of_People_suffering_from_depression.html) [Anxiety Disorders](files/Gender_distribution_of_People_suffering_from_anxiety_disorders.html) [Eating Disorders](files/Gender_distribution_of_People_suffering_from_eating_disorders.html) [Schizophrenia](files/Gender_distribution_of_People_suffering_from_schizophrenia.html) [Bipolar Disorders](files/Gender_distribution_of_People_suffering_from_bipolar_disorder.html)
 
 ## Death toll due to Mental disorders
