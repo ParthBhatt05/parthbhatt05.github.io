@@ -8,7 +8,7 @@ redirect_from:
 ---
 ![Image of Word Colud](images/wordcloud_tweet.png)
 
-<p style='text-align: justify;'> It’s estimated that around one billion people globally have a mental disorder. Despite being critical to overall well-being and physical health, diagnoses and furthermore, treatment or support, remain much lower than this estimate. Let me highlight some key statistics presenting the scenario of mental health across the world.</p>
+<p style='text-align: justify;'> The World is in a Mental Health Crisis. It’s estimated that around one billion people globally have a mental disorder. Despite being critical to overall well-being and physical health, diagnoses and furthermore, treatment or support, remain much lower than this estimate. Let me highlight some key statistics presenting the scenario of mental health across the world.</p>
 
 ## Every 6th or 7th person experiences from mental disorder
 
@@ -103,18 +103,22 @@ All forms of depressive disorder experience some of the following symptoms:
 
 ## Data Sources
 
-1) Institute of Health Metrics and Evaluation (IHME), Global Burden of Disease (GBD):
+1) Analysis of Tweets:
+   - Extract keywords from tweets related to mental disorders determined using sentiment analysis
+   - 31,000 tweets: (9,000 positive) from 17,000 users over a week's analysis period to generate the word-cloud
+
+2) Institute of Health Metrics and Evaluation (IHME), Global Burden of Disease (GBD):
    - Deaths, DALYs and prevalence of mental health and substance use disorders, by age and sex
    - Geographical coverage: Global by country and region
    - Time span: 1990 – 2016
    - Available at: [gbd-results-tool](http://ghdx.healthdata.org/gbd-results-tool)
 
-2) World Health Organization (WHO) International Classification of Diseases (ICD):
+3) World Health Organization (WHO) International Classification of Diseases (ICD):
    - World Health Organization. (1992). The ICD-10 classification of mental and behavioural disorders: clinical descriptions and diagnostic guidelines (Vol. 1). World Health Organization.
    - Data: Definitions and classifications of mental and substance use disorders
    - Available at: [ICD-10 Classification of Mental and Behavioural Disorders](http://www.who.int/classifications/icd/en/bluebook.pdf)
 
-3) World Health Organization (WHO) Global Health Observatory (GHO):
+4) World Health Organization (WHO) Global Health Observatory (GHO):
    - Data: Prevalence of depression
    - Geographical coverage: Global by country
    - Time span: 2015
