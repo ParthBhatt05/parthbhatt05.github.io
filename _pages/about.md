@@ -80,7 +80,6 @@ All forms of depressive disorder experience some of the following symptoms:
 ## A deep dive into all the mental disorders
 
 [Depression across the world](files/Percent_People_in_world_suffering_from_depression.html) 
-[Depression wrt Education and Emplyment Levels](files/Distribution_by_Education_and_Employment_of_people_suffering_with_Depression.html)
 
 [Anxiety Disorders across the world](files/Percent_People_in_world_suffering_from_anxiety_disorders.html) |
 [Bipolar Disorder across the world](files/Percent_People_in_world_suffering_from_bipolar_disorder.html) |
@@ -98,6 +97,7 @@ All forms of depressive disorder experience some of the following symptoms:
 [DALY Age Distribution for Eating Disorders](files/Age_distribution_of_Disability_Adjusted_life_years_of_people_suffering_from_eating_disorders.html) |
 [DALY Age Distribution for Schizophrenia](files/Age_distribution_of_Disability_Adjusted_life_years_of_people_suffering_from_schizophrenia.html) 
 
+([DALY Across various Disorders](files/DALYS_across_various_disorders.html))
 
 ## Data Sources
 
