@@ -1,22 +1,5 @@
 # main links links
 main:
-  - title: "Depression"
-    url: /publications/
-
-  - title: "Anxiety Disorders"
-    url: /talks/    
-
-  - title: "Eating Disorders"
-    url: /teaching/    
-    
-  - title: "Schizophrenia"
-    url: /portfolio/
-
-  - title: "Bipolar Disorders"
-    url: /portfolio/    
-    
-  - title: "DALYs"
-    url: /year-archive/
-    
+  
   - title: "Resume"
-    url: /files/Resume
+    url: /files/Resume.pdf
