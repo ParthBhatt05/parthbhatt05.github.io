@@ -8,7 +8,7 @@ redirect_from:
 ---
 ![Image of Word Colud](images/wordcloud_tweet.png)
 
-<p style='text-align: justify;'> It’s estimated that around one billion people globally have a mental or substance use disorder. Despite being critical to overall well-being and physical health, diagnoses and furthermore, treatment or support, remain much lower than this estimate. Let me highlight some key statistics presenting the scenario of mental health across the world.</p>
+<p style='text-align: justify;'> It’s estimated that around one billion people globally have a mental disorder. Despite being critical to overall well-being and physical health, diagnoses and furthermore, treatment or support, remain much lower than this estimate. Let me highlight some key statistics presenting the scenario of mental health across the world.</p>
 
 ## Every 6th or 7th person experiences from mental disorder
 
