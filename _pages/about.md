@@ -68,13 +68,13 @@ Schizophrenia	|0.30% [0.2-0.4%]	|20 million	|0.26% males 0.25% females|
 
 All forms of depressive disorder experience some of the following symptoms:
 
-1. reduced concentration and attention;
-2. reduced self-esteem and self-confidence;
-3. ideas of guilt and unworthiness (even in a mild type of episode);
-4. bleak and pessimistic views of the future;
-5. ideas or acts of self-harm or suicide;
+1. reduced concentration and attention
+2. reduced self-esteem and self-confidence
+3. ideas of guilt and unworthiness (even in a mild type of episode)
+4. bleak and pessimistic views of the future
+5. ideas or acts of self-harm or suicide
 6. disturbed sleep
-7. diminished appetite.
+7. diminished appetite
 
 
 ## A deep dive into all the mental disorders
