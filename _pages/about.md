@@ -1,50 +1,121 @@
 ---
 permalink: /
-title: "academicpages is a ready-to-fork GitHub Pages template for academic personal websites"
-excerpt: "About me"
+title: "World in Mental Health Crisis"
 author_profile: true
 redirect_from: 
   - /about/
   - /about.html
 ---
+![Image of Word Colud](images/wordcloud_tweet.png)
 
-This is the front page of a website that is powered by the [academicpages template](https://github.com/academicpages/academicpages.github.io) and hosted on GitHub pages. [GitHub pages](https://pages.github.com) is a free service in which websites are built and hosted from code and data stored in a GitHub repository, automatically updating when a new commit is made to the respository. This template was forked from the [Minimal Mistakes Jekyll Theme](https://mmistakes.github.io/minimal-mistakes/) created by Michael Rose, and then extended to support the kinds of content that academics have: publications, talks, teaching, a portfolio, blog posts, and a dynamically-generated CV. You can fork [this repository](https://github.com/academicpages/academicpages.github.io) right now, modify the configuration and markdown files, add your own PDFs and other content, and have your own site for free, with no ads! An older version of this template powers my own personal website at [stuartgeiger.com](http://stuartgeiger.com), which uses [this Github repository](https://github.com/staeiou/staeiou.github.io).
+<p style='text-align: justify;'> It’s estimated that around one billion people globally have a mental or substance use disorder. Despite being critical to overall well-being and physical health, diagnoses and furthermore, treatment or support, remain much lower than this estimate. Let me highlight some key statistics presenting the scenario of mental health across the world.</p>
 
-A data-driven personal website
-======
-Like many other Jekyll-based GitHub Pages templates, academicpages makes you separate the website's content from its form. The content & metadata of your website are in structured markdown files, while various other files constitute the theme, specifying how to transform that content & metadata into HTML pages. You keep these various markdown (.md), YAML (.yml), HTML, and CSS files in a public GitHub repository. Each time you commit and push an update to the repository, the [GitHub pages](https://pages.github.com/) service creates static HTML pages based on these files, which are hosted on GitHub's servers free of charge.
+## Every 6th or 7th person experiences from mental disorder
 
-Many of the features of dynamic content management systems (like Wordpress) can be achieved in this fashion, using a fraction of the computational resources and with far less vulnerability to hacking and DDoSing. You can also modify the theme to your heart's content without touching the content of your site. If you get to a point where you've broken something in Jekyll/HTML/CSS beyond repair, your markdown files describing your talks, publications, etc. are safe. You can rollback the changes or even delete the repository and start over -- just be sure to save the markdown files! Finally, you can also write scripts that process the structured data on the site, such as [this one](https://github.com/academicpages/academicpages.github.io/blob/master/talkmap.ipynb) that analyzes metadata in pages about talks to display [a map of every location you've given a talk](https://academicpages.github.io/talkmap.html).
+<p style='text-align: justify;'> Prevalence of mental health disorders has not significantly increased. However, this does not mean mental health disorders are any less pressing. Their prevalence remains high, even if they are not increasingly significantly. In fact, as we make progress in combating other health aspects, mental health will become increasingly important in overall health burden on relative terms. As a share of total disease burden, mental health disorders are increasing, even if not in absolute terms. </p>
 
-Getting started
-======
-1. Register a GitHub account if you don't have one and confirm your e-mail (required!)
-1. Fork [this repository](https://github.com/academicpages/academicpages.github.io) by clicking the "fork" button in the top right. 
-1. Go to the repository's settings (rightmost item in the tabs that start with "Code", should be below "Unwatch"). Rename the repository "[your GitHub username].github.io", which will also be your website's URL.
-1. Set site-wide configuration and create content & metadata (see below -- also see [this set of diffs](http://archive.is/3TPas) showing what files were changed to set up [an example site](https://getorg-testacct.github.io) for a user with the username "getorg-testacct")
-1. Upload any files (like PDFs, .zip files, etc.) to the files/ directory. They will appear at https://[your GitHub username].github.io/files/example.pdf.  
-1. Check status by going to the repository settings, in the "GitHub pages" section
+**Mental health disorders as a share of total disease burden**
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="files/Share_of_mental_disorders_amongst_other_disorders.html" height="500" width="100%"></iframe>
 
-Site-wide configuration
-------
-The main configuration file for the site is in the base directory in [_config.yml](https://github.com/academicpages/academicpages.github.io/blob/master/_config.yml), which defines the content in the sidebars and other site-wide features. You will need to replace the default variables with ones about yourself and your site's github repository. The configuration file for the top menu is in [_data/navigation.yml](https://github.com/academicpages/academicpages.github.io/blob/master/_data/navigation.yml). For example, if you don't have a portfolio or blog posts, you can remove those items from that navigation.yml file to remove them from the header. 
+**Share of population with mental health disorders**
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="files/Percent_People_in_world_suffering_from_mental_disorders.html" height="500" width="100%"></iframe>
 
-Create content & metadata
-------
-For site content, there is one markdown file for each type of content, which are stored in directories like _publications, _talks, _posts, _teaching, or _pages. For example, each talk is a markdown file in the [_talks directory](https://github.com/academicpages/academicpages.github.io/tree/master/_talks). At the top of each markdown file is structured data in YAML about the talk, which the theme will parse to do lots of cool stuff. The same structured data about a talk is used to generate the list of talks on the [Talks page](https://academicpages.github.io/talks), each [individual page](https://academicpages.github.io/talks/2012-03-01-talk-1) for specific talks, the talks section for the [CV page](https://academicpages.github.io/cv), and the [map of places you've given a talk](https://academicpages.github.io/talkmap.html) (if you run this [python file](https://github.com/academicpages/academicpages.github.io/blob/master/talkmap.py) or [Jupyter notebook](https://github.com/academicpages/academicpages.github.io/blob/master/talkmap.ipynb), which creates the HTML for the map based on the contents of the _talks directory).
 
-**Markdown generator**
+## There are in general five major types of mental disorders
 
-I have also created [a set of Jupyter notebooks](https://github.com/academicpages/academicpages.github.io/tree/master/markdown_generator
-) that converts a CSV containing structured data about talks or presentations into individual markdown files that will be properly formatted for the academicpages template. The sample CSVs in that directory are the ones I used to create my own personal website at stuartgeiger.com. My usual workflow is that I keep a spreadsheet of my publications and talks, then run the code in these notebooks to generate the markdown files, then commit and push them to the GitHub repository.
+<p style='text-align: justify;'> While <a href = "files/Share_of_Depression_amongst_mental_disorders.html"> Depression </a> is the most common amongst all other mental disorders, <a href="parthbhatt05.github.io/files/Share_of_Anxiety_disorders_amongst_mental_disorders.html"> Anxiety Disorders </a> are most prevalent amongst people. The other three categories are: <a href="parthbhatt05.github.io/files/Share_of_Eating_disorders_amongst_mental_disorders.html"> Eating Disorders</a>, <a href = "files/Share_of_Schizophrenia_amongst_mental_disorders.html"> Schizophrenia</a>, and <a href="parthbhatt05.github.io/files/Share_of_Bipolar_disorder_amongst_mental_disorders.html">Bipolar Disorders</a>. </p>
 
-How to edit your site's GitHub repository
-------
-Many people use a git client to create files on their local computer and then push them to GitHub's servers. If you are not familiar with git, you can directly edit these configuration and markdown files directly in the github.com interface. Navigate to a file (like [this one](https://github.com/academicpages/academicpages.github.io/blob/master/_talks/2012-03-01-talk-1.md) and click the pencil icon in the top right of the content preview (to the right of the "Raw | Blame | History" buttons). You can delete a file by clicking the trashcan icon to the right of the pencil icon. You can also create new files or upload files by navigating to a directory and clicking the "Create new file" or "Upload files" buttons. 
+|Disorder | Share of global population with disorder (2017) [Difference across Countries] |Number of people with the disorder (2017) | Share of males:females with disorder (2017) |
+|--------|-------:|:------:|:------:|
+Any mental health disorder	|10.70% |	792 million	|9.3% males 11.9% females|
+Depression	|3.40% [2-6%]	|264 million|	2.7% males 4.1% females|
+Anxiety disorders	|3.80% [2.5-7%]	|284 million	|2.8% males 4.7% females|
+Bipolar disorder	|0.60% [0.3-1.2%]|	46 million|	0.55% males 0.65% females|
+Eating disorders	|0.20% [0.1-1%]	|16 million	|0.13% males 0.29% females|
+Schizophrenia	|0.30% [0.2-0.4%]	|20 million	|0.26% males 0.25% females|
 
-Example: editing a markdown file for a talk
-![Editing a markdown file for a talk](/images/editing-talk.png)
+**Prevalence of mental health disorders by disorder type**
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="files/Share_of_mental_healh_disorders.html" height="500" width="100%"></iframe>
 
-For more info
-------
-More info about configuring academicpages can be found in [the guide](https://academicpages.github.io/markdown/). The [guides for the Minimal Mistakes theme](https://mmistakes.github.io/minimal-mistakes/docs/configuration/) (which this theme was forked from) might also be helpful.
+**Prevalence of mental health disorders by gender**
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="files/Gender_distribution_of_People_suffering_from_mental_disorders.html" height="500" width="100%"></iframe>
+
+[Depression](files/Gender_distribution_of_People_suffering_from_depression.html) [Anxiety Disorders](files/Gender_distribution_of_People_suffering_from_anxiety_disorders.html) [Eating Disorders](files/Gender_distribution_of_People_suffering_from_eating_disorders.html) [Schizophrenia](files/Gender_distribution_of_People_suffering_from_schizophrenia.html) [Bipolar Disorders](files/Gender_distribution_of_People_suffering_from_bipolar_disorder.html)
+
+## Death toll due to Mental disorders
+
+<p style='text-align: justify;'>The direct death toll from mental health disorders is typically low, however, mental health disorders are also attributed to significant number of indirect deaths through suicide and self-harm. Suicide deaths are strongly linked - although not always attributed to - mental health disorders.</p>
+
+**Suicide death rates vs. prevalence of mental & substance use disorders**
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="files/Mental_Disorder_vs_Suicide_Rate.html" height="500" width="100%"></iframe>
+
+<p style='text-align: justify;'>Disability Adjusted Life Years (DALYs) for a disease or health condition are calculated as the sum of the Years of Life Lost (YLL) due to premature mortality in the population and the Years Lost due to Disability (YLD) for people living with the health condition or its consequences.</p>
+
+**Disability adjusted life years of people having Mental Disorders (per 100,000)**
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="files/Disability_Adjusted_life_years_of_people_suffering_from_mental_disorders.html" height="500" width="100%"></iframe>
+
+## Depression
+
+<p style='text-align: justify;'>Currently, Depression, a common psychological disorder, affects about 121 million people worldwide, and WHO has projected Depression to reach second place in the ranking of Disability Adjusted Life Years calculated for all ages, while it currently stands second for ages 15-44. And other mental illnesses as well have collectively been responsible for the bourgeois of the suicide rate, making mental disorder to be the second leading cause of death amongst 15-29 years old.</p>
+
+**Population suffering from Depression**
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="files/Population_with_Depression.html" height="500" width="100%"></iframe>
+
+**DALY of people suffering from Depression**
+<iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="files/Disability_Adjusted_life_years_of_people_suffering_from_depression.html" height="500" width="100%"></iframe>
+
+<p style='text-align: justify;'>Depressive disorders occur with varying severity. The WHO’s International Classification of Diseases (ICD-10) define this set of disorders ranging from mild to moderate to severe. The IHME adopt such definitions by disaggregating to mild, persistent depression (dysthymia) and major depressive disorder (severe).</p>
+
+All forms of depressive disorder experience some of the following symptoms:
+1) reduced concentration and attention;
+2) reduced self-esteem and self-confidence;
+3) ideas of guilt and unworthiness (even in a mild type of episode);
+4) bleak and pessimistic views of the future;
+5) ideas or acts of self-harm or suicide;
+6) disturbed sleep
+7) diminished appetite.
+
+
+## A deep dive into all the mental disorders
+
+[Depression across the world](files/Percent_People_in_world_suffering_from_depression.html) 
+[Depression wrt Education and Emplyment Levels](files/Distribution_by_Education_and_Employment_of_people_suffering_with_Depression.html)
+
+[Anxiety Disorders across the world](files/Percent_People_in_world_suffering_from_anxiety_disorders.html) |
+[Bipolar Disorder across the world](files/Percent_People_in_world_suffering_from_bipolar_disorder.html) |
+[Eating Disorder across the world](files/Percent_People_in_world_suffering_from_eating_disorders.html) |
+[Schizophrenia across the world](files/Percent_People_in_world_suffering_from_schizophrenia.html)
+
+[DALY Scenario of World with Anxiety Disorders](files/Disability_Adjusted_life_years_of_people_suffering_from_anxiety_disorders.html) |
+[DALY Scenario of World with Bipolar Disorder](files/Disability_Adjusted_life_years_of_people_suffering_from_bipolar_disorder.html) |
+[DALY Scenario of World with Eating Disorders](files/Disability_Adjusted_life_years_of_people_suffering_from_eating_disorders.html) |
+[DALY Scenario of World with Schizophrenia](files/Disability_Adjusted_life_years_of_people_suffering_from_schizophrenia.html) 
+
+[DALY Age Distribution for Anxiety Disorders](files/Age_distribution_of_Disability_Adjusted_life_years_of_people_suffering_from_anxiety_disorders.html) |
+[DALY Age Distribution for Bipolar Disorder](files/Age_distribution_of_Disability_Adjusted_life_years_of_people_suffering_from_bipolar_disorder.html) |
+[DALY Age Distribution for Depression](files/Age_distribution_of_Disability_Adjusted_life_years_of_people_suffering_from_depression.html) |
+[DALY Age Distribution for Eating Disorders](files/Age_distribution_of_Disability_Adjusted_life_years_of_people_suffering_from_eating_disorders.html) |
+[DALY Age Distribution for Schizophrenia](files/Age_distribution_of_Disability_Adjusted_life_years_of_people_suffering_from_schizophrenia.html) 
+
+[DALY Across various Disorders](files/DALYS_across_various_disorders.html)
+
+
+## Data Sources
+
+1) Institute of Health Metrics and Evaluation (IHME), Global Burden of Disease (GBD):
+   - Deaths, DALYs and prevalence of mental health and substance use disorders, by age and sex
+   - Geographical coverage: Global by country and region
+   - Time span: 1990 – 2016
+   - Available at: [gbd-results-tool](http://ghdx.healthdata.org/gbd-results-tool)
+
+2) World Health Organization (WHO) International Classification of Diseases (ICD):
+   - World Health Organization. (1992). The ICD-10 classification of mental and behavioural disorders: clinical descriptions and diagnostic guidelines (Vol. 1). World Health Organization.
+   - Data: Definitions and classifications of mental and substance use disorders
+   - Available at: ICD-10 Classification of Mental and Behavioural Disorders
+
+3) World Health Organization (WHO) Global Health Observatory (GHO):
+   - Data: Prevalence of depression
+   - Geographical coverage: Global by country
+   - Time span: 2015
+   - Available at: WHO Global Health Observatory (GHO)
+
