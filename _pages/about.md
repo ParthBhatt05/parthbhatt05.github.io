@@ -110,7 +110,6 @@ All forms of depressive disorder experience some of the following symptoms:
 2) Institute of Health Metrics and Evaluation (IHME), Global Burden of Disease (GBD):
    - Deaths, DALYs and prevalence of mental health and substance use disorders, by age and sex
    - Geographical coverage: Global by country and region
-   - Time span: 1990 – 2016
    - Available at: [gbd-results-tool](http://ghdx.healthdata.org/gbd-results-tool)
 
 3) World Health Organization (WHO) International Classification of Diseases (ICD):
@@ -121,6 +120,5 @@ All forms of depressive disorder experience some of the following symptoms:
 4) World Health Organization (WHO) Global Health Observatory (GHO):
    - Data: Prevalence of depression
    - Geographical coverage: Global by country
-   - Time span: 2015
    - Available at: [WHO Global Health Observatory (GHO)](http://apps.who.int/gho/data/node.home)
 
