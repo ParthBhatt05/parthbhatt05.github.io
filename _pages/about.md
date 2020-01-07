@@ -10,7 +10,7 @@ redirect_from:
 
 <p style='text-align: justify;'> The World is in a Mental Health Crisis. It’s estimated that around one billion people globally have a mental disorder. Despite being critical to overall well-being and physical health, diagnoses and furthermore, treatment or support, remain much lower than this estimate. Let me highlight some key statistics presenting the scenario of mental health across the world.</p>
 
-## Every 6th or 7th person experiences from mental disorder
+## Every 6th or 7th person experiences a mental disorder
 
 <p style='text-align: justify;'> Prevalence of mental health disorders has not significantly increased per se. However, this does not mean that mental health disorders are any less pressing. Their prevalence remains high, even if they are not increasing significantly. In fact, as we make progress in combating other health aspects, mental health has become increasingly important in overall health burden on relative terms. As a share of total disease burden, mental health disorders are increasing, even if not in absolute terms. </p>
 
