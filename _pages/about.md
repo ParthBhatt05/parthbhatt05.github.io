@@ -58,7 +58,7 @@ Schizophrenia	|0.30% [0.2-0.4%]	|20 million	|0.26% males 0.25% females|
 
 ## Depression
 
-<p style='text-align: justify;'>Currently, Depression, a common psychological disorder, affects about 121 million people worldwide, and WHO has projected Depression to reach second place in the ranking of Disability Adjusted Life Years calculated for all ages, while it currently stands second for ages 15-44. And other mental illnesses as well have collectively been responsible for the bourgeois of the suicide rate, making mental disorder to be the second leading cause of death amongst 15-29 years old.</p>
+<p style='text-align: justify;'>Currently, Depression, a common psychological disorder, affects about 264 million people worldwide, and WHO has projected Depression to reach second place in the ranking of Disability Adjusted Life Years calculated for all ages, while it currently stands second for ages 15-44. And other mental illnesses as well have collectively been responsible for the bourgeois of the suicide rate, making mental disorder to be the second leading cause of death amongst 15-29 years old.</p>
 
 **[Population suffering from Depression](parthbhatt05.github.io/files/Percent_People_in_world_suffering_from_depression.html)**
 <iframe id="igraph" scrolling="no" style="border:none;" seamless="seamless" src="parthbhatt05.github.io/files/Percent_People_in_world_suffering_from_depression.html" height="500" width="100%"></iframe>
