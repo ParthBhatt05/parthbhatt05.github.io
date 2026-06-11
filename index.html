@@ -91,7 +91,16 @@ section{padding:96px 0}
 .proj-body-inner{padding:0 24px 28px;border-top:1px solid var(--line)}
 .proj-body-inner .problem{font-size:15px;color:#ccc;padding-top:20px}
 .proj-body-inner .flow{margin:28px 0 8px}
-.proj-body-inner .flow svg{width:100%;height:auto;display:block;max-width:720px;margin:0 auto}
+.pipeline{position:relative}
+.pipe-step{display:flex;gap:16px;position:relative}
+.pipe-step:not(:last-child)::after{content:'';position:absolute;left:17px;top:38px;bottom:-8px;width:2px;background:rgba(13,115,119,0.3)}
+.pipe-num{flex-shrink:0;width:34px;height:34px;border-radius:50%;background:var(--teal);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px;position:relative;z-index:1}
+.pipe-step.last .pipe-num{background:var(--amber);color:#000}
+.pipe-content{flex:1;padding-bottom:20px}
+.pipe-title{font-size:14px;font-weight:600;color:var(--text);padding-top:8px;line-height:1.4}
+.pipe-subs{margin-top:5px;font-size:12.5px;color:var(--muted);line-height:1.6}
+.pipe-branches{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.pipe-branch{font-size:12px;color:#cfcfcf;background:rgba(13,115,119,0.12);border:1px solid rgba(13,115,119,0.35);border-radius:6px;padding:5px 10px;line-height:1.4}
 .proj-body-inner .tech{font-size:14px;color:var(--muted);margin-top:16px}
 .proj-body-inner .tech b{color:#aaa;font-weight:600}
 .proj-body-inner .impact{font-size:15px;font-weight:700;color:var(--amber);margin-top:16px}
@@ -219,7 +228,7 @@ footer{border-top:1px solid var(--line);padding:32px 0;text-align:center;font-si
   <div class="wrap">
     <div class="sec-label fade">The Through-Line</div>
     <div class="thread-grid fade">
-      <div class="thread-card"><div class="thread-card-name">Lutalica</div><div class="thread-card-desc">There from day one — a mental health expression platform (poetry, prose, open mics) in Ahmedabad, promoting wellbeing through community expression.</div></div>
+      <div class="thread-card"><div class="thread-card-name">Lutalica</div><div class="thread-card-desc">Founding member of a mental health expression platform (poetry, prose, open mics) in Ahmedabad — promoting wellbeing through community expression.</div></div>
       <div class="thread-card"><div class="thread-card-name">Transliteration</div><div class="thread-card-desc">Live Lutalica recordings became training data. Preserving the meaning in human expression — not just the words.</div></div>
       <div class="thread-card"><div class="thread-card-name">Depression Detection</div><div class="thread-card-desc">Unsupervised ML + PHQ-9 emulation from Twitter behavioral data. Routing users to support by clinical severity band.</div></div>
       <div class="thread-card"><div class="thread-card-name">Patient Care</div><div class="thread-card-desc">12 use cases across 8 indications. $120M profit impact from better HCP-patient matching.</div></div>
@@ -248,7 +257,7 @@ footer{border-top:1px solid var(--line);padding:32px 0;text-align:center;font-si
   </div>
 </section>
 
-<footer>Parth Bhatt · Austin, TX · <a href="mailto:parthbhatt05@icloud.com">parthbhatt05@icloud.com</a></footer>
+<footer>Parth Bhatt · Texas · <a href="mailto:parthbhatt05@icloud.com">parthbhatt05@icloud.com</a></footer>
 
 <script>
 /* ════════ DATA ════════ */
@@ -269,7 +278,7 @@ const ARC = [
   {year:"2021–2022", org:"Northeastern University → Danfoss", title:"Investing in Craft",
    proved:"Goes back to learn, not to retreat.",
    full:"Left ZS to pursue MS in Data Science at Northeastern. Teaching Assistant from day one — not a student waiting to contribute; a practitioner sharpening the foundation. Co-op at Danfoss: turned CNC machine audio into a predictive maintenance signal ($1.2M weekly revenue), and replaced a linear forecasting model with an ensemble that cut error 12%."},
-  {year:"2023–Present", org:"Deloitte, Austin", title:"Leading at Scale",
+  {year:"2023–Present", org:"Deloitte, Texas", title:"Leading at Scale",
    proved:"The best measure of a DS lead is what the team can do after you leave.",
    full:"Not just building models — leading teams that build models. Across 7 engagements in 3 years: energy grid rerouting, battery demand forecasting, vaccine smart ordering, $120M patient care impact, causal ML on a $2B retail revenue stream, item planning, forecast explainability. The pattern: own the technical approach, earn stakeholder trust, build the team's capability so it outlasts the project."}
 ];
@@ -343,7 +352,7 @@ const ERAS = [
     ]},
   { name:"Gujarati/Hindi → English Transliteration", year:"2017–2018", badge:"Meaning preserved",
     p1:"Translate live voice — preserving metaphors and tonal stress, not just swapping words.",
-    problem:"Translate live voice and text from Gujarati/Hindi to English — preserving metaphors and tonal stress, not just swapping words. Data source: Lutalica (mental health expression platform, there from the start). Live open mic recordings became training corpus.",
+    problem:"Translate live voice and text from Gujarati/Hindi to English — preserving metaphors and tonal stress, not just swapping words. Data source: Lutalica (mental health expression platform, founding member). Live open mic recordings became training corpus.",
     tech:"Seq2Seq + Bahdanau Attention (LSTM-based), ASR preprocessing, custom corpus",
     note:"<b>Distinction:</b> Translation swaps words. Transliteration preserves what the speaker meant.",
     flow:[
@@ -542,41 +551,21 @@ const STACK = [
 
 /* ════════ SVG FLOW RENDERER ════════ */
 function esc(x){return x.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
-function flowSVG(steps){
-  const W=720, NW=520, NX=(W-NW)/2, BW=440, BX=200, RAIL=170, GAP=30;
-  let y=6, out=[], n=steps.length;
-  out.push(`<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0D7377"/></marker></defs>`);
-  steps.forEach((st,i)=>{
-    const last = i===n-1, stroke = last? "#E8A838":"#0D7377";
-    if(i>0){
-      out.push(`<line x1="${W/2}" y1="${y}" x2="${W/2}" y2="${y+GAP-4}" stroke="#0D7377" stroke-width="1" marker-end="url(#ah)"/>`);
-      y+=GAP;
-    }
-    const subs = st.s||[];
-    const h = 16 + 19 + subs.length*16 + 10;
-    out.push(`<rect x="${NX}" y="${y}" width="${NW}" height="${h}" rx="6" fill="#1A1A1A" stroke="${stroke}" stroke-width="1.5"/>`);
-    let ty = y+16+7;
-    out.push(`<text x="${W/2}" y="${ty}" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="600" fill="#F0F0F0">${esc(st.t)}</text>`);
-    subs.forEach(sl=>{ ty+=16; out.push(`<text x="${W/2}" y="${ty}" text-anchor="middle" font-family="Inter,sans-serif" font-size="11.5" font-weight="300" fill="#9a9a9a">${esc(sl)}</text>`); });
-    y+=h;
-    if(st.b && st.b.length){
-      const railTop=y;
-      let stubs=[];
-      st.b.forEach(bl=>{
-        const bh=26, by=y+14;
-        stubs.push(by+bh/2);
-        y+=14;
-        out.push(`<rect x="${BX}" y="${y}" width="${BW}" height="${bh}" rx="5" fill="#1A1A1A" stroke="#0D7377" stroke-width="1" stroke-dasharray="none" opacity="0.95"/>`);
-        out.push(`<text x="${BX+14}" y="${y+17}" font-family="Inter,sans-serif" font-size="11.5" fill="#cfcfcf">${esc(bl)}</text>`);
-        y+=bh;
-      });
-      const railBot=stubs[stubs.length-1];
-      out.push(`<line x1="${RAIL}" y1="${railTop}" x2="${RAIL}" y2="${railBot}" stroke="#0D7377" stroke-width="1"/>`);
-      stubs.forEach(sy=>out.push(`<line x1="${RAIL}" y1="${sy}" x2="${BX}" y2="${sy}" stroke="#0D7377" stroke-width="1"/>`));
-      y+=6;
-    }
-  });
-  return `<svg viewBox="0 0 ${W} ${y+8}" xmlns="http://www.w3.org/2000/svg" role="img">${out.join("")}</svg>`;
+function flowHTML(steps){
+  const n=steps.length;
+  return '<div class="pipeline">'+steps.map((st,i)=>{
+    const last=i===n-1;
+    const subs=st.s||[];
+    const branches=st.b||[];
+    return `<div class="pipe-step${last?' last':''}">
+      <div class="pipe-num">${i+1}</div>
+      <div class="pipe-content">
+        <div class="pipe-title">${esc(st.t)}</div>
+        ${subs.length?`<div class="pipe-subs">${subs.map(s=>esc(s)).join('<br>')}</div>`:''}
+        ${branches.length?`<div class="pipe-branches">${branches.map(b=>`<span class="pipe-branch">${esc(b)}</span>`).join('')}</div>`:''}
+      </div>
+    </div>`;
+  }).join('')+'</div>';
 }
 
 /* ════════ RENDER: ARC ════════ */
@@ -626,7 +615,7 @@ ERAS.forEach((era,i)=>{
     head.addEventListener("click",()=>{
       const open=card.classList.toggle("open");
       if(open){
-        if(!flowEl.innerHTML && p.flow) flowEl.innerHTML=flowSVG(p.flow);
+        if(!flowEl.innerHTML && p.flow) flowEl.innerHTML=flowHTML(p.flow);
         body.style.maxHeight=body.scrollHeight+"px";
         setTimeout(()=>{ if(card.classList.contains("open")) body.style.maxHeight="none"; },480);
       } else {
