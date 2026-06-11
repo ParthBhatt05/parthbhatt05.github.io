@@ -287,7 +287,7 @@ const ERAS = [
       {t:"CNN Speaker Identity Gate", s:["3-layer CNN trained on owner voice embedding","Cosine similarity threshold — rejects all non-owner audio","False acceptance rate < 0.1%"]},
       {t:"NLP Command Parser", s:["Keyword spotting + intent classification via LSTM","Entity extraction: device name, target state, time reference"]},
       {t:"IoT Sensor Context Fusion", s:["Temperature, PIR motion, ambient light, power draw","Context weighting: command overridden if sensor state contradicts intent"]},
-      {t:"RL-based Schedule Optimizer", s:["Q-learning agent: state = sensor snapshot, action = appliance config","Reward signal = energy savings × comfort score","Policy improves with each interaction cycle"]},
+      {t:"ML-based Schedule Optimizer", s:["Q-learning agent: state = sensor snapshot, action = appliance config","Reward signal = energy savings × comfort score","Policy improves with each interaction cycle"]},
       {t:"Appliance Control Output", s:["GPIO signals to relay board via Raspberry Pi","Sub-200ms end-to-end latency"]}
     ]},
   { name:"License Plate Recognition", year:"2016", badge:"625 / 700+ plates",
@@ -523,8 +523,6 @@ const ERAS = [
     ]}
 ]}
 ];
-
-const STACK
 
 const STACK = [
   {label:"Modeling & ML", items:["Causal Inference","Time Series Forecasting (LGBM, LSTM, Ensemble)","Deep Learning (CNN, RNN, Seq2Seq + Attention)","Reinforcement Learning","Unsupervised (t-SNE, LDA, K-means)","Ensemble Methods (CatBoost, AdaBoost, Gradient Boosting)","Explainability (Surrogate Models, Elasticity Attribution)","Predictive Maintenance"]},
