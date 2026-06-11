@@ -58,7 +58,7 @@ section{padding:96px 0}
 @keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
 
 /* ── ARC ── */
-.arc-rail{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:16px;scrollbar-width:thin;scrollbar-color:var(--teal) var(--surface)}
+.arc-rail{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:16px;padding-right:24px;scrollbar-width:thin;scrollbar-color:var(--teal) var(--surface)}
 .arc-card{flex:0 0 280px;scroll-snap-align:start;background:var(--surface);border:1px solid var(--line);border-left:3px solid transparent;border-radius:8px;padding:24px;cursor:pointer;transition:border-color .2s,filter .2s}
 .arc-card:hover{border-left-color:var(--teal);filter:brightness(1.15)}
 .arc-card.active{border-left-color:var(--teal-bright);filter:brightness(1.2)}
@@ -111,15 +111,12 @@ table.lead td:nth-child(2){font-weight:600;color:var(--text)}
 .lead-pattern b{color:var(--text)}
 
 /* ── HUMAN THREAD ── */
-.thread{position:relative;margin-left:8px;padding-left:40px}
-.thread::before{content:'';position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:var(--teal)}
-.th-item{position:relative;padding-bottom:48px}
-.th-item:last-child{padding-bottom:0}
-.th-item::before{content:'';position:absolute;left:-40px;top:6px;width:16px;height:16px;border-radius:50%;background:var(--bg);border:3px solid var(--teal-bright)}
-.th-year{font-size:14px;font-weight:600;color:var(--amber);letter-spacing:.08em}
-.th-name{font-size:18px;font-weight:700;color:var(--text);margin-top:4px}
-.th-desc{font-size:14px;color:var(--muted);margin-top:6px;max-width:560px}
-.th-close{text-align:center;max-width:500px;margin:64px auto 0;font-size:16px;font-style:italic;color:#ccc}
+.thread-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.thread-card{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:8px;padding:24px;transition:border-color .2s}
+.thread-card:hover{border-left-color:var(--teal-bright)}
+.thread-card-name{font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px}
+.thread-card-desc{font-size:14px;color:var(--muted);line-height:1.6}
+.th-close{text-align:center;max-width:500px;margin:48px auto 0;font-size:16px;font-style:italic;color:#ccc}
 
 /* ── STACK ── */
 .stack-group{margin-bottom:40px}
@@ -217,16 +214,16 @@ footer{border-top:1px solid var(--line);padding:32px 0;text-align:center;font-si
   </div>
 </section>
 
-<!-- ━━ THE HUMAN THREAD ━━ -->
+<!-- ━━ THE THROUGH-LINE ━━ -->
 <section id="thread">
   <div class="wrap">
-    <div class="sec-label fade">The Human Thread</div>
-    <div class="thread fade">
-      <div class="th-item"><div class="th-year">2016–2018</div><div class="th-name">Lutalica</div><div class="th-desc">Co-founded a mental health expression platform (poetry, prose, open mics) — Ahmedabad, promoting wellbeing through community expression.</div></div>
-      <div class="th-item"><div class="th-year">2017–2018</div><div class="th-name">Transliteration</div><div class="th-desc">Live Lutalica recordings became training data. Preserving the meaning in human expression — not just the words.</div></div>
-      <div class="th-item"><div class="th-year">2021</div><div class="th-name">Depression Detection</div><div class="th-desc">Unsupervised ML + PHQ-9 emulation from Twitter behavioral data. Routing users to support by clinical severity band.</div></div>
-      <div class="th-item"><div class="th-year">2024–2025</div><div class="th-name">Patient Care</div><div class="th-desc">12 use cases across 8 indications. $120M profit impact from better HCP-patient matching.</div></div>
-      <div class="th-item"><div class="th-year">2025</div><div class="th-name">Vaccine Smart Ordering</div><div class="th-desc">Ensuring vaccines reach patients when they're needed. Supply chain intelligence in service of public health.</div></div>
+    <div class="sec-label fade">The Through-Line</div>
+    <div class="thread-grid fade">
+      <div class="thread-card"><div class="thread-card-name">Lutalica</div><div class="thread-card-desc">There from day one — a mental health expression platform (poetry, prose, open mics) in Ahmedabad, promoting wellbeing through community expression.</div></div>
+      <div class="thread-card"><div class="thread-card-name">Transliteration</div><div class="thread-card-desc">Live Lutalica recordings became training data. Preserving the meaning in human expression — not just the words.</div></div>
+      <div class="thread-card"><div class="thread-card-name">Depression Detection</div><div class="thread-card-desc">Unsupervised ML + PHQ-9 emulation from Twitter behavioral data. Routing users to support by clinical severity band.</div></div>
+      <div class="thread-card"><div class="thread-card-name">Patient Care</div><div class="thread-card-desc">12 use cases across 8 indications. $120M profit impact from better HCP-patient matching.</div></div>
+      <div class="thread-card"><div class="thread-card-name">Vaccine Smart Ordering</div><div class="thread-card-desc">Ensuring vaccines reach patients when they're needed. Supply chain intelligence in service of public health.</div></div>
     </div>
     <p class="th-close fade">This is not a coincidence. It is a consistent direction.</p>
   </div>
@@ -274,10 +271,7 @@ const ARC = [
    full:"Left ZS to pursue MS in Data Science at Northeastern. Teaching Assistant from day one — not a student waiting to contribute; a practitioner sharpening the foundation. Co-op at Danfoss: turned CNC machine audio into a predictive maintenance signal ($1.2M weekly revenue), and replaced a linear forecasting model with an ensemble that cut error 12%."},
   {year:"2023–Present", org:"Deloitte, Austin", title:"Leading at Scale",
    proved:"The best measure of a DS lead is what the team can do after you leave.",
-   full:"Not just building models — leading teams that build models. Across 7 engagements in 3 years: energy grid rerouting, battery demand forecasting, vaccine smart ordering, $120M patient care impact, causal ML on a $2B retail revenue stream, item planning, forecast explainability. The pattern: own the technical approach, earn stakeholder trust, build the team's capability so it outlasts the project."},
-  {year:"2016 → Present", org:"Through-line", title:"The Human Thread",
-   proved:"Technical depth with a human north star.",
-   full:"Lutalica (mental health expression platform) → Transliteration from live recordings → Depression Detection via PHQ-9 emulation → Patient Care AI across 8 indications → Vaccine Smart Ordering. This is not a coincidence. It is a consistent direction."}
+   full:"Not just building models — leading teams that build models. Across 7 engagements in 3 years: energy grid rerouting, battery demand forecasting, vaccine smart ordering, $120M patient care impact, causal ML on a $2B retail revenue stream, item planning, forecast explainability. The pattern: own the technical approach, earn stakeholder trust, build the team's capability so it outlasts the project."}
 ];
 
 /* Flow node: {t:title, s:[sub lines], b:[branch lines]} — last node rendered amber */
@@ -349,7 +343,7 @@ const ERAS = [
     ]},
   { name:"Gujarati/Hindi → English Transliteration", year:"2017–2018", badge:"Meaning preserved",
     p1:"Translate live voice — preserving metaphors and tonal stress, not just swapping words.",
-    problem:"Translate live voice and text from Gujarati/Hindi to English — preserving metaphors and tonal stress, not just swapping words. Data source: Lutalica (co-founded expression platform). Live open mic recordings became training corpus.",
+    problem:"Translate live voice and text from Gujarati/Hindi to English — preserving metaphors and tonal stress, not just swapping words. Data source: Lutalica (mental health expression platform, there from the start). Live open mic recordings became training corpus.",
     tech:"Seq2Seq + Bahdanau Attention (LSTM-based), ASR preprocessing, custom corpus",
     note:"<b>Distinction:</b> Translation swaps words. Transliteration preserves what the speaker meant.",
     flow:[
