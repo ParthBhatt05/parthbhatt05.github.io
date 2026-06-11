@@ -170,12 +170,18 @@ li::before{content:'·';position:absolute;left:4px;color:var(--teal-bright);font
 </main>
 
 <script>
-let lastY=0; const nav=document.getElementById("nav");
-addEventListener("scroll",()=>{
-  const y=scrollY;
-  nav.classList.toggle("hidden", y>120 && y>lastY);
-  lastY=y;
-},{passive:true});
+const nav=document.getElementById("nav");
+if(window.self!==window.top){
+  nav.style.display="none";
+  document.querySelector(".cv").style.paddingTop="32px";
+} else {
+  let lastY=0;
+  addEventListener("scroll",()=>{
+    const y=scrollY;
+    nav.classList.toggle("hidden", y>120 && y>lastY);
+    lastY=y;
+  },{passive:true});
+}
 </script>
 </body>
 </html>
