@@ -263,7 +263,7 @@ const ARC = [
    full:"Training program shortened from months to 3 weeks — the system recognized readiness. Within months, co-ideated a natural language-to-Python platform: type an instruction in English, get working code. Left within a year — not because of failure, but because the ceiling was visible."},
   {year:"2019–2020", org:"ZS Associates, Pune", title:"Where AI Meets Stakes",
    proved:"Can operate where data decisions directly affect patient outcomes.",
-   full:"Real World Data advisory for pharma clients — EMR, EHR, claims data — defining protocols that affected patient treatment and drug compliance. Then led development of a treatment pathway predictor that reduced doctor prep time by 2/3 and hit 72% precision across 12 therapy areas. AI at the intersection of technical rigor and human consequence."},
+   full:"Real World Data advisory for pharma clients — EMR, EHR, claims data — defining protocols that affected patient treatment and drug compliance. Then led development of a treatment pathway predictor that delivered sharper prognosis at point of care at 72% precision across 12 therapy areas. AI at the intersection of technical rigor and human consequence."},
   {year:"2021–2022", org:"Northeastern University → Danfoss", title:"Investing in Craft",
    proved:"Goes back to learn, not to retreat.",
    full:"Left ZS to pursue MS in Data Science at Northeastern. Teaching Assistant from day one — not a student waiting to contribute; a practitioner sharpening the foundation. Co-op at Danfoss: turned CNC machine audio into a predictive maintenance signal ($1.2M weekly revenue), and replaced a linear forecasting model with an ensemble that cut error 12%."},
@@ -280,36 +280,36 @@ const ERAS = [
   { name:"Voice & Sensor Home Automation", year:"2016", badge:"Owner-locked control",
     p1:"Home automation that responds only to its owner — not any voice, not any command pattern.",
     problem:"Home automation that responds only to its owner — not any voice, not any command pattern.",
-    tech:"CNN (speaker ID), NLP (command recognition), Reinforcement Learning (schedule optimization), IoT sensors, Raspberry Pi",
+    tech:"CNN (speaker ID), NLP (command recognition), Decision Tree (schedule optimization), IoT sensors, Raspberry Pi",
     flow:[
       {t:"Raw Audio Capture", s:["16kHz PCM stream via microphone array","Pre-emphasis filter applied to boost high-frequency signal"]},
       {t:"MFCC Feature Extraction → Spectrogram Registration", s:["40-band Mel-frequency cepstral coefficients","Converts acoustic waveform into 2D time-frequency representation"]},
       {t:"CNN Speaker Identity Gate", s:["3-layer CNN trained on owner voice embedding","Cosine similarity threshold — rejects all non-owner audio","False acceptance rate < 0.1%"]},
       {t:"NLP Command Parser", s:["Keyword spotting + intent classification via LSTM","Entity extraction: device name, target state, time reference"]},
       {t:"IoT Sensor Context Fusion", s:["Temperature, PIR motion, ambient light, power draw","Context weighting: command overridden if sensor state contradicts intent"]},
-      {t:"ML-based Schedule Optimizer", s:["Q-learning agent: state = sensor snapshot, action = appliance config","Reward signal = energy savings × comfort score","Policy improves with each interaction cycle"]},
+      {t:"Behavioral Pattern Rule Engine", s:["Decision tree trained on historical usage logs — time, sensor state, command patterns","Rules extracted from repeated behaviors: 'lights off after 11pm if no motion for 20min'","No manual programming — rules inferred automatically from observed routine"]},
       {t:"Appliance Control Output", s:["GPIO signals to relay board via Raspberry Pi","Sub-200ms end-to-end latency"]}
     ]},
   { name:"License Plate Recognition", year:"2016", badge:"625 / 700+ plates",
     p1:"Real-world plates are warped, angled, partially occluded. Standard OCR fails.",
     problem:"Real-world plates are warped, angled, partially occluded. Standard OCR fails. Field survey needed.",
-    note:"<b>Key innovation:</b> Instead of correcting the image geometrically, treated distortion as uncertainty — CNN assigns a probability to each possible character, plate assembled from highest-confidence readings.",
+    note:"<b>Key innovation:</b> Instead of correcting the image geometrically, treated distortion as uncertainty — KNN assigns a probability to each possible character from nearest neighbor distances, plate assembled from highest-confidence readings.",
     impact:"Validation: 700+ plates surveyed manually. 625 recognized correctly.",
     flow:[
       {t:"Live Camera Feed", s:["30fps input stream — real parking lot environment","Variable lighting, motion blur, partial occlusion"]},
       {t:"Still Frame Capture + ROI Detection", s:["Sliding window + edge density heuristic to localize plate region","Adaptive thresholding for contrast normalization"]},
-      {t:"Distortion Assessment", b:["Clean plate → Tesseract OCR direct path","Distorted / Angled → Custom CNN Probability Matrix","(Each character slot scored across 36 alphanumeric classes)"]},
-      {t:"Probabilistic Character Assembly", s:["Argmax across CNN softmax output per character position","Confidence threshold — low-confidence positions flagged for review"]},
+      {t:"Distortion Assessment", b:["Clean plate → Tesseract OCR direct path","Distorted / Angled → KNN Classifier per Character Slot","(Each position scored across 36 alphanumeric classes by nearest-neighbor distance)"]},
+      {t:"Probabilistic Character Assembly", s:["Argmax across KNN neighbor-distance scores per character position","Confidence threshold — low-confidence positions flagged for review"]},
       {t:"Plate String Output", s:["89% recognition accuracy across 700+ field-tested plates"]}
     ]},
   { name:"Library Book Recommendation System", year:"2015", badge:"Deployed live",
     p1:"Local library wanted personalized recommendations beyond browse-and-search.",
     problem:"Local library wanted personalized recommendations beyond browse-and-search.",
-    tech:"CatBoost + AdaBoost ensemble, LDA topic modeling, intent classification",
+    tech:"CatBoost + AdaBoost ensemble, keyword co-occurrence topic clustering, intent classification",
     impact:"Deployed: Live on the library's website.",
     flow:[
       {t:"User Chat Input", s:["Free-text natural language query"]},
-      {t:"Intent Classification + LDA Topic Modeling", s:["Supervised intent layer: request type (genre, author, similar-to)","LDA: 20-topic model trained on full library corpus — surfaces latent themes","TF-IDF weighted query vector aligned to topic distribution"]},
+      {t:"Intent Classification + Topic Clustering", s:["Supervised intent layer: request type (genre, author, similar-to)","Keyword co-occurrence matrix built from full catalogue — books grouped by shared term density","TF-IDF weighted query vector matched to topic cluster centroids"]},
       {t:"Reading History Retrieval", s:["Prior checkouts → topic affinity profile per user","Recency-weighted: recent reads score higher in preference signal"]},
       {t:"CatBoost + AdaBoost Ensemble", s:["CatBoost: handles categorical features (genre, author metadata) natively","AdaBoost weak learners: iteratively reweight on misclassified preference signals","Final score = convex combination of both model outputs"]},
       {t:"Ranked Book List → Recommendation Output", s:["Top-K ranked by combined relevance score · Deployed on library website"]}
@@ -369,16 +369,16 @@ const ERAS = [
   context:"The pharma commercial model was mid-transformation — shifting from rep-driven, relationship-based selling toward AI-driven precision engagement. The challenge: patient data was abundant but fragmented across EMR, EHR, and claims systems that rarely talked to each other. The clinical and commercial worlds were still operating largely separately. The project below was built at this inflection point.",
   projects:[
   { name:"Plug & Predict — Treatment Pathway Predictor", year:"2019–2020", badge:"72% precision",
-    p1:"Can AI pre-generate likely next steps before the doctor even opens the chart?",
-    problem:"Doctors spend significant prep time piecing together a patient's history before visits. Can AI pre-generate the likely next steps — drug regimen, procedures, diagnoses — before the doctor even opens the chart?",
+    p1:"Surface future outcome probabilities and existing condition severity — so the doctor walks in already knowing the picture.",
+    problem:"Physicians needed sharper, faster prognosis — not a summary of the past, but a probability-weighted view of what comes next. What conditions are active? How severe? What treatment paths are viable — and what does each path do to projected severity?",
     note:"<b>Scale:</b> Adopted across 12 therapy areas, multiple pharma clients.",
-    impact:"72% precision · 2/3 reduction in doctor prep time · Faster prognosis at point of care",
+    impact:"72% precision · Sharper prognosis at point of care · Treatment choice + projected severity reduction surfaced per patient · Adopted across 12 therapy areas",
     flow:[
       {t:"Multi-Source Patient Data Ingestion (Time Series)", b:["Demographics + comorbidities","ICD-10 diagnosis codes + timestamps","Drug regimen history — gaps, switches, adherence","Procedures, surgeries, referral chains","Insurance + preferred provider network","Unstructured doctor notes → NLP → structured features"]},
       {t:"Feature Engineering + Temporal Alignment", s:["Event sequences aligned on index date","Lag features: 30/60/90/180-day lookback windows","Missing data imputation via forward-fill + population median"]},
       {t:"Proprietary Deep Neural Network + Ensemble", s:["Multi-task LSTM: shared temporal encoder, task-specific prediction heads","Attention layer weights recent clinical events higher","Ensemble with gradient boosted trees for tabular pattern capture"]},
-      {t:"3 / 6 / 12-Month Prediction Horizon", b:["Optimal drug regimen — ranked by efficacy likelihood","Recommended procedures — by clinical pathway probability","Likely next diagnoses — ICD-10 code prediction at each horizon"]},
-      {t:"Doctor Dashboard at Point of Care", s:["72% precision · 2/3 reduction in pre-visit prep time","Deployed across 12 therapy areas — pharma clients globally"]}
+      {t:"3 / 6 / 12-Month Outcome Probabilities", b:["Existing conditions listed with severity scores that support the prognosis","Likely next diagnoses — probability-ranked per time horizon","Treatment options ranked by projected impact on severity reduction"]},
+      {t:"Clinical Decision Surface at Point of Care", s:["72% precision · Prognosis probabilities + severity context delivered at consult","Adopted across 12 therapy areas — pharma clients globally"]}
     ]}
 ]},
 { id:"neu", tab:"Northeastern", name:"Northeastern (Jan 2021 – Dec 2022)",
@@ -486,7 +486,7 @@ const ERAS = [
       {t:"Multi-Source Patient & HCP Data Integration", s:["Claims data (Rx fills, procedure codes) + EMR (diagnosis, labs)","HCP engagement signals: rep visit cadence, channel response, sample uptake","Prescription history: brand switches, adherence gaps, formulary changes"]},
       {t:"Causal Inference Engine", s:["DoWhy framework: formal causal graph (DAG) defined per indication","Propensity score matching — controls for HCP selection bias","Double ML (Chernozhukov): nuisance function estimation separates confounders","Isolates true treatment effect: what actually drives HCP adoption — not correlation"]},
       {t:"Counterfactual Estimation", s:["Potential outcomes framework: Y(1) vs. Y(0) per HCP","Individual Treatment Effect (ITE) estimated per doctor per indication","What would Rx volume look like without the intervention? Quantified."]},
-      {t:"Patient Pathway Prediction System", s:["Transformer-based sequence model on patient event timelines","Concomitant symptom identification: which co-morbidities predict treatment escalation?","Next-best-action recommendation at patient level — surfaced to HCP at point of care"]},
+      {t:"Patient Pathway Prediction System", s:["Custom-architected deep sequence model built ground-up for this patient population","Concomitant symptom identification: which co-morbidities predict treatment escalation?","Next-best-action recommendation at patient level — surfaced to HCP at point of care"]},
       {t:"Drug Treatment Recommendations", s:["Causal effect estimate + patient prediction → precision recommendation stack","Personalized to HCP prescribing behavior + patient population profile","Ranked by estimated impact on Rx velocity and adherence improvement"]},
       {t:"Surfaced to HCPs at Point of Care", s:["Omnichannel delivery: rep briefing deck, portal alert, email trigger","12 use cases · 8 therapy indications · $2B GTM + launch readiness impact"]}
     ]},
@@ -515,7 +515,7 @@ const ERAS = [
     problem:"Forecasts changed week-over-week with no explanation. Business teams couldn't trust, interrogate, or act on them.",
     flow:[
       {t:"Black-Box Forecast Input", s:["Production ensemble forecast output — complex, non-interpretable","Week-over-week delta identified as primary business pain point"]},
-      {t:"Surrogate Interpretable Model", s:["LIME / linear surrogate trained locally around each forecast point","Fidelity constraint: surrogate R² > 0.92 vs. black box in local neighborhood","Captures same patterns as complex model — in human-readable form"]},
+      {t:"Surrogate Interpretable Model", s:["Custom interpretability layer trained locally around each forecast point","Fidelity constraint: surrogate R² > 0.92 vs. black box in local neighborhood","Captures the same decision logic as the complex model — expressed in human-readable driver terms"]},
       {t:"Driver Elasticity Estimation", s:["Partial derivative of forecast w.r.t. each input driver","Signed elasticity: +1 unit of driver X → +Y% forecast change","Drivers: volume history, promo depth, price index, distribution points, competitor activity"]},
       {t:"Temporal Attribution via Dynamic Programming", s:["DP finds optimal sequence of driver contributions that bridges Last Year → Last Cycle → Last Week → Current","Shapley-value inspired: marginal contribution allocated fairly across drivers","Sequence constrained to produce non-crossing attribution paths"]},
       {t:"Waterfall Attribution Chart", s:["Each bar = one driver's signed contribution to the forecast change","Color coded: positive drivers (teal) vs. negative drivers (amber)","Three comparison scenarios: YoY, cycle-on-cycle, week-on-week"]},
@@ -525,7 +525,7 @@ const ERAS = [
 ];
 
 const STACK = [
-  {label:"Modeling & ML", items:["Causal Inference","Time Series Forecasting (LGBM, LSTM, Ensemble)","Deep Learning (CNN, RNN, Seq2Seq + Attention)","Reinforcement Learning","Unsupervised (t-SNE, LDA, K-means)","Ensemble Methods (CatBoost, AdaBoost, Gradient Boosting)","Explainability (Surrogate Models, Elasticity Attribution)","Predictive Maintenance"]},
+  {label:"Modeling & ML", items:["Causal Inference","Time Series Forecasting","Deep Learning","Reinforcement Learning","Unsupervised & Supervised Machine Learning","Ensemble Methods","Recommendation & Prediction Systems"]},
   {label:"NLP & Signal Processing", items:["Topic Modeling","Intent Matching","Transliteration","FFT / Spectrograms","NLP Pipelines"]},
   {label:"Engineering & Platforms", items:["Python","R","SQL","Spark","GCP","AWS","Azure","Snowflake","MLFlow","Docker"]},
   {label:"Domain Expertise", items:["Healthcare & Life Sciences","CPG & Retail","Energy & Utilities","Manufacturing","Financial Planning"]}
