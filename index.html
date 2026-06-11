@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="Parth Bhatt — Data Scientist. 8 years of AI that ships: from Raspberry Pi prototypes to $2B+ in production impact. Healthcare · Consumer · Energy · Retail · Manufacturing."/>
+<title>Parth Bhatt | Data Scientist</title>
+<link rel="canonical" href="https://parthbhatt05.github.io/"/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://parthbhatt05.github.io/"/>
+<meta property="og:title" content="Parth Bhatt | Data Scientist"/>
+<meta property="og:description" content="8 years of AI that ships — from Raspberry Pi prototypes to $2B+ in production impact."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0D0D0D;
+  --text:#F0F0F0;
+  --teal:#0D7377;
+  --teal-bright:#14A8AD;
+  --amber:#E8A838;
+  --surface:#1A1A1A;
+  --muted:#888888;
+  --line:#262626;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-weight:400;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--teal-bright);text-decoration:none}
+.wrap{max-width:900px;margin:0 auto;padding:0 24px}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,13,13,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);transition:transform .3s ease}
+nav.hidden{transform:translateY(-100%)}
+.nav-inner{max-width:900px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+.nav-name{font-weight:700;font-size:16px;color:var(--text);letter-spacing:.02em}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{font-size:14px;color:var(--muted);transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+
+/* ── SECTIONS ── */
+section{padding:96px 0}
+.sec-label{font-size:13px;letter-spacing:.25em;text-transform:uppercase;color:var(--teal-bright);font-weight:600;margin-bottom:48px}
+.fade{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+.fade.in{opacity:1;transform:none}
+
+/* ── HERO ── */
+#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;position:relative;padding:120px 0 64px}
+#hero h1{font-size:clamp(44px,7vw,72px);font-weight:700;line-height:1.1;letter-spacing:-.02em;max-width:880px}
+#hero h1 .hl{color:var(--amber)}
+.hero-sub{font-size:18px;font-weight:300;color:var(--muted);max-width:600px;margin-top:32px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:64px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:32px 24px;text-align:center}
+.stat .num{font-size:40px;font-weight:700;color:var(--amber);letter-spacing:-.02em}
+.stat .lbl{font-size:13px;font-weight:300;color:var(--muted);margin-top:8px;letter-spacing:.04em}
+.chev{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);color:var(--muted);animation:bob 1.8s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* ── ARC ── */
+.arc-rail{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:16px;scrollbar-width:thin;scrollbar-color:var(--teal) var(--surface)}
+.arc-card{flex:0 0 280px;scroll-snap-align:start;background:var(--surface);border:1px solid var(--line);border-left:3px solid transparent;border-radius:8px;padding:24px;cursor:pointer;transition:border-color .2s,filter .2s}
+.arc-card:hover{border-left-color:var(--teal);filter:brightness(1.15)}
+.arc-card.active{border-left-color:var(--teal-bright);filter:brightness(1.2)}
+.arc-year{font-size:32px;font-weight:700;color:var(--teal-bright);line-height:1.2}
+.arc-org{font-size:14px;color:var(--muted);margin-top:4px}
+.arc-thesis{font-size:16px;font-style:italic;color:var(--text);margin-top:16px;line-height:1.45}
+.arc-proved{font-size:14px;color:#888;margin-top:16px}
+.arc-proved b{color:#aaa;font-weight:600}
+.arc-drawer{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.arc-drawer-inner{margin-top:24px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:8px;padding:32px}
+.arc-drawer-inner h3{font-size:18px;font-weight:700;margin-bottom:4px}
+.arc-drawer-inner .org{font-size:14px;color:var(--muted);margin-bottom:16px}
+.arc-drawer-inner p{font-size:15px;color:#ccc}
+.arc-drawer-inner .pr{margin-top:16px;font-size:14px;color:var(--muted)}
+.arc-drawer-inner .pr b{color:var(--teal-bright);font-weight:600}
+
+/* ── WORK ── */
+.era-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:40px}
+.era-tab{background:transparent;border:1px solid var(--line);color:var(--muted);font-family:inherit;font-size:14px;padding:8px 20px;border-radius:24px;cursor:pointer;transition:all .2s}
+.era-tab:hover{border-color:var(--teal);color:var(--text)}
+.era-tab.active{border-color:var(--teal);background:var(--teal);color:#fff}
+.era-context{font-size:14px;font-style:italic;color:var(--muted);margin-bottom:32px;line-height:1.7}
+.proj{background:var(--surface);border:1px solid var(--line);border-radius:8px;margin-bottom:16px;overflow:hidden;transition:border-color .2s}
+.proj:hover{border-color:#333}
+.proj-head{padding:24px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.proj-head h3{font-size:17px;font-weight:700}
+.proj-head .p1{font-size:14px;font-style:italic;color:var(--muted);margin-top:6px;font-weight:300}
+.badge{flex-shrink:0;font-size:12px;font-weight:600;color:var(--amber);border:1px solid rgba(232,168,56,.35);border-radius:16px;padding:4px 12px;white-space:nowrap;margin-top:2px}
+.proj-body{max-height:0;overflow:hidden;transition:max-height .45s ease}
+.proj-body-inner{padding:0 24px 28px;border-top:1px solid var(--line)}
+.proj-body-inner .problem{font-size:15px;color:#ccc;padding-top:20px}
+.proj-body-inner .flow{margin:28px 0 8px}
+.proj-body-inner .flow svg{width:100%;height:auto;display:block;max-width:720px;margin:0 auto}
+.proj-body-inner .tech{font-size:14px;color:var(--muted);margin-top:16px}
+.proj-body-inner .tech b{color:#aaa;font-weight:600}
+.proj-body-inner .impact{font-size:15px;font-weight:700;color:var(--amber);margin-top:16px}
+.proj-body-inner .note{font-size:14px;color:#aaa;margin-top:12px}
+.proj-body-inner .note b{color:#ccc}
+.expand-ind{color:var(--teal-bright);font-size:18px;line-height:1;flex-shrink:0;margin-top:4px;transition:transform .3s}
+.proj.open .expand-ind{transform:rotate(45deg)}
+
+/* ── LEADERSHIP ── */
+.lead-tag{font-size:14px;font-style:italic;color:var(--muted);margin:-32px 0 40px}
+table.lead{width:100%;border-collapse:collapse;font-size:15px}
+table.lead th{text-align:left;font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--teal-bright);font-weight:600;padding:0 16px 16px 0;border-bottom:1px solid var(--teal)}
+table.lead td{padding:20px 16px 20px 0;border-bottom:1px solid var(--line);vertical-align:top;color:#ccc}
+table.lead td:first-child{white-space:nowrap;color:var(--muted);font-size:14px}
+table.lead td:nth-child(2){font-weight:600;color:var(--text)}
+.lead-pattern{margin-top:32px;font-size:15px;color:#aaa}
+.lead-pattern b{color:var(--text)}
+
+/* ── HUMAN THREAD ── */
+.thread{position:relative;margin-left:8px;padding-left:40px}
+.thread::before{content:'';position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:var(--teal)}
+.th-item{position:relative;padding-bottom:48px}
+.th-item:last-child{padding-bottom:0}
+.th-item::before{content:'';position:absolute;left:-40px;top:6px;width:16px;height:16px;border-radius:50%;background:var(--bg);border:3px solid var(--teal-bright)}
+.th-year{font-size:14px;font-weight:600;color:var(--amber);letter-spacing:.08em}
+.th-name{font-size:18px;font-weight:700;color:var(--text);margin-top:4px}
+.th-desc{font-size:14px;color:var(--muted);margin-top:6px;max-width:560px}
+.th-close{text-align:center;max-width:500px;margin:64px auto 0;font-size:16px;font-style:italic;color:#ccc}
+
+/* ── STACK ── */
+.stack-group{margin-bottom:40px}
+.stack-label{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal-bright);font-weight:600;margin-bottom:16px}
+.pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{font-size:13px;color:var(--text);background:var(--surface);border:1px solid var(--teal);border-radius:20px;padding:6px 16px}
+
+/* ── CTA ── */
+#cta{text-align:center;padding:128px 0}
+#cta p{font-size:18px;max-width:600px;margin:0 auto 48px;color:#ccc}
+.cta-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-block;font-size:15px;font-weight:600;padding:14px 36px;border-radius:8px;transition:all .2s}
+.btn-solid{background:var(--teal);color:#fff;border:1px solid var(--teal)}
+.btn-solid:hover{background:var(--teal-bright);border-color:var(--teal-bright)}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--teal)}
+.btn-ghost:hover{border-color:var(--teal-bright);color:var(--teal-bright)}
+footer{border-top:1px solid var(--line);padding:32px 0;text-align:center;font-size:13px;color:var(--muted)}
+
+@media(max-width:680px){
+  section{padding:64px 0}
+  .stats{grid-template-columns:1fr}
+  .arc-rail{flex-direction:column;overflow-x:visible}
+  .arc-card{flex:1 1 auto}
+  table.lead{font-size:14px}
+  table.lead td:first-child{white-space:normal}
+  .proj-head{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="#hero" class="nav-name">Parth Bhatt</a>
+    <div class="nav-links">
+      <a href="#work">Work</a>
+      <a href="cv.html">CV</a>
+      <a href="mailto:parthbhatt05@icloud.com" aria-label="Email" title="Email">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ━━ HERO ━━ -->
+<section id="hero">
+  <div class="wrap">
+    <h1 class="fade">8 years of AI that ships — from Raspberry Pi prototypes to <span class="hl">$2B+</span> in production impact.</h1>
+    <p class="hero-sub fade">Data Scientist who builds production ML systems at scale and the teams that run them. Healthcare · Consumer · Energy · Retail · Manufacturing.</p>
+    <div class="stats fade">
+      <div class="stat"><div class="num">$2B+</div><div class="lbl">Client Business Value Influenced</div></div>
+      <div class="stat"><div class="num">700+</div><div class="lbl">Practitioners Trained</div></div>
+      <div class="stat"><div class="num">$60M+</div><div class="lbl">New Firm Revenue Secured</div></div>
+    </div>
+  </div>
+  <div class="chev"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></div>
+</section>
+
+<!-- ━━ THE ARC ━━ -->
+<section id="arc">
+  <div class="wrap">
+    <div class="sec-label fade">The Arc</div>
+    <div class="arc-rail fade" id="arcRail"></div>
+    <div class="arc-drawer" id="arcDrawer"><div class="arc-drawer-inner" id="arcDrawerInner"></div></div>
+  </div>
+</section>
+
+<!-- ━━ WORK ━━ -->
+<section id="work">
+  <div class="wrap">
+    <div class="sec-label fade">Work</div>
+    <div class="era-tabs fade" id="eraTabs"></div>
+    <div id="eraPanels" class="fade"></div>
+  </div>
+</section>
+
+<!-- ━━ LEADERSHIP ━━ -->
+<section id="leadership">
+  <div class="wrap">
+    <div class="sec-label fade">Leadership</div>
+    <p class="lead-tag fade">"The best measure of a DS lead is what the team can do after you leave."</p>
+    <div class="fade" style="overflow-x:auto">
+      <table class="lead">
+        <thead><tr><th>When</th><th>Organization</th><th>What Was Built in Others</th></tr></thead>
+        <tbody>
+          <tr><td>2014–2018</td><td>Nirma / Google Student Ambassador / ISTE</td><td>Ran Advanced DS workshops; mentored juniors into leadership roles in ISTE; designed interview processes</td></tr>
+          <tr><td>2019–2020</td><td>ZS Associates</td><td>Upskilled 20+ junior analysts; weekly AI &amp; Healthcare knowledge series; built DS culture before it was standard</td></tr>
+          <tr><td>2021–2022</td><td>Northeastern</td><td>TA from Day 1 for DBMS, Supervised ML, Statistics — designed assessments, mid-terms, finals; classroom instruction</td></tr>
+          <tr><td>2022</td><td>Danfoss</td><td>Structured and delivered executive business case for multi-site scale-up; trained team on PARTH methodology</td></tr>
+          <tr><td>2023–Present</td><td>Deloitte</td><td>Trained 700+ practitioners (GenAI, time series, neural networks); formally mentored 20+ DS to next level; hired 18 DS roles; grew delivery capacity 66%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lead-pattern fade"><b>The pattern:</b> Never just solves the problem in front of him. Transfers the capability to solve the next one.</p>
+  </div>
+</section>
+
+<!-- ━━ THE HUMAN THREAD ━━ -->
+<section id="thread">
+  <div class="wrap">
+    <div class="sec-label fade">The Human Thread</div>
+    <div class="thread fade">
+      <div class="th-item"><div class="th-year">2016–2018</div><div class="th-name">Lutalica</div><div class="th-desc">Co-founded a mental health expression platform (poetry, prose, open mics) — Ahmedabad, promoting wellbeing through community expression.</div></div>
+      <div class="th-item"><div class="th-year">2017–2018</div><div class="th-name">Transliteration</div><div class="th-desc">Live Lutalica recordings became training data. Preserving the meaning in human expression — not just the words.</div></div>
+      <div class="th-item"><div class="th-year">2021</div><div class="th-name">Depression Detection</div><div class="th-desc">Unsupervised ML + PHQ-9 emulation from Twitter behavioral data. Routing users to support by clinical severity band.</div></div>
+      <div class="th-item"><div class="th-year">2024–2025</div><div class="th-name">Patient Care</div><div class="th-desc">12 use cases across 8 indications. $120M profit impact from better HCP-patient matching.</div></div>
+      <div class="th-item"><div class="th-year">2025</div><div class="th-name">Vaccine Smart Ordering</div><div class="th-desc">Ensuring vaccines reach patients when they're needed. Supply chain intelligence in service of public health.</div></div>
+    </div>
+    <p class="th-close fade">This is not a coincidence. It is a consistent direction.</p>
+  </div>
+</section>
+
+<!-- ━━ STACK ━━ -->
+<section id="stack">
+  <div class="wrap">
+    <div class="sec-label fade">Stack</div>
+    <div id="stackGroups" class="fade"></div>
+  </div>
+</section>
+
+<!-- ━━ CTA ━━ -->
+<section id="cta">
+  <div class="wrap">
+    <p class="fade">Currently exploring Lead and Principal DS roles where technical depth and commercial outcomes both matter.</p>
+    <div class="cta-btns fade">
+      <a class="btn btn-solid" href="mailto:parthbhatt05@icloud.com">Email &rarr;</a>
+      <a class="btn btn-ghost" href="https://www.linkedin.com/in/parthbhatt05" target="_blank" rel="noopener">LinkedIn &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<footer>Parth Bhatt · Austin, TX · <a href="mailto:parthbhatt05@icloud.com">parthbhatt05@icloud.com</a></footer>
+
+<script>
+/* ════════ DATA ════════ */
+
+const ARC = [
+  {year:"2014", org:"Nirma University, Ahmedabad", title:"The Bet Nobody Else Made",
+   proved:"Pattern recognition before patterns are obvious.",
+   full:"While peers filled electives with safe options, every available Data Science and AI elective mapped onto a BTech CSE. Minor in Finance — because understanding money is understanding incentives. This was 2014. Most people hadn't heard the term “data scientist” yet."},
+  {year:"2015–2018", org:"Nirma University — Academic Projects", title:"Building Real Systems as a Student",
+   proved:"Never interested in demos. Only systems that run.",
+   full:"Most academic projects were toy demos. These were systems with real constraints: 700+ license plates surveyed in the field, live voice streams on a Raspberry Pi, a physical robot car navigating NASCAR-style tracks with moving obstacles, a real library's recommendation engine serving actual users."},
+  {year:"2018", org:"Infosys, Pune", title:"First Industry Signal",
+   proved:"Knowing when a room is too small.",
+   full:"Training program shortened from months to 3 weeks — the system recognized readiness. Within months, co-ideated a natural language-to-Python platform: type an instruction in English, get working code. Left within a year — not because of failure, but because the ceiling was visible."},
+  {year:"2019–2020", org:"ZS Associates, Pune", title:"Where AI Meets Stakes",
+   proved:"Can operate where data decisions directly affect patient outcomes.",
+   full:"Real World Data advisory for pharma clients — EMR, EHR, claims data — defining protocols that affected patient treatment and drug compliance. Then led development of a treatment pathway predictor that reduced doctor prep time by 2/3 and hit 72% precision across 12 therapy areas. AI at the intersection of technical rigor and human consequence."},
+  {year:"2021–2022", org:"Northeastern University → Danfoss", title:"Investing in Craft",
+   proved:"Goes back to learn, not to retreat.",
+   full:"Left ZS to pursue MS in Data Science at Northeastern. Teaching Assistant from day one — not a student waiting to contribute; a practitioner sharpening the foundation. Co-op at Danfoss: turned CNC machine audio into a predictive maintenance signal ($1.2M weekly revenue), and replaced a linear forecasting model with an ensemble that cut error 12%."},
+  {year:"2023–Present", org:"Deloitte, Austin", title:"Leading at Scale",
+   proved:"The best measure of a DS lead is what the team can do after you leave.",
+   full:"Not just building models — leading teams that build models. Across 7 engagements in 3 years: energy grid rerouting, battery demand forecasting, vaccine smart ordering, $120M patient care impact, causal ML on a $2B retail revenue stream, item planning, forecast explainability. The pattern: own the technical approach, earn stakeholder trust, build the team's capability so it outlasts the project."},
+  {year:"2016 → Present", org:"Through-line", title:"The Human Thread",
+   proved:"Technical depth with a human north star.",
+   full:"Lutalica (mental health expression platform) → Transliteration from live recordings → Depression Detection via PHQ-9 emulation → Patient Care AI across 8 indications → Vaccine Smart Ordering. This is not a coincidence. It is a consistent direction."}
+];
+
+/* Flow node: {t:title, s:[sub lines], b:[branch lines]} — last node rendered amber */
+const ERAS = [
+{ id:"nirma", tab:"Nirma", name:"Nirma University (2015–2018)",
+  context:"2014–2018 was the early innings of the deep learning revolution. While ImageNet results were circulating in research papers, virtually no undergraduate programs had integrated practical ML. Building CNN-based systems, LIDAR-driven robots, and spectrogram-powered recommendation engines at this time was not a curriculum choice — it was a deliberate bet on where computing was heading.",
+  projects:[
+  { name:"Voice & Sensor Home Automation", year:"2016", badge:"Owner-locked control",
+    p1:"Home automation that responds only to its owner — not any voice, not any command pattern.",
+    problem:"Home automation that responds only to its owner — not any voice, not any command pattern.",
+    tech:"CNN (speaker ID), NLP (command recognition), Reinforcement Learning (schedule optimization), IoT sensors, Raspberry Pi",
+    flow:[
+      {t:"Configured User Voice"},
+      {t:"Spectrogram Registration", s:["CNN-based speaker identification"]},
+      {t:"Voice Match Gate", s:["Rejected: unrecognized voice"]},
+      {t:"NLP Keyword Extraction", s:["Command parsing"]},
+      {t:"IoT Sensor Context", s:["Temperature, Motion, Light levels"]},
+      {t:"RL-based Schedule Learning", s:["Dynamic appliance logic over time"]},
+      {t:"Appliance Control Output"}
+    ]},
+  { name:"License Plate Recognition", year:"2016", badge:"625 / 700+ plates",
+    p1:"Real-world plates are warped, angled, partially occluded. Standard OCR fails.",
+    problem:"Real-world plates are warped, angled, partially occluded. Standard OCR fails. Field survey needed.",
+    note:"<b>Key innovation:</b> Instead of correcting the image geometrically, treated distortion as uncertainty — CNN assigns a probability to each possible character, plate assembled from highest-confidence readings.",
+    impact:"Validation: 700+ plates surveyed manually. 625 recognized correctly.",
+    flow:[
+      {t:"Live Camera Feed"},
+      {t:"Still Frame Capture"},
+      {t:"Plate Region Detection (CV)"},
+      {t:"Distortion Assessment", b:["Clean plate → Direct OCR","Distorted → Custom CNN Probability Matrix","(Each character position scored across all numerics + letters)"]},
+      {t:"Character Assembly from Max-Probability"},
+      {t:"Plate String Output"}
+    ]},
+  { name:"Library Book Recommendation System", year:"2015", badge:"Deployed live",
+    p1:"Local library wanted personalized recommendations beyond browse-and-search.",
+    problem:"Local library wanted personalized recommendations beyond browse-and-search.",
+    tech:"CatBoost + AdaBoost ensemble, LDA topic modeling, intent classification",
+    impact:"Deployed: Live on the library's website.",
+    flow:[
+      {t:"User Chat Input"},
+      {t:"Intent Matching + LDA Topic Modeling", s:["What themes is this person looking for?"]},
+      {t:"Reading History", s:["Prior checkouts"]},
+      {t:"CatBoost Ensemble (AdaBoost weak learners)", s:["Topic vector + History vector → Combined feature space"]},
+      {t:"Ranked Book List → Recommendation Output"}
+    ]},
+  { name:"RoboCar", year:"2016–2017", badge:"90% avoidance",
+    p1:"A car IC navigating real-world-style tracks with dynamic obstacles — no pre-mapped routes.",
+    problem:"Build a car IC that navigates real-world-style tracks with dynamic obstacles — no pre-mapped routes, no controlled environment.",
+    note:"<b>Testing:</b> 9 tracks modeled on NASCAR and F1 circuits (all unknown to the system). Obstacles: moving cars, barrels, cones — 200+ instances total.",
+    impact:"Result: 90% obstacle avoidance rate. 7 unplanned stops across all tracks.",
+    flow:[
+      {t:"LIDAR Sensor Input", s:["Point cloud: distances + obstacle classification"]},
+      {t:"CNN Real-Time Processing", s:["Object type + distance + trajectory"]},
+      {t:"Obstacle?", b:["No → Continue","Yes → Avoidance Path Computed"]},
+      {t:"Motor Control Signal"},
+      {t:"Track Navigation"}
+    ]},
+  { name:"Music Mood Recommendation System", year:"2017", badge:"16×16 mood matrix",
+    p1:"Your current playlist reveals your mood. Build a system that knows this — and feeds it.",
+    problem:"Your current playlist reveals your mood. Build a system that knows this — and feeds it. And learns from you over time.",
+    tech:"Neural Networks, Spectrogram analysis, NLP, feedback-driven matrix optimization",
+    flow:[
+      {t:"Current Playlist Input"},
+      {t:"Feature Extraction per Song", b:["FFT Spectrogram (audio texture)","Tone Analysis","NLP (lyric / speech content)","Emotion Classification (CNN)"]},
+      {t:"16×16 Mood Matrix", s:["4 base emotions × 4×4 intensity quadrant grid","Each song mapped to a matrix position"]},
+      {t:"Recommendations Generated from Adjacent Quadrants"},
+      {t:"Listening Feedback Loop", b:["Song skipped early → Matrix weight ↓","Full listen or repeat → Matrix weight ↑"]},
+      {t:"Matrix Reconfigures → More accurate next session"}
+    ]},
+  { name:"Gujarati/Hindi → English Transliteration", year:"2017–2018", badge:"Meaning preserved",
+    p1:"Translate live voice — preserving metaphors and tonal stress, not just swapping words.",
+    problem:"Translate live voice and text from Gujarati/Hindi to English — preserving metaphors and tonal stress, not just swapping words. Data source: Lutalica (co-founded expression platform). Live open mic recordings became training corpus.",
+    tech:"Seq2Seq + Bahdanau Attention (LSTM-based), ASR preprocessing, custom corpus",
+    note:"<b>Distinction:</b> Translation swaps words. Transliteration preserves what the speaker meant.",
+    flow:[
+      {t:"Live Voice Input (Gujarati / Hindi)"},
+      {t:"ASR Library → Source Language Text"},
+      {t:"Seq2Seq with Bahdanau Attention (LSTM)", b:["Encoder: Source language sequence","Attention: Contextual alignment weights","Decoder: English output sequence"]},
+      {t:"Transliteration Output", s:["Metaphors preserved · Tonal stress retained","Cultural meaning intact — not word-for-word"]}
+    ]}
+]},
+{ id:"infosys", tab:"Infosys", name:"Infosys (Sept 2018 – July 2019)",
+  context:"Pre-LLM era. GPT-2 hadn't been released. The idea of natural language generating working code was largely academic. Building a functional NL-to-Python system in 2018-19 using Seq2Seq + Attention was genuinely ahead of what most enterprise software teams were attempting.",
+  projects:[
+  { name:"Natural Language → Python Platform", year:"2018–2019", badge:"3+ yrs before Copilot",
+    p1:"What if intent written in English produced working code?",
+    problem:"Developers spend disproportionate time on boilerplate. What if intent written in English produced working code?",
+    note:"<b>Role:</b> Main ideator and co-developer.",
+    impact:"One of the earliest NL-to-code systems built in enterprise — predates GitHub Copilot by 3+ years.",
+    flow:[
+      {t:"English Instruction Input"},
+      {t:"Seq2Seq + Attention (LSTM)", b:["Encoder: Parse intent from natural language","Attention: Align intent tokens to code patterns","Decoder: Generate syntactically valid Python"]},
+      {t:"Syntax Validation"},
+      {t:"Working Python Output"}
+    ]}
+]},
+{ id:"zs", tab:"ZS", name:"ZS Associates (July 2019 – Dec 2020)",
+  context:"The pharma commercial model was mid-transformation — shifting from rep-driven, relationship-based selling toward AI-driven precision engagement. The challenge: patient data was abundant but fragmented across EMR, EHR, and claims systems that rarely talked to each other. The clinical and commercial worlds were still operating largely separately. The project below was built at this inflection point.",
+  projects:[
+  { name:"Plug & Predict — Treatment Pathway Predictor", year:"2019–2020", badge:"72% precision",
+    p1:"Can AI pre-generate likely next steps before the doctor even opens the chart?",
+    problem:"Doctors spend significant prep time piecing together a patient's history before visits. Can AI pre-generate the likely next steps — drug regimen, procedures, diagnoses — before the doctor even opens the chart?",
+    note:"<b>Scale:</b> Adopted across 12 therapy areas, multiple pharma clients.",
+    impact:"72% precision · 2/3 reduction in doctor prep time · Faster prognosis at point of care",
+    flow:[
+      {t:"Patient Data Inputs (Time Series Format)", b:["Demographics","Diagnosis history","Treatments & Procedures","Surgeries","Insurance & Preferred Provider","Doctor Notes (NLP-processed → structured)"]},
+      {t:"Proprietary Deep Neural Network + Ensemble", s:["Time series modeling of patient trajectory"]},
+      {t:"3 / 6 / 12-Month Prediction Horizon", b:["Best-fit drug regimen","Recommended procedures","Likely diagnoses"]},
+      {t:"Doctor Dashboard", s:["Recommendations surfaced at point of care"]}
+    ]}
+]},
+{ id:"neu", tab:"Northeastern", name:"Northeastern (Jan 2021 – Dec 2022)",
+  context:"",
+  projects:[
+  { name:"Depression Detection via Social Media", year:"2021", badge:"PHQ-9 emulation",
+    p1:"Social media leaves behavioral trails. Can AI read them and route users to support?",
+    problem:"Depression is underdiagnosed. Social media leaves behavioral trails. Can AI read those trails and route users to the right level of support?",
+    tech:"t-SNE, LDA, unsupervised ML, PHQ-9 emulation, geolocation matching",
+    note:"<b>Significance:</b> Bridges a clinical diagnostic framework with passive behavioral data — no self-reported labels needed.",
+    flow:[
+      {t:"Twitter Behavioral Data", s:["Posts, meme shares, engagement patterns, timing"]},
+      {t:"t-SNE", s:["Dimensionality reduction — surfaces behavioral clusters"]},
+      {t:"LDA Topic Modeling", s:["Unsupervised — extract latent themes per user"]},
+      {t:"Posterior Probability Scoring", s:["How strongly does each user map to","depression-linked topic distributions?"]},
+      {t:"PHQ-9 Band Mapping (Clinical Standard Emulated)", b:["Minimal (1–4)","Mild (5–9)","Moderate (10–14)","Moderately Severe (15–19)","Severe (20–27)"]},
+      {t:"Resource Routing by Severity Band", b:["Minimal → Informational content","Moderate → Curated articles / targeted support","Severe → Nearest therapist (geo-matched)"]}
+    ]},
+  { name:"NYC Cab Demand Prediction + Dynamic Routing", year:"2021–2022", badge:"Zone-level LSTM",
+    p1:"Predict where demand spikes before they happen — then route available cabs optimally.",
+    problem:"Predict where demand spikes before they happen — then route available cabs optimally.",
+    flow:[
+      {t:"Historical Ride Data + Temporal Features"},
+      {t:"Custom LSTM", s:["Demand prediction per zone, per time window"]},
+      {t:"Demand Heatmap (Zone × Time)"},
+      {t:"Modified Dijkstra's Algorithm", s:["Shortest path: cab → highest-demand zone","Edge weights = current traffic + demand signal"]},
+      {t:"Dynamic Routing Instruction per Cab"}
+    ]},
+  { name:"Crypto Sentiment Analysis — Twitter → Bitcoin Price", year:"2021–2022", badge:"Sentiment → price signal",
+    p1:"Does what people say about Bitcoin on Twitter actually move the price?",
+    problem:"Does what people say about Bitcoin on Twitter actually move the price? Quantify the relationship — then build a model that uses sentiment as a predictive signal.",
+    tech:"NLP (VADER, TextBlob), LSTM, Elephas (distributed ML via Spark), cross-correlation, time series, Python",
+    note:"<b>Key insight:</b> Cross-correlation analysis run before modeling — ensuring sentiment lead/lag structure was understood before feeding it as a feature, not an afterthought. · <a href='https://github.com/ParthBhatt05/Crypto-Sentiment-Analysis' target='_blank' rel='noopener'>GitHub ↗</a>",
+    flow:[
+      {t:"Bitcoin Twitter Data Collection"},
+      {t:"Data Cleaning + Preprocessing", s:["Noise removal, deduplication, tokenization"]},
+      {t:"Sentiment Scoring", s:["VADER vs. TextBlob benchmarked →","best-fit method selected per corpus"]},
+      {t:"Bitcoin Price Data Collection", s:["Cryptocurrency market feed"]},
+      {t:"EDA: Tweets & Prices independently", s:["Volume patterns, volatility, time-of-day effects"]},
+      {t:"Aggregation: Sentiment + Price → Time-Aligned Dataset", s:["Tweet sentiment bucketed to price intervals"]},
+      {t:"Cross-Correlation Analysis", s:["Does sentiment lead price? At which lag? How strongly?"]},
+      {t:"LSTM Model", s:["Sentiment signal + price history → Price prediction"], b:["Primary: LSTM on aggregated data","Alternative: Elephas (distributed Keras on Spark)"]},
+      {t:"Output: Quantified impact of public sentiment", s:["on Bitcoin price movement"]}
+    ]}
+]},
+{ id:"danfoss", tab:"Danfoss", name:"Danfoss (Jan 2022 – Sept 2022)",
+  context:"Industry 4.0 was moving from strategy documents to factory floors. The gap between sensor data and actionable intelligence remained expensive: unplanned manufacturing downtime was costing industry an estimated 5–20% of productive capacity globally. The shift from time-based to condition-based maintenance — triggered by real sensor signal, not scheduled intervals — was the core value unlock. PARTH sat directly in this gap.",
+  projects:[
+  { name:"PARTH — Predictive Analytics & Real-Time Heuristics", year:"2022", badge:"$1.2M weekly",
+    p1:"Can audio signal from the machine itself predict failure before it happens?",
+    problem:"CNC tool-tips fail without warning — causing machine downtime, scrapped batches, and cascading schedule disruption. Can audio signal from the machine itself predict failure before it happens?",
+    impact:"25% reduction in operational downtime · $1.2M incremental weekly revenue recovered · Executive buy-in secured for multi-site scale-up",
+    flow:[
+      {t:"CNC Machine in Operation"},
+      {t:"Analog Audio Sensor Capture"},
+      {t:"FFT Processing → Spectrogram", s:["Audio converted to 2D frequency-time distribution"]},
+      {t:"Normal Signature vs. Anomaly Detection", s:["Large frequency spikes = degradation signal"]},
+      {t:"Material Data Integration", s:["Known tool-tip material properties + lifecycle data"]},
+      {t:"Half-Life Prediction Model", s:["Optimal sharpen/replace window identified","before failure threshold is reached"]},
+      {t:"Proactive Alert: \"Sharpen Now\" / \"Replace by [Date]\""},
+      {t:"Tool Serviced Before Failure", s:["Downtime avoided · Batch protected · Schedule intact"]}
+    ]},
+  { name:"Annual Sales Forecasting Revamp", year:"2022", badge:"−12% error",
+    p1:"Existing Elastic Net model leaving 12% avoidable forecast error.",
+    problem:"Existing Elastic Net model leaving 12% avoidable forecast error — with downstream impact on inventory and global planning.",
+    impact:"12% forecast error reduction vs. Elastic Net baseline",
+    flow:[
+      {t:"Global Sales History + Contextual Features", s:["Seasonality, regional signals, macro indicators"]},
+      {t:"Bayesian Hyperparameter Optimization"},
+      {t:"Ensemble Model", b:["LGBM (gradient boosting — tabular patterns)","LSTM (sequential temporal dependencies)","Google Time Series Model (trend + seasonality)"]},
+      {t:"Weighted Ensemble Output"},
+      {t:"12% Forecast Error Reduction vs. Elastic Net baseline"}
+    ]}
+]},
+{ id:"deloitte", tab:"Deloitte", name:"Deloitte (Apr 2023 – Present)",
+  context:"Each project below sits at an industry inflection point. Energy grids are under simultaneous pressure from aging infrastructure, DER integration, and EV load growth. CPG brands face the most volatile demand environment in decades. Pharma's commercial model is shifting from rep-led to AI-driven precision engagement. In each case, the question was the same: what does production-grade AI look like in this specific constraint environment?",
+  projects:[
+  { name:"Major US Energy Utility | Distribution Fault Prediction & Rerouting", year:"2023–", badge:"$18M annual",
+    p1:"Every grid fault required manual diagnosis and intervention.",
+    problem:"Faults in transformers, feeders, or DER instruments cause outages. The existing system had no automated detection or intelligent rerouting — every fault required manual diagnosis and intervention.",
+    impact:"22% reduction in circuit faults · $18M annual profit improvement · Pilot secured across Northeast circuits",
+    flow:[
+      {t:"Energy Grid as a Graph", s:["Nodes: Transformers · Feeders · DERs · Substations","Edges: Distribution connections + load weights"]},
+      {t:"Continuous Monitoring"},
+      {t:"Fault Detection", s:["Custom graph traversal algorithm","Detects: broken edges, node failures,","misrouted segments, cascade risk"]},
+      {t:"Fault Classified + Located"},
+      {t:"AI-Enabled Rerouting", s:["Best alternate distribution path computed","to maintain power flow, avoid outage"]},
+      {t:"Rerouting Executed Automatically"}
+    ]},
+  { name:"Causal ML on $2B Retail Revenue Stream", year:"2023–", badge:"7% uplift",
+    p1:"Standard ML couldn't answer “what actually caused this lift?”",
+    problem:"A major retailer needed to measure the true causal impact of marketing and promotional spend — not just correlation. Standard ML couldn't answer “what actually caused this lift?”",
+    impact:"7% sales uplift · 22% improvement in recommendation acceptance · 15% increase in patient adherence (pharma parallel deployment) · Approach adopted as new best practice across Deloitte teams",
+    flow:[
+      {t:"Multi-channel Sales + Marketing Data", s:["Promotions, pricing, digital, in-store"]},
+      {t:"Causal Inference Model", s:["Isolates true treatment effect from confounders"]},
+      {t:"Counterfactual Estimation", s:["What would have happened without the intervention?"]},
+      {t:"Causal Attribution per Channel"},
+      {t:"Decision Support: Where to spend next"}
+    ]},
+  { name:"Global Battery Manufacturer | Demand Forecasting", year:"2023–", badge:"Lower RMSE",
+    p1:"Forecast degraded at granular store-item level — outliers contaminating baseline.",
+    problem:"Battery demand forecast degraded at granular store-item level — outliers contaminating baseline, store-level signal too noisy.",
+    flow:[
+      {t:"Historical Sales Data (Battery SKUs × Stores × Time)"},
+      {t:"Outlier Treatment", s:["Custom approach — removes contamination, reduces RMSE"]},
+      {t:"Store-Item Clustering", s:["K-means: sales velocity + store format +","regional demand signals + SKU family"]},
+      {t:"Aggregation / Disaggregation Strategy", s:["Forecast at cluster level → disaggregate to store-item"]},
+      {t:"Improved Forecast Output", s:["Lower RMSE · Maintained recall thresholds"]}
+    ]},
+  { name:"Global Pharma Client | Patient Care Portfolio", year:"2024–2025", badge:"~$120M impact",
+    p1:"HCP engagement was suboptimal across 8 therapy indications.",
+    problem:"HCP engagement was suboptimal across 8 therapy indications — doctors weren't receiving the right signal at the right moment, at scale.",
+    impact:"~$120M estimated profit impact · 12 use cases delivered · Consistent delivery quality across 8 indications",
+    flow:[
+      {t:"Patient Prediction System", s:["Identifying concomitant symptoms in patient pathways"]},
+      {t:"Drug Treatment Recommendations", s:["Tailored to the client's portfolio"]},
+      {t:"Surfaced to Doctors at Point of Care"}
+    ]},
+  { name:"Global Pharma Client | Vaccine Smart Ordering", year:"2025", badge:"Full-scale rollout",
+    p1:"E-commerce vaccine ordering was manual and reactive.",
+    problem:"E-commerce vaccine ordering was manual and reactive — prone to stock gaps and missed demand signals.",
+    flow:[
+      {t:"Demand Signal", s:["Historical order patterns + seasonal triggers + channel data"]},
+      {t:"Dynamic Inventory Threshold Model", s:["Reorder point computed per SKU per channel"]},
+      {t:"Smart Order Generated Automatically"},
+      {t:"Pilot: E-commerce channel"},
+      {t:"Stakeholder Alignment Secured → Full-Scale Rollout"}
+    ]},
+  { name:"Major US Retailer | Item Plan & Demand Forecasting", year:"2023–", badge:"Store-level relevance",
+    p1:"Assortment decisions were outpacing forecast accuracy.",
+    problem:"Item-level forecasts lacked relevance at store and regional granularity — assortment decisions were outpacing forecast accuracy.",
+    flow:[
+      {t:"Item + Store + Region Trend Signals Integrated"},
+      {t:"Store Clustering", s:["K-means on sales velocity, store format,","regional demand, item performance metrics"]},
+      {t:"Item-Level Forecast"},
+      {t:"Assortment and Item Plan Output"}
+    ]},
+  { name:"CPG Manufacturer | Forecast Explainability", year:"2023–", badge:"Deployed in Anaplan",
+    p1:"Forecasts changed week-over-week with no explanation.",
+    problem:"Forecasts changed week-over-week with no explanation. Business teams couldn't trust, interrogate, or act on them.",
+    flow:[
+      {t:"Current Forecast"},
+      {t:"Surrogate Model", s:["Interpretable model trained to mimic","the complex forecasting black box"]},
+      {t:"Elasticity Identification", s:["Contribution of each driver per unit change"]},
+      {t:"Dynamic Programming", s:["Optimal sequence: which drivers explain movement from","Last Year → Last Cycle → Last Week → Current?"]},
+      {t:"Waterfall Attribution Output", s:["Each bar = one driver's positive or negative contribution"]},
+      {t:"Explainability Dashboard", s:["Deployed in Anaplan · End users trained","Three comparison scenarios"]}
+    ]}
+]}
+];
+
+const STACK = [
+  {label:"Modeling & ML", items:["Causal Inference","Time Series Forecasting (LGBM, LSTM, Ensemble)","Deep Learning (CNN, RNN, Seq2Seq + Attention)","Reinforcement Learning","Unsupervised (t-SNE, LDA, K-means)","Ensemble Methods (CatBoost, AdaBoost, Gradient Boosting)","Explainability (Surrogate Models, Elasticity Attribution)","Predictive Maintenance"]},
+  {label:"NLP & Signal Processing", items:["Topic Modeling","Intent Matching","Transliteration","FFT / Spectrograms","NLP Pipelines"]},
+  {label:"Engineering & Platforms", items:["Python","R","SQL","Spark","GCP","AWS","Azure","Snowflake","MLFlow","Docker","Anaplan"]},
+  {label:"Domain Expertise", items:["Healthcare & Life Sciences","CPG & Retail","Energy & Utilities","Manufacturing","Financial Planning"]}
+];
+
+/* ════════ SVG FLOW RENDERER ════════ */
+function esc(x){return x.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function flowSVG(steps){
+  const W=720, NW=520, NX=(W-NW)/2, BW=440, BX=200, RAIL=170, GAP=30;
+  let y=6, out=[], n=steps.length;
+  out.push(`<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0D7377"/></marker></defs>`);
+  steps.forEach((st,i)=>{
+    const last = i===n-1, stroke = last? "#E8A838":"#0D7377";
+    if(i>0){
+      out.push(`<line x1="${W/2}" y1="${y}" x2="${W/2}" y2="${y+GAP-4}" stroke="#0D7377" stroke-width="1" marker-end="url(#ah)"/>`);
+      y+=GAP;
+    }
+    const subs = st.s||[];
+    const h = 16 + 19 + subs.length*16 + 10;
+    out.push(`<rect x="${NX}" y="${y}" width="${NW}" height="${h}" rx="6" fill="#1A1A1A" stroke="${stroke}" stroke-width="1.5"/>`);
+    let ty = y+16+7;
+    out.push(`<text x="${W/2}" y="${ty}" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="600" fill="#F0F0F0">${esc(st.t)}</text>`);
+    subs.forEach(sl=>{ ty+=16; out.push(`<text x="${W/2}" y="${ty}" text-anchor="middle" font-family="Inter,sans-serif" font-size="11.5" font-weight="300" fill="#9a9a9a">${esc(sl)}</text>`); });
+    y+=h;
+    if(st.b && st.b.length){
+      const railTop=y;
+      let stubs=[];
+      st.b.forEach(bl=>{
+        const bh=26, by=y+14;
+        stubs.push(by+bh/2);
+        y+=14;
+        out.push(`<rect x="${BX}" y="${y}" width="${BW}" height="${bh}" rx="5" fill="#1A1A1A" stroke="#0D7377" stroke-width="1" stroke-dasharray="none" opacity="0.95"/>`);
+        out.push(`<text x="${BX+14}" y="${y+17}" font-family="Inter,sans-serif" font-size="11.5" fill="#cfcfcf">${esc(bl)}</text>`);
+        y+=bh;
+      });
+      const railBot=stubs[stubs.length-1];
+      out.push(`<line x1="${RAIL}" y1="${railTop}" x2="${RAIL}" y2="${railBot}" stroke="#0D7377" stroke-width="1"/>`);
+      stubs.forEach(sy=>out.push(`<line x1="${RAIL}" y1="${sy}" x2="${BX}" y2="${sy}" stroke="#0D7377" stroke-width="1"/>`));
+      y+=6;
+    }
+  });
+  return `<svg viewBox="0 0 ${W} ${y+8}" xmlns="http://www.w3.org/2000/svg" role="img">${out.join("")}</svg>`;
+}
+
+/* ════════ RENDER: ARC ════════ */
+const arcRail=document.getElementById("arcRail"), arcDrawer=document.getElementById("arcDrawer"), arcInner=document.getElementById("arcDrawerInner");
+let arcOpen=-1;
+ARC.forEach((s,i)=>{
+  const c=document.createElement("div"); c.className="arc-card";
+  c.innerHTML=`<div class="arc-year">${s.year}</div><div class="arc-org">${s.org}</div><div class="arc-thesis">${s.title}</div><div class="arc-proved"><b>What this proved:</b> ${s.proved}</div>`;
+  c.addEventListener("click",()=>{
+    if(arcOpen===i){ arcOpen=-1; arcDrawer.style.maxHeight="0"; c.classList.remove("active"); return; }
+    arcOpen=i;
+    [...arcRail.children].forEach(el=>el.classList.remove("active"));
+    c.classList.add("active");
+    arcInner.innerHTML=`<h3>${s.title}</h3><div class="org">${s.year} · ${s.org}</div><p>${s.full}</p><div class="pr"><b>What this proved:</b> ${s.proved}</div>`;
+    arcDrawer.style.maxHeight=arcInner.scrollHeight+48+"px";
+  });
+  arcRail.appendChild(c);
+});
+
+/* ════════ RENDER: WORK ════════ */
+const tabsEl=document.getElementById("eraTabs"), panelsEl=document.getElementById("eraPanels");
+ERAS.forEach((era,i)=>{
+  const t=document.createElement("button"); t.className="era-tab"+(i===0?" active":""); t.textContent=era.tab;
+  t.addEventListener("click",()=>{
+    [...tabsEl.children].forEach(el=>el.classList.remove("active")); t.classList.add("active");
+    [...panelsEl.children].forEach((p,j)=>p.style.display=j===i?"block":"none");
+  });
+  tabsEl.appendChild(t);
+
+  const panel=document.createElement("div"); panel.style.display=i===0?"block":"none";
+  let html=era.context?`<p class="era-context">${era.context}</p>`:"";
+  panel.innerHTML=html;
+  era.projects.forEach(p=>{
+    const card=document.createElement("div"); card.className="proj";
+    card.innerHTML=`<div class="proj-head">
+        <div><h3>${p.name} <span style="color:var(--muted);font-weight:300;font-size:14px">· ${p.year}</span></h3><div class="p1">${p.p1}</div></div>
+        <div style="display:flex;gap:12px;align-items:flex-start"><span class="badge">${p.badge}</span><span class="expand-ind">+</span></div>
+      </div>
+      <div class="proj-body"><div class="proj-body-inner">
+        <p class="problem"><b style="color:var(--teal-bright)">Problem.</b> ${p.problem}</p>
+        <div class="flow"></div>
+        ${p.tech?`<p class="tech"><b>Tech:</b> ${p.tech}</p>`:""}
+        ${p.note?`<p class="note">${p.note}</p>`:""}
+        ${p.impact?`<p class="impact">${p.impact}</p>`:""}
+      </div></div>`;
+    const head=card.querySelector(".proj-head"), body=card.querySelector(".proj-body"), flowEl=card.querySelector(".flow");
+    head.addEventListener("click",()=>{
+      const open=card.classList.toggle("open");
+      if(open){
+        if(!flowEl.innerHTML && p.flow) flowEl.innerHTML=flowSVG(p.flow);
+        body.style.maxHeight=body.scrollHeight+"px";
+        setTimeout(()=>{ if(card.classList.contains("open")) body.style.maxHeight="none"; },480);
+      } else {
+        body.style.maxHeight=body.scrollHeight+"px";
+        requestAnimationFrame(()=>{ body.style.maxHeight="0"; });
+      }
+    });
+    panel.appendChild(card);
+  });
+  panelsEl.appendChild(panel);
+});
+
+/* ════════ RENDER: STACK ════════ */
+const sg=document.getElementById("stackGroups");
+STACK.forEach(g=>{
+  const d=document.createElement("div"); d.className="stack-group";
+  d.innerHTML=`<div class="stack-label">${g.label}</div><div class="pills">${g.items.map(x=>`<span class="pill">${x}</span>`).join("")}</div>`;
+  sg.appendChild(d);
+});
+
+/* ════════ BEHAVIOR ════════ */
+// fade-in on scroll
+const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } }),{threshold:0.1});
+document.querySelectorAll(".fade").forEach(el=>io.observe(el));
+
+// nav hide on scroll down, show on scroll up
+let lastY=0; const nav=document.getElementById("nav");
+addEventListener("scroll",()=>{
+  const y=scrollY;
+  nav.classList.toggle("hidden", y>120 && y>lastY);
+  lastY=y;
+},{passive:true});
+</script>
+</body>
+</html>

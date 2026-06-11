@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="CV — Parth Bhatt, AI strategy and data science leader. 8+ years building production ML systems driving $2B+ in client business value."/>
+<title>CV | Parth Bhatt</title>
+<link rel="canonical" href="https://parthbhatt05.github.io/cv.html"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0D0D0D;
+  --text:#F0F0F0;
+  --teal:#0D7377;
+  --teal-bright:#14A8AD;
+  --amber:#E8A838;
+  --surface:#1A1A1A;
+  --muted:#888888;
+  --line:#262626;
+  --body:#D0D0D0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--teal-bright);text-decoration:none}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,13,13,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);transition:transform .3s ease}
+nav.hidden{transform:translateY(-100%)}
+.nav-inner{max-width:900px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+.nav-name{font-weight:700;font-size:16px;color:var(--text)}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{font-size:14px;color:var(--muted);transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+
+.cv{max-width:760px;margin:0 auto;padding:128px 24px 96px}
+.cv-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
+h1{font-size:36px;font-weight:700;color:var(--teal-bright);letter-spacing:-.01em}
+.contact{font-size:14px;color:var(--muted);margin-top:8px}
+.dl-btn{font-family:inherit;font-size:14px;font-weight:600;color:var(--text);background:transparent;border:1px solid var(--teal);border-radius:8px;padding:10px 24px;cursor:pointer;transition:all .2s;margin-top:6px}
+.dl-btn:hover{border-color:var(--teal-bright);color:var(--teal-bright)}
+
+h2{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal-bright);font-weight:600;border-bottom:1px solid var(--teal);padding-bottom:8px;margin:48px 0 24px}
+.summary{font-size:15px;color:var(--body)}
+.job{margin-bottom:32px}
+.job h3{font-size:17px;font-weight:700;color:var(--text)}
+.job .meta{font-size:14px;font-style:italic;color:var(--muted);margin:2px 0 12px}
+ul{list-style:none}
+li{font-size:15px;color:var(--body);padding-left:20px;position:relative;margin-bottom:10px}
+li::before{content:'·';position:absolute;left:4px;color:var(--teal-bright);font-weight:700}
+.skill-line{font-size:15px;margin-bottom:12px;color:var(--muted)}
+.skill-line b{color:var(--text);font-weight:600}
+.edu{margin-bottom:28px}
+.edu h3{font-size:16px;font-weight:700;color:var(--text)}
+.edu .meta{font-size:14px;font-style:italic;color:var(--muted);margin:2px 0 10px}
+
+@media(max-width:680px){.cv{padding-top:104px}h1{font-size:30px}}
+
+@media print{
+  nav,.dl-btn{display:none !important}
+  body{background:#fff;color:#000}
+  .cv{padding:0;max-width:100%}
+  h1{color:#000}
+  h2{color:#000;border-bottom-color:#000}
+  .contact,.job .meta,.edu .meta,.skill-line{color:#333}
+  .summary,li,.skill-line b{color:#000}
+  .job h3,.edu h3,.skill-line b{color:#000}
+  li::before{color:#000}
+  a{color:#000}
+  .job,.edu{break-inside:avoid}
+  @page{margin:18mm 16mm}
+}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-name">Parth Bhatt</a>
+    <div class="nav-links">
+      <a href="index.html">&larr; Back</a>
+      <a href="index.html#work">Work</a>
+      <a href="mailto:parthbhatt05@icloud.com" aria-label="Email" title="Email">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<main class="cv">
+  <div class="cv-top">
+    <div>
+      <h1>Parth Bhatt</h1>
+      <p class="contact">Austin, Texas · 646-204-9729 · <a href="mailto:parthbhatt05@icloud.com">parthbhatt05@icloud.com</a> · <a href="https://www.linkedin.com/in/parthbhatt05" target="_blank" rel="noopener">linkedin.com/in/parthbhatt05</a></p>
+    </div>
+    <button class="dl-btn" onclick="window.print()">Download PDF</button>
+  </div>
+
+  <h2>Summary</h2>
+  <p class="summary">AI strategy and data science leader with 8+ years building and deploying production ML systems — driving $2B+ in client business value and $20M+ in new firm revenue across pharma, energy, retail, and manufacturing. Expert in translating complex technical problems into measurable business outcomes, leading cross-functional teams, and operationalizing AI from prototype to production.</p>
+
+  <h2>Professional Experience</h2>
+
+  <div class="job">
+    <h3>Deloitte</h3>
+    <p class="meta">Sr. AI Consultant | AI &amp; Data Solutions · April 2023 – Present · Austin, TX</p>
+    <ul>
+      <li>Defined AI GTM strategies and sized growth opportunities across target verticals — presenting data-driven business cases to C-suite stakeholders and securing $20M+ in new firm revenue across flagship AI/ML engagements in pharma, energy, and retail.</li>
+      <li>Led cross-functional teams of 20+ (data scientists, ML engineers, analysts) to deliver six production AI/ML solutions end-to-end — applying causal ML on a $2B revenue stream, achieving 7% sales uplift, 22% improvement in recommendation acceptance, and 15% increase in patient adherence.</li>
+      <li>Spearheaded a patient-centric AI portfolio of 12 use cases across 8 therapy indications for a global pharma client — delivering ~$120M in estimated profit impact through precision HCP engagement and AI-driven treatment recommendations.</li>
+      <li>Managed a team of 12 to deliver a spatial fault-prediction and dynamic rerouting product for a major energy utility — reducing circuit faults by 22% and driving $18M in annual profit improvement through a novel graph-traversal algorithm.</li>
+      <li>Designed and delivered AI, LLM, and GenAI enablement programs for 700+ practitioners — establishing responsible AI guidelines adopted as internal best practice and directly supporting the firm's AI commercialization strategy.</li>
+      <li>Established quarterly OKRs and managed business cadences including weekly pipeline reviews, MBRs, and QBRs — hiring 18 data science roles and growing team delivery capacity by 66%.</li>
+    </ul>
+  </div>
+
+  <div class="job">
+    <h3>Danfoss Power Solutions</h3>
+    <p class="meta">Data Science Co-Op | Innovation Accelerator · January 2022 – September 2022 · Cambridge, MA</p>
+    <ul>
+      <li>Built PARTH (Predictive Analytics &amp; Real-Time Heuristics): a CNN-based predictive maintenance model that converted CNC machine audio into FFT spectrograms to detect tool-tip degradation before failure — reducing machine downtime by 25% and generating $1.2M in incremental weekly revenue; led the executive business case that secured multi-factory scale-up approval.</li>
+      <li>Redesigned sales forecasting infrastructure using a Bayesian-optimized LGBM + LSTM + Time Series ensemble, reducing forecast error by 12% and improving inventory planning accuracy across global HQ operations.</li>
+    </ul>
+  </div>
+
+  <div class="job">
+    <h3>ZS Associates</h3>
+    <p class="meta">Decision Analytics Associate | Real World Data &amp; Advisory · July 2019 – December 2020 · Pune, India</p>
+    <ul>
+      <li>Built a people development program that upskilled 20+ junior analysts — designing structured learning paths, mentoring on ML best practices, and measurably improving team delivery quality; pioneered weekly AI &amp; Healthcare knowledge sessions that built a data science culture across the organization.</li>
+      <li>Deployed end-to-end deep neural network pipelines to model patient journeys and predict treatment pathways — achieving 72% predictive precision across 12 therapy areas, reducing physician prep time by 2/3, and directly informing commercial go-to-market strategy across multiple pharma clients.</li>
+    </ul>
+  </div>
+
+  <div class="job">
+    <h3>Infosys</h3>
+    <p class="meta">Systems Engineer | Advanced Automation &amp; Software Research · September 2018 – July 2019 · Pune, India</p>
+    <ul>
+      <li>Engineered automated reporting workflows for a global computer manufacturing client, cutting operational timelines by 50%.</li>
+      <li>Co-ideated and co-developed a semantics-oriented natural language-to-Python platform (Seq2Seq + Attention) — enabling non-technical users to generate working code from plain English instructions.</li>
+    </ul>
+  </div>
+
+  <div class="job">
+    <h3>Lutalica</h3>
+    <p class="meta">Co-Founder / Founding Developer · May 2016 – June 2018 · Ahmedabad, India</p>
+    <ul>
+      <li>Co-founded a mental health-focused creative expression platform (poetry, prose, open mics) — designed core product features, led events and performance programming, and built back-end analytics tools for understanding user trends.</li>
+      <li>Designed and built a Gujarati/Hindi to English transliterator (Seq2Seq + Attention) preserving metaphors and tonal stress; live performance recordings from the platform served as the training corpus.</li>
+    </ul>
+  </div>
+
+  <h2>Skills</h2>
+  <p class="skill-line"><b>Leadership &amp; Strategy:</b> Project Management · Executive Advisory · GTM Strategy · Innovation · Business-Case Development · Cross-functional Stakeholder Alignment</p>
+  <p class="skill-line"><b>Data Science &amp; ML:</b> Causal Inference · Forecasting · Predictive Modeling · NLP · Deep Learning · Optimization · LLMs · Explainability · Predictive Maintenance</p>
+  <p class="skill-line"><b>Languages:</b> Python · R · SQL · MongoDB</p>
+  <p class="skill-line"><b>Frameworks &amp; Platforms:</b> GCP · AWS · Azure · Snowflake · MLFlow · Docker · OpenAI · Claude · Grok</p>
+
+  <h2>Education</h2>
+
+  <div class="edu">
+    <h3>Northeastern University, Khoury College of Computer Sciences</h3>
+    <p class="meta">Master of Science, Data Science · January 2021 – December 2022 · Boston, MA</p>
+    <ul>
+      <li>Teaching Assistant from Day 1 — DBMS, Supervised ML, Statistics: designed and graded assessments, mid-terms, and finals.</li>
+      <li>Key projects: Depression detection via social media (t-SNE + LDA → PHQ-9 emulation); NYC cab demand prediction (LSTM + modified Dijkstra's); Crypto Sentiment Analysis — cross-correlation and LSTM modeling of Twitter sentiment impact on Bitcoin prices (distributed alt: Elephas on Spark); UNO bot via Q-Learning.</li>
+    </ul>
+  </div>
+
+  <div class="edu">
+    <h3>Nirma University, Institute of Technology</h3>
+    <p class="meta">Bachelor of Technology, Computer Science &amp; Engineering · Minor in Finance · August 2014 – May 2018 · Ahmedabad, India</p>
+    <ul>
+      <li>Concentrated electives in Data Science &amp; AI from 2014 — built 6 production-grade systems ahead of mainstream adoption: CNN-based license plate recognition, music mood recommendation (neural mood matrix), RoboCar (90% obstacle avoidance on F1-style tracks), voice-controlled home automation, Hindi/Gujarati transliterator, and library recommendation engine.</li>
+      <li>Google Student Ambassador: led Advanced Data Science workshops. ISTE Chapter Editor-in-Chief.</li>
+    </ul>
+  </div>
+</main>
+
+<script>
+let lastY=0; const nav=document.getElementById("nav");
+addEventListener("scroll",()=>{
+  const y=scrollY;
+  nav.classList.toggle("hidden", y>120 && y>lastY);
+  lastY=y;
+},{passive:true});
+</script>
+</body>
+</html>
