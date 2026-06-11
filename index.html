@@ -34,7 +34,8 @@ a{color:var(--teal-bright);text-decoration:none}
 nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,13,13,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);transition:transform .3s ease}
 nav.hidden{transform:translateY(-100%)}
 .nav-inner{max-width:900px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
-.nav-name{font-weight:700;font-size:16px;color:var(--text);letter-spacing:.02em}
+.nav-name{font-weight:700;font-size:16px;color:var(--text);letter-spacing:.02em;display:flex;align-items:center;gap:10px}
+.nav-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;object-position:center 10%;flex-shrink:0;box-shadow:0 0 0 1.5px var(--teal)}
 .nav-links{display:flex;gap:32px;align-items:center}
 .nav-links a{font-size:14px;color:var(--muted);transition:color .2s}
 .nav-links a:hover{color:var(--text)}
@@ -147,7 +148,7 @@ footer{border-top:1px solid var(--line);padding:32px 0;text-align:center;font-si
 
 <nav id="nav">
   <div class="nav-inner">
-    <a href="#hero" class="nav-name">Parth Bhatt</a>
+    <a href="#hero" class="nav-name"><img src="parth-nobg.png" alt="Parth Bhatt" class="nav-avatar">Parth Bhatt</a>
     <div class="nav-links">
       <a href="#work">Work</a>
       <a href="cv.html">CV</a>
@@ -268,7 +269,7 @@ const ARC = [
    full:"Left ZS to pursue MS in Data Science at Northeastern. Teaching Assistant from day one — not a student waiting to contribute; a practitioner sharpening the foundation. Co-op at Danfoss: turned CNC machine audio into a predictive maintenance signal ($1.2M weekly revenue), and replaced a linear forecasting model with an ensemble that cut error 12%."},
   {year:"2023–Present", org:"Deloitte, Texas", title:"Leading at Scale",
    proved:"The best measure of a DS lead is what the team can do after you leave.",
-   full:"Not just building models — leading teams that build models. Across 7 engagements in 3 years: energy grid rerouting, battery demand forecasting, vaccine smart ordering, $120M patient care impact, causal ML on a $2B retail revenue stream, item planning, forecast explainability. The pattern: own the technical approach, earn stakeholder trust, build the team's capability so it outlasts the project."}
+   full:"Not just building models — leading teams that build models. Across 7 engagements in 3 years: energy grid rerouting, battery demand forecasting, vaccine smart ordering, $120M patient care impact, causal ML on a $2B patient care portfolio, item planning, forecast explainability. The pattern: own the technical approach, earn stakeholder trust, build the team's capability so it outlasts the project."}
 ];
 
 /* Flow node: {t:title, s:[sub lines], b:[branch lines]} — last node rendered amber */
@@ -477,14 +478,17 @@ const ERAS = [
       {t:"Aggregation / Disaggregation Strategy", s:["Forecast at cluster level → disaggregate to store-item"]},
       {t:"Improved Forecast Output", s:["Lower RMSE · Maintained recall thresholds"]}
     ]},
-  { name:"Global Pharma Client | Patient Care Portfolio", year:"2024–2025", badge:"~$120M impact",
+  { name:"Global Pharma Client | Patient Care Portfolio", year:"2024–2025", badge:"$2B GTM impact",
     p1:"HCP engagement was suboptimal across 8 therapy indications.",
-    problem:"HCP engagement was suboptimal across 8 therapy indications — doctors weren't receiving the right signal at the right moment, at scale.",
-    impact:"~$120M estimated profit impact · 12 use cases delivered · Consistent delivery quality across 8 indications",
+    problem:"HCP engagement was suboptimal across 8 therapy indications — doctors weren't receiving the right signal at the right moment, at scale. AI-powered use cases fed directly into GTM strategy and launch readiness, generating $2B in business impact.",
+    impact:"$2B business impact from GTM & launch readiness strategies · $120M profit impact · 22% improvement in recommendation acceptance · 15% increase in patient adherence · 12 use cases · 8 indications",
     flow:[
-      {t:"Patient Prediction System", s:["Identifying concomitant symptoms in patient pathways"]},
-      {t:"Drug Treatment Recommendations", s:["Tailored to the client's portfolio"]},
-      {t:"Surfaced to Doctors at Point of Care"}
+      {t:"Patient & HCP Data", s:["Claims, EMR, prescription history, engagement signals"]},
+      {t:"Causal Inference Model", s:["Isolates true treatment effect from confounders","What actually drives HCP adoption — not just correlation"]},
+      {t:"Counterfactual Estimation", s:["What would have happened without the intervention?"]},
+      {t:"Patient Prediction System", s:["Concomitant symptom identification in patient pathways"]},
+      {t:"Drug Treatment Recommendations", s:["Causal signal + prediction → tailored to client portfolio"]},
+      {t:"Surfaced to HCPs at Point of Care", s:["Across 12 use cases · 8 therapy indications"]}
     ]},
   { name:"Global Pharma Client | Vaccine Smart Ordering", year:"2025", badge:"Full-scale rollout",
     p1:"E-commerce vaccine ordering was manual and reactive.",
@@ -496,17 +500,7 @@ const ERAS = [
       {t:"Pilot: E-commerce channel"},
       {t:"Stakeholder Alignment Secured → Full-Scale Rollout"}
     ]},
-  { name:"Causal ML on $2B Retail Revenue Stream", year:"2025", badge:"7% uplift",
-    p1:"Standard ML couldn't answer “what actually caused this lift?”",
-    problem:"A major retailer needed to measure the true causal impact of marketing and promotional spend — not just correlation. Standard ML couldn't answer “what actually caused this lift?”",
-    impact:"7% sales uplift · 22% improvement in recommendation acceptance · 15% increase in patient adherence (pharma parallel deployment) · Approach adopted as new best practice across Deloitte teams",
-    flow:[
-      {t:"Multi-channel Sales + Marketing Data", s:["Promotions, pricing, digital, in-store"]},
-      {t:"Causal Inference Model", s:["Isolates true treatment effect from confounders"]},
-      {t:"Counterfactual Estimation", s:["What would have happened without the intervention?"]},
-      {t:"Causal Attribution per Channel"},
-      {t:"Decision Support: Where to spend next"}
-    ]},
+
   { name:"Major US Retailer | Item Plan & Demand Forecasting", year:"2026", badge:"Store-level relevance",
     p1:"Assortment decisions were outpacing forecast accuracy.",
     problem:"Item-level forecasts lacked relevance at store and regional granularity — assortment decisions were outpacing forecast accuracy.",
