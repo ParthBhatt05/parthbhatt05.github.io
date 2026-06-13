@@ -154,9 +154,22 @@ footer{border-top:1px solid var(--line);padding:32px 0;text-align:center;font-si
   table.lead td:first-child{white-space:normal}
   .proj-head{flex-wrap:wrap}
 }
+
+/* ── Motion-Driven / Storytelling enhancements ── */
+#scroll-progress{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--teal),var(--teal-bright));z-index:300;width:0%;transition:width .08s linear;pointer-events:none}
+.fade{transition:opacity .7s ease,transform .7s ease}
+.num{font-variant-numeric:tabular-nums;transition:color .3s}
+.marquee-wrap{overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);margin-top:40px;border-top:1px solid var(--line);padding-top:32px}
+.marquee-track{display:flex;width:max-content;animation:marquee 40s linear infinite}
+.marquee-track:hover{animation-play-state:paused}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.marquee-pill{background:var(--surface);border:1px solid var(--line);color:var(--muted);padding:5px 14px;border-radius:24px;font-size:12px;font-weight:500;white-space:nowrap;margin-right:10px;flex-shrink:0;transition:color .2s,border-color .2s}
+.marquee-pill:hover{color:var(--teal-bright);border-color:var(--teal)}
+@media(prefers-reduced-motion:reduce){.marquee-track{animation:none}.fade{transition:opacity .3s ease}}
 </style>
 </head>
 <body>
+<div id="scroll-progress"></div>
 
 <nav id="nav">
   <div class="nav-inner">
@@ -721,17 +734,63 @@ function closeCV(){document.getElementById('cvModal').style.display='none';docum
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCV();});
 document.addEventListener('click',e=>{if(e.target&&e.target.id==='cvModal')closeCV();});
 
-// fade-in on scroll
-const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } }),{threshold:0.1});
+// staggered fade-in per section (storytelling cascade)
+document.querySelectorAll("section").forEach(sec=>{
+  sec.querySelectorAll(".fade").forEach((el,i)=>{el.style.transitionDelay=(i*90)+"ms";});
+});
+const io=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}
+}),{threshold:0.1});
 document.querySelectorAll(".fade").forEach(el=>io.observe(el));
 
-// nav hide on scroll down, show on scroll up
-let lastY=0; const nav=document.getElementById("nav");
+// scroll: progress bar + hero parallax + nav hide
+const progressBar=document.getElementById("scroll-progress");
+const heroWrap=document.querySelector("#hero .wrap");
+const nav=document.getElementById("nav");
+let lastY=0;
 addEventListener("scroll",()=>{
   const y=scrollY;
-  nav.classList.toggle("hidden", y>120 && y>lastY);
+  const maxY=document.documentElement.scrollHeight-innerHeight;
+  progressBar.style.width=(maxY>0?Math.min(100,y/maxY*100):0)+"%";
+  if(heroWrap) heroWrap.style.transform=`translateY(${Math.min(y*0.25,120)}px)`;
+  nav.classList.toggle("hidden",y>120&&y>lastY);
   lastY=y;
 },{passive:true});
+
+// animated stat counters
+function animateCounter(el){
+  const raw=el.textContent.trim();
+  const prefix=raw.match(/^\$/) ? "$" : "";
+  const suffix=raw.match(/[BM+]+$/) ? raw.match(/[BM+]+$/)[0] : "";
+  const numStr=raw.replace(/[$BM+]/g,"");
+  const target=parseFloat(numStr);
+  if(isNaN(target))return;
+  const duration=1400,start=performance.now();
+  const tick=now=>{
+    const p=Math.min((now-start)/duration,1);
+    const ease=1-Math.pow(1-p,3);
+    const val=target*ease;
+    el.textContent=prefix+(val>=10?Math.round(val):val.toFixed(1))+suffix;
+    if(p<1)requestAnimationFrame(tick);
+    else el.textContent=raw;
+  };
+  requestAnimationFrame(tick);
+}
+const statObs=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){animateCounter(e.target);statObs.unobserve(e.target);}
+}),{threshold:0.5});
+document.querySelectorAll(".num").forEach(el=>statObs.observe(el));
+
+// skills marquee
+(()=>{
+  const allSkills=[...new Set(STACK.flatMap(g=>g.items))];
+  const doubled=[...allSkills,...allSkills];
+  const track=document.createElement("div"); track.className="marquee-track";
+  doubled.forEach(s=>{const p=document.createElement("span");p.className="marquee-pill";p.textContent=s;track.appendChild(p);});
+  const wrap=document.createElement("div"); wrap.className="marquee-wrap";
+  wrap.appendChild(track);
+  document.getElementById("stackGroups").after(wrap);
+})();
 </script>
 
 <div id="cvModal" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(10,10,10,.92);backdrop-filter:blur(6px)">
