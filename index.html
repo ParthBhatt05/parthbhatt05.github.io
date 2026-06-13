@@ -277,6 +277,8 @@ footer{border-top:1px solid var(--line);padding:32px 0;text-align:center;font-si
         <thead><tr><th>When</th><th>Organization</th><th>What Was Built in Others</th></tr></thead>
         <tbody>
           <tr><td>2014–2018</td><td>Nirma: Google Student Ambassadors Club / ISTE</td><td>Ran Advanced DS workshops; mentored juniors into leadership roles in ISTE; designed interview processes</td></tr>
+          <tr><td>2016–2018</td><td>Lutalica</td><td>As founding member, set direction and culture from zero — recruited and aligned a small cross-functional team around a shared mission; established operating rhythms and divided ownership across content, community, and outreach; made early product and positioning calls with no playbook to follow</td></tr>
+          <tr><td>2018–2019</td><td>Infosys</td><td>Trained analysts and junior engineers to automate repetitive workflows using Python — shifted manual, time-intensive tasks to scripted pipelines; introduced structured thinking around code reuse and process standardization; reduced team overhead on recurring deliverables so capacity could move toward higher-value work</td></tr>
           <tr><td>2019–2020</td><td>ZS Associates</td><td>Upskilled 20+ junior analysts; weekly AI &amp; Healthcare knowledge series; built DS culture before it was standard</td></tr>
           <tr><td>2021–2022</td><td>Northeastern</td><td>TA from Day 1 for DBMS, Supervised ML, Statistics — designed assessments, mid-terms, finals; classroom instruction</td></tr>
           <tr><td>2022</td><td>Danfoss</td><td>Structured and delivered executive business case for multi-site scale-up; trained team on PARTH methodology</td></tr>
@@ -299,7 +301,6 @@ footer{border-top:1px solid var(--line);padding:32px 0;text-align:center;font-si
       <div class="thread-card"><div class="thread-card-name">Energy Grid</div><div class="thread-card-desc">22% reduction in circuit faults for a major US utility. Every fault prevented is a household that keeps its lights on — $18M annual improvement with real reliability behind it.</div></div>
       <div class="thread-card"><div class="thread-card-name">Predictive Maintenance</div><div class="thread-card-desc">CNC failure prediction at Danfoss reduced unplanned downtime 25%. Less industrial waste, safer factory floors, $1.2M weekly revenue that stays in productive output rather than scrap.</div></div>
       <div class="thread-card"><div class="thread-card-name">Transliteration</div><div class="thread-card-desc">Gujarati and Hindi speakers heard and understood in English — not just translated, but preserved. Language access as a form of inclusion.</div></div>
-      <div class="thread-card"><div class="thread-card-name">Library Recommender</div><div class="thread-card-desc">Deployed live on a real library's website as a student project. Community access to knowledge, shaped by what each person has already read.</div></div>
     </div>
     <p class="th-close fade">This is not a coincidence. It is a consistent direction.</p>
   </div>
@@ -743,8 +744,9 @@ function arcLogo(org,h){
   if(!o||!CO_BADGE[o].img)return'';
   const b=CO_BADGE[o];
   const f=b.filter?`filter:${b.filter};`:'';
-  const sz=h||20;
-  return`<img src="${b.img}" style="height:${sz}px;max-width:${sz*4}px;object-fit:contain;flex-shrink:0;${f}" alt="${o}">`;
+  const sz=h||36;
+  // fixed-size box so all logos appear visually consistent regardless of aspect ratio
+  return`<span style="display:inline-flex;align-items:center;justify-content:center;width:${sz*2.2}px;height:${sz}px;flex-shrink:0"><img src="${b.img}" style="max-height:${sz}px;max-width:${sz*2.2}px;width:auto;height:auto;object-fit:contain;${f}" alt="${o}"></span>`;
 }
 function coBadge(org){
   const o=Object.keys(CO_BADGE).find(k=>org.includes(k));
@@ -756,7 +758,7 @@ function coBadge(org){
 }
 ARC.forEach((s,i)=>{
   const c=document.createElement("div"); c.className="arc-card";
-  c.innerHTML=`<div class="arc-org">${s.org}</div><div class="arc-year-row">${arcLogo(s.org,18)}<div class="arc-year">${s.year}</div></div><div class="arc-thesis">${s.title}</div>`;
+  c.innerHTML=`<div class="arc-org">${s.org}</div><div class="arc-year-row">${arcLogo(s.org,36)}<div class="arc-year">${s.year}</div></div><div class="arc-thesis">${s.title}</div>`;
   // inline drawer for mobile
   const inl=document.createElement("div"); inl.className="arc-inline-drawer";
   const inlInner=document.createElement("div"); inlInner.className="arc-drawer-inner"; inl.appendChild(inlInner);
@@ -798,7 +800,6 @@ ERAS.forEach((era,i)=>{
         <div style="display:flex;gap:12px;align-items:flex-start"><span class="badge">${p.badge}</span><span class="expand-ind">+</span></div>
       </div>
       <div class="proj-body"><div class="proj-body-inner">
-        <p class="problem"><b style="color:var(--teal-bright)">Problem.</b> ${p.problem}</p>
         <div class="flow"></div>
         ${p.tech?`<p class="tech"><b>Tech:</b> ${p.tech}</p>`:""}
         ${p.note?`<p class="note">${p.note}</p>`:""}
