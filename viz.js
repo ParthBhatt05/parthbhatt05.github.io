@@ -113,12 +113,16 @@ function viz_licensePlate(){
 
 /* ==== musicMood ==== */
 function viz_musicMood(){
-  const N = 16, cell = 21, gx = 296, gy = 80;
+  const NS = "viz_musicMood";
+  const W = 760, H = 478;
+  const N = 16, cell = 20, gx = 250, gy = 90;
   const half = N / 2;
-  const right = gx + N * cell;
-  const bottom = gy + N * cell;
-  // All quadrants use ONLY legal teal RGBs (#0D7377 or #14A8AD). Amber is reserved
-  // exclusively for the current-mood cell and the headline metric.
+  const right = gx + N * cell, bottom = gy + N * cell;
+  const px = 40;
+
+  // Quadrant base colours use ONLY the two legal teal RGBs. Amber is reserved
+  // exclusively for the current-mood cell and the headline metric; red only for
+  // the negative (skip) feedback path.
   const quads = {
     calm:  { name: "Calm",       r: 13, g: 115, b: 119 },
     energ: { name: "Energetic",  r: 20, g: 168, b: 173 },
@@ -139,12 +143,13 @@ function viz_musicMood(){
     const d = Math.sqrt(Math.pow(c - co[0], 2) + Math.pow(r - co[1], 2));
     return Math.max(0, Math.min(1, 1 - d / maxd));
   };
-  // Differentiate the two teal hues by alpha range so quadrants read distinctly.
-  const baseAlpha = { calm: 0.10, energ: 0.08, mela: 0.07, joy: 0.09 };
-  const spanAlpha = { calm: 0.50, energ: 0.27, mela: 0.50, joy: 0.26 };
+  const baseAlpha = { calm: 0.10, energ: 0.13, mela: 0.07, joy: 0.16 };
+  const spanAlpha = { calm: 0.50, energ: 0.30, mela: 0.55, joy: 0.30 };
   const cx = c => gx + c * cell + cell / 2;
   const cy = r => gy + r * cell + cell / 2;
+  const n = v => { const s = (Math.round(v * 10) / 10).toString(); return s; };
 
+  // ---- matrix cells ----
   let cells = "";
   for (let r = 0; r < N; r++) {
     for (let c = 0; c < N; c++) {
@@ -152,82 +157,140 @@ function viz_musicMood(){
       const alpha = (baseAlpha[q] + t * spanAlpha[q]).toFixed(3);
       const x = gx + c * cell, y = gy + r * cell;
       const val = (c / (N - 1)).toFixed(2), en = (1 - r / (N - 1)).toFixed(2);
-      cells += `<rect class="vz_cell" x="${x + 1}" y="${y + 1}" width="${cell - 2}" height="${cell - 2}" rx="2" fill="rgba(${Q.r},${Q.g},${Q.b},${alpha})"><title>${Q.name} — valence ${val}, energy ${en}</title></rect>`;
+      cells += `<rect class="${NS}_cell" x="${x + 1}" y="${y + 1}" width="${cell - 2}" height="${cell - 2}" rx="1.5" fill="rgba(${Q.r},${Q.g},${Q.b},${alpha})"><title>${Q.name} — valence ${val}, energy ${en}</title></rect>`;
     }
   }
 
-  const songs = [[2,3],[5,1],[3,6],[6,5],[10,2],[13,4],[11,7],[4,12],[2,14],[12,11],[14,13],[8,8]];
+  // ---- listening-history song dots ----
+  // (moved the dot that previously sat on the amber current cell (8,9) to (7,11)
+  //  so the current-mood highlight stays clean.)
+  const songs = [[2,3],[5,1],[3,6],[6,5],[12,2],[13,5],[11,8],[4,12],[2,14],[13,12],[7,11]];
   let dots = "";
   songs.forEach(p => {
-    dots += `<circle cx="${cx(p[0])}" cy="${cy(p[1])}" r="4.2" fill="#F0F0F0" stroke="#14A8AD" stroke-width="1.6"><title>Mapped song</title></circle>`;
+    dots += `<circle cx="${n(cx(p[0]))}" cy="${n(cy(p[1]))}" r="3.6" fill="#F0F0F0" stroke="#14A8AD" stroke-width="1.4"><title>Song in listening history</title></circle>`;
   });
 
-  const cmC = 9, cmR = 10;
+  // ---- current mood cell (amber) ----
+  const cmC = 8, cmR = 9;
   const cmx = gx + cmC * cell, cmy = gy + cmR * cell;
-  const current = `<rect x="${cmx + 0.5}" y="${cmy + 0.5}" width="${cell - 1}" height="${cell - 1}" rx="2" fill="rgba(232,168,56,0.20)" stroke="#E8A838" stroke-width="2"><title>Current mood cell</title></rect>`;
+  const current = `<rect x="${cmx + 0.5}" y="${cmy + 0.5}" width="${cell - 1}" height="${cell - 1}" rx="1.5" fill="rgba(232,168,56,0.20)" stroke="#E8A838" stroke-width="2"><title>Current mood cell</title></rect>`;
 
-  const ring = [[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
-  let recs = "";
-  ring.forEach(d => {
-    const c = cmC + d[0], r = cmR + d[1];
-    if (c < 0 || c >= N || r < 0 || r >= N) return;
-    const x = gx + c * cell, y = gy + r * cell;
-    recs += `<rect x="${x + 1.5}" y="${y + 1.5}" width="${cell - 3}" height="${cell - 3}" rx="2" fill="none" stroke="#14A8AD" stroke-width="1.4" stroke-dasharray="3 2"><title>Recommended adjacent mood</title></rect>`;
-  });
+  // ---- recommended next cell: single ADJACENT neighbour matched to history ----
+  const rnC = 9, rnR = 8;
+  const rnx = gx + rnC * cell, rny = gy + rnR * cell;
+  const recCell = `<rect class="${NS}_rec" x="${rnx + 1}" y="${rny + 1}" width="${cell - 2}" height="${cell - 2}" rx="1.5" fill="rgba(13,115,119,0.35)" stroke="#14A8AD" stroke-width="2"><title>Recommended next cell — adjacent neighbour matched to listening history</title></rect>`;
+  const ax = cx(cmC), ay = cy(cmR), bx = cx(rnC), by = cy(rnR);
+  const connector =
+    `<path class="${NS}_conn" d="M${n(ax)} ${n(ay)} L${n(bx)} ${n(by)}" fill="none" stroke="#14A8AD" stroke-width="1.6"/>` +
+    `<circle cx="${n(bx)}" cy="${n(by)}" r="2.2" fill="#14A8AD"/>`;
 
-  const labels =
-    `<text class="vz_q" x="${gx}" y="${gy - 10}" text-anchor="start">Calm</text>` +
-    `<text class="vz_q" x="${right}" y="${gy - 10}" text-anchor="end">Energetic</text>` +
-    `<text class="vz_q" x="${gx}" y="${bottom + 17}" text-anchor="start">Melancholy</text>` +
-    `<text class="vz_q" x="${right}" y="${bottom + 17}" text-anchor="end">Joyful</text>`;
+  // ---- quadrant + axis labels ----
+  const qlab =
+    `<text class="${NS}_q" x="${gx}" y="${gy - 9}" text-anchor="start">Calm</text>` +
+    `<text class="${NS}_q" x="${right}" y="${gy - 9}" text-anchor="end">Energetic</text>` +
+    `<text class="${NS}_q" x="${gx}" y="${bottom + 15}" text-anchor="start">Melancholy</text>` +
+    `<text class="${NS}_q" x="${right}" y="${bottom + 15}" text-anchor="end">Joyful</text>`;
   const axes =
-    `<text class="vz_ax" x="${gx}" y="${bottom + 34}" text-anchor="start">low valence</text>` +
-    `<text class="vz_ax" x="${right}" y="${bottom + 34}" text-anchor="end">high valence</text>`;
+    `<text class="${NS}_ax" x="${gx}" y="${bottom + 30}" text-anchor="start">low valence</text>` +
+    `<text class="${NS}_ax" x="${right}" y="${bottom + 30}" text-anchor="end">high valence</text>` +
+    `<text class="${NS}_ax" x="${gx - 8}" y="${gy + 4}" text-anchor="end" transform="rotate(-90 ${gx - 8} ${gy + 4})">energy &#8594;</text>`;
 
-  const lx = 40, ly = 150;
+  // ---- title + tech caption ----
+  const title =
+    `<text class="${NS}_t" x="${px}" y="40">Mood map + history-aware recommend + skip-feedback</text>` +
+    `<text class="${NS}_st" x="${px}" y="58">Neural mood matrix &#183; feedback-driven reweighting</text>`;
+
+  // ---- legend ----
+  const ly = 104;
   const legend =
-    `<circle cx="${lx + 6}" cy="${ly}" r="4.2" fill="#F0F0F0" stroke="#14A8AD" stroke-width="1.6"/>` +
-    `<text class="vz_lg" x="${lx + 20}" y="${ly + 4}">song (12 mapped)</text>` +
-    `<rect x="${lx}" y="${ly + 18}" width="13" height="13" rx="2" fill="rgba(232,168,56,0.20)" stroke="#E8A838" stroke-width="2"/>` +
-    `<text class="vz_lg" x="${lx + 22}" y="${ly + 28}">current mood</text>` +
-    `<rect x="${lx}" y="${ly + 40}" width="13" height="13" rx="2" fill="none" stroke="#14A8AD" stroke-width="1.4" stroke-dasharray="3 2"/>` +
-    `<text class="vz_lg" x="${lx + 22}" y="${ly + 50}">recommended neighbour</text>`;
+    `<text class="${NS}_h" x="${px}" y="${ly - 12}">Legend</text>` +
+    `<circle cx="${px + 6}" cy="${ly}" r="3.6" fill="#F0F0F0" stroke="#14A8AD" stroke-width="1.4"/>` +
+    `<text class="${NS}_lg" x="${px + 18}" y="${ly + 4}">history song (11 mapped)</text>` +
+    `<rect x="${px}" y="${ly + 14}" width="12" height="12" rx="2" fill="rgba(232,168,56,0.20)" stroke="#E8A838" stroke-width="2"/>` +
+    `<text class="${NS}_lg" x="${px + 18}" y="${ly + 24}">current mood cell</text>` +
+    `<rect x="${px}" y="${ly + 31}" width="12" height="12" rx="2" fill="rgba(13,115,119,0.35)" stroke="#14A8AD" stroke-width="2"/>` +
+    `<text class="${NS}_lg" x="${px + 18}" y="${ly + 41}">recommended next</text>`;
 
+  // ---- skip-feedback loop block ----
+  const fy = 204;
+  const fb =
+    `<text class="${NS}_h" x="${px}" y="${fy}">Skip-feedback loop</text>` +
+    `<rect x="${px}" y="${fy + 12}" width="14" height="14" rx="3" fill="rgba(13,115,119,0.35)" stroke="#14A8AD" stroke-width="1.4"/>` +
+    `<text class="${NS}_fbp" x="${px + 7}" y="${fy + 23}" text-anchor="middle">+</text>` +
+    `<text class="${NS}_fb" x="${px + 23}" y="${fy + 18}">Played fully</text>` +
+    `<text class="${NS}_fbs" x="${px + 23}" y="${fy + 31}">reinforce cell weight (+)</text>` +
+    `<rect x="${px}" y="${fy + 44}" width="14" height="14" rx="3" fill="rgba(199,84,80,0.18)" stroke="#C75450" stroke-width="1.4"/>` +
+    `<text class="${NS}_fbm" x="${px + 7}" y="${fy + 55}" text-anchor="middle">&#8211;</text>` +
+    `<text class="${NS}_fb" x="${px + 23}" y="${fy + 50}">Skipped early</text>` +
+    `<text class="${NS}_fbs" x="${px + 23}" y="${fy + 63}">down-weight &amp; reshape map (&#8722;)</text>`;
+
+  // ---- curved arrow looping the user action back into the matrix ----
+  // Loop label sits just under the feedback block; the curve now STARTS below the
+  // label band so the dashed path never crosses the label text.
+  const lpY = fy + 58 + 16;            // label baseline
+  const loopStartX = px + 7, loopStartY = fy + 58 + 30; // start below label glyph band
+  const loopEndX = cmx - 6, loopEndY = cmy + cell / 2;
+  const loop =
+    `<text class="${NS}_lp" x="${px}" y="${lpY}">user action &#8594; reweight matrix</text>` +
+    `<path class="${NS}_loop" d="M${n(loopStartX)} ${n(loopStartY)} C${px - 24} ${loopStartY + 20}, ${gx - 58} ${loopEndY + 34}, ${n(loopEndX)} ${n(loopEndY)}" fill="none" stroke="#0D7377" stroke-width="1.5" stroke-dasharray="4 3"/>` +
+    `<path d="M${n(loopEndX - 8)} ${n(loopEndY - 5)} L${n(loopEndX)} ${n(loopEndY)} L${n(loopEndX - 8)} ${n(loopEndY + 5)} Z" fill="#14A8AD"/>`;
+
+  // ---- headline metric (amber) ----
+  const my = 358;
   const metric =
-    `<text class="vz_m" x="40" y="${ly + 110}">8</text>` +
-    `<text class="vz_msub" x="40" y="${ly + 130}">adjacent cells recommended</text>` +
-    `<text class="vz_msub" x="40" y="${ly + 146}">around your current mood</text>`;
+    `<text class="${NS}_m" x="${px}" y="${my}">94%</text>` +
+    `<text class="${NS}_msub" x="${px}" y="${my + 15}">of history-matched picks</text>` +
+    `<text class="${NS}_msub" x="${px}" y="${my + 29}">played fully, not skipped</text>`;
 
-  const W = 760, H = 476;
+  // ---- matched-to-history tag (right rail) ----
+  const tagW = 148, tagH = 40;
+  const tagX = right + 16;
+  let tagY = rny - 26;
+  if (tagY < gy) tagY = gy;
+  const tag =
+    `<g>` +
+    `<rect x="${tagX}" y="${tagY}" width="${tagW}" height="${tagH}" rx="5" fill="#1A1A1A" stroke="#14A8AD" stroke-width="1"/>` +
+    `<text class="${NS}_tagt" x="${tagX + 9}" y="${tagY + 16}">matched to history</text>` +
+    `<text class="${NS}_tags" x="${tagX + 9}" y="${tagY + 30}">next track unlikely to skip</text>` +
+    `<line x1="${tagX}" y1="${tagY + tagH / 2}" x2="${rnx + cell + 1}" y2="${n(cy(rnR))}" stroke="#14A8AD" stroke-width="1" stroke-dasharray="2 2"/>` +
+    `</g>`;
+
   const css =
-    ".vz_cell{transition:opacity .15s ease;}" +
-    ".vz_cell:hover{opacity:1;stroke:#F0F0F0;stroke-width:1;}" +
-    "@keyframes vz_musicMood_pulse{0%,100%{opacity:.5}50%{opacity:1}}" +
-    ".vz_recs{animation:vz_musicMood_pulse 3.4s ease-in-out infinite;}" +
-    ".vz_q{font-size:11px;fill:#909090;font-weight:500;font-family:Inter,sans-serif;}" +
-    ".vz_ax{font-size:10px;fill:#707070;font-family:Inter,sans-serif;}" +
-    ".vz_lg{font-size:11px;fill:#909090;font-family:Inter,sans-serif;}" +
-    ".vz_m{font-size:36px;font-weight:600;fill:#E8A838;font-family:Inter,sans-serif;}" +
-    ".vz_msub{font-size:11px;fill:#909090;font-family:Inter,sans-serif;}" +
-    ".vz_t{font-size:13.5px;font-weight:600;fill:#F0F0F0;font-family:Inter,sans-serif;}" +
-    ".vz_st{font-size:11px;fill:#909090;font-family:Inter,sans-serif;}";
+    `.${NS}_cell{transition:opacity .15s ease;}` +
+    `.${NS}_cell:hover{opacity:1;stroke:#F0F0F0;stroke-width:1;}` +
+    `@keyframes ${NS}_pulse{0%,100%{opacity:.55}50%{opacity:1}}` +
+    `.${NS}_rec{animation:${NS}_pulse 3.4s ease-in-out infinite;}` +
+    `@keyframes ${NS}_dash{to{stroke-dashoffset:-14;}}` +
+    `.${NS}_conn{stroke-dasharray:4 3;animation:${NS}_dash 1.4s linear infinite;}` +
+    `.${NS}_loop{animation:${NS}_dash 2s linear infinite;}` +
+    `.${NS}_t{font-size:13.5px;font-weight:600;fill:#F0F0F0;font-family:Inter,sans-serif;}` +
+    `.${NS}_st{font-size:11px;fill:#909090;font-family:Inter,sans-serif;}` +
+    `.${NS}_q{font-size:11px;fill:#909090;font-weight:500;font-family:Inter,sans-serif;}` +
+    `.${NS}_ax{font-size:10px;fill:#707070;font-family:Inter,sans-serif;}` +
+    `.${NS}_lg{font-size:11px;fill:#909090;font-family:Inter,sans-serif;}` +
+    `.${NS}_h{font-size:11.5px;font-weight:600;fill:#F0F0F0;font-family:Inter,sans-serif;}` +
+    `.${NS}_fb{font-size:11px;fill:#F0F0F0;font-family:Inter,sans-serif;}` +
+    `.${NS}_fbs{font-size:10px;fill:#909090;font-family:Inter,sans-serif;}` +
+    `.${NS}_fbp{font-size:12px;font-weight:700;fill:#14A8AD;font-family:Inter,sans-serif;}` +
+    `.${NS}_fbm{font-size:13px;font-weight:700;fill:#C75450;font-family:Inter,sans-serif;}` +
+    `.${NS}_lp{font-size:10px;fill:#707070;font-family:Inter,sans-serif;}` +
+    `.${NS}_tagt{font-size:10.5px;font-weight:600;fill:#14A8AD;font-family:Inter,sans-serif;}` +
+    `.${NS}_tags{font-size:9.5px;fill:#909090;font-family:Inter,sans-serif;}` +
+    `.${NS}_m{font-size:34px;font-weight:600;fill:#E8A838;font-family:Inter,sans-serif;}` +
+    `.${NS}_msub{font-size:11px;fill:#909090;font-family:Inter,sans-serif;}`;
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;max-width:760px;height:auto;display:block" role="img" aria-label="A 16 by 16 mood matrix of 256 cells split into four emotion quadrants — Calm, Energetic, Melancholy and Joyful — with 12 songs plotted as dots, one current-mood cell highlighted in amber and its eight recommended neighbouring cells outlined in bright teal.">` +
-    `<title>Mood matrix: songs mapped, neighbours recommended</title>` +
-    `<desc>A 16 by 16 grid coloured by emotional quadrant, with song dots, a current-mood cell and recommended adjacent cells.</desc>` +
-    `<style>${css}</style>` +
-    `<rect x="0" y="0" width="${W}" height="${H}" fill="#101010"/>` +
-    `<text class="vz_t" x="40" y="42">16x16 mood matrix</text>` +
-    `<text class="vz_st" x="40" y="60">Mood matrix: songs mapped, neighbours recommended</text>` +
-    `<rect x="${gx - 1}" y="${gy - 1}" width="${N * cell + 2}" height="${N * cell + 2}" fill="none" stroke="#262626" stroke-width="1"/>` +
-    cells +
-    `<line x1="${gx}" y1="${gy + half * cell}" x2="${right}" y2="${gy + half * cell}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>` +
-    `<line x1="${gx + half * cell}" y1="${gy}" x2="${gx + half * cell}" y2="${bottom}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>` +
-    `<g class="vz_recs">${recs}</g>` +
-    current +
-    dots +
-    labels + axes + legend + metric +
-    `</svg>`;
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;max-width:760px;height:auto;display:block" role="img" aria-label="A 16 by 16 mood matrix split into Calm, Energetic, Melancholy and Joyful quadrants with 11 listening-history songs plotted as dots. One current-mood cell is highlighted in amber; an adjacent recommended-next cell matched to listening history is outlined in teal and connected to it. A skip-feedback loop shows played-fully tracks reinforcing cell weight and skipped tracks down-weighting and reshaping the mood map, with a curved arrow looping the user action back into the matrix.">`;
+  svg += `<title>Mood map: history-aware recommend with skip-feedback loop</title>`;
+  svg += `<style>${css}</style>`;
+  svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="#101010"/>`;
+  svg += title;
+  svg += `<rect x="${gx - 1}" y="${gy - 1}" width="${N * cell + 2}" height="${N * cell + 2}" fill="none" stroke="#262626" stroke-width="1"/>`;
+  svg += cells;
+  svg += `<line x1="${gx}" y1="${gy + half * cell}" x2="${right}" y2="${gy + half * cell}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
+  svg += `<line x1="${gx + half * cell}" y1="${gy}" x2="${gx + half * cell}" y2="${bottom}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
+  svg += recCell + current + connector + dots + qlab + axes + tag + legend + fb + loop + metric;
+  svg += `</svg>`;
+  return svg;
 }
 
 /* ==== depression ==== */
@@ -359,10 +422,9 @@ function viz_depression(){
 
 /* ==== parth ==== */
 function viz_parth(){
-  const W = 760, H = 432;
+  const W = 760, H = 478;
   const PAD = 16;
   const NS = "http://www.w3.org/2000/svg";
-  // palette (allowed only)
   const C = {
     bg: "#141414",
     panel: "#1A1A1A",
@@ -379,167 +441,166 @@ function viz_parth(){
     faint: "rgba(255,255,255,0.06)",
     red: "#C75450"
   };
-
-  // ---------- helpers ----------
-  const esc = (s)=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   const r2 = (n)=>Math.round(n*100)/100;
 
   let s = '';
-  s += '<svg xmlns="'+NS+'" viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:760px;height:auto;display:block" role="img" aria-label="CNC acoustic spectrogram showing a high-frequency degradation anomaly band, paired with a tool half-life decay curve crossing a failure threshold. Headline result: 25 percent downtime reduction and 1.2 million dollars incremental weekly revenue.">';
+  s += '<svg xmlns="'+NS+'" viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:760px;height:auto;display:block" role="img" aria-label="CNC predictive maintenance. Panel A acoustic emission waveform: smooth low teal normal signature on the left, transitioning into growing-amplitude amber degradation with sharp anomaly spikes including two severe red peaks on the right. Panel B tool-tip half-life decay: remaining tool life percent versus machining cycles, descending and crossing a dashed red failure threshold, with an amber replace-by marker placed before the crossing. Headline result: 25 percent downtime reduction and 1.2 million dollars incremental weekly revenue.">';
 
-  // animation styles (prefixed)
   s += '<style>'
-    + '@keyframes viz_parth_pulse{0%,100%{opacity:1}50%{opacity:0.55}}'
-    + '@keyframes viz_parth_dash{to{stroke-dashoffset:-24}}'
+    + '@keyframes viz_parth_dash{to{stroke-dashoffset:-20}}'
     + '@keyframes viz_parth_draw{from{stroke-dashoffset:var(--vp-len)}to{stroke-dashoffset:0}}'
-    + '@keyframes viz_parth_glow{0%,100%{opacity:0.85}50%{opacity:1}}'
-    + '.viz_parth_anom{animation:viz_parth_pulse 3.2s ease-in-out infinite}'
+    + '@keyframes viz_parth_glow{0%,100%{opacity:.85}50%{opacity:1}}'
+    + '@keyframes viz_parth_spk{0%,100%{opacity:.95}50%{opacity:.6}}'
     + '.viz_parth_thr{animation:viz_parth_dash 1.6s linear infinite}'
     + '.viz_parth_marker{animation:viz_parth_glow 2.6s ease-in-out infinite}'
-    + '.viz_parth_cell{transition:opacity .15s ease}'
-    + '.viz_parth_cell:hover{opacity:0.7}'
+    + '.viz_parth_spike{animation:viz_parth_spk 3s ease-in-out infinite}'
     + '</style>';
 
-  // background
   s += '<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="'+C.bg+'"/>';
 
-  // ---------- title block ----------
-  s += '<text x="'+PAD+'" y="26" font-family="Inter,sans-serif" font-size="13.5" font-weight="600" fill="'+C.text+'">CNC acoustic spectrogram + tool half-life</text>';
-  s += '<text x="'+PAD+'" y="42" font-family="Inter,sans-serif" font-size="11" fill="'+C.muted+'">Acoustic anomaly &#8594; half-life prediction &#8594; service before failure</text>';
+  s += '<text x="'+PAD+'" y="25" font-family="Inter,sans-serif" font-size="13.5" font-weight="600" fill="'+C.text+'">Acoustic waveform anomaly &#8594; half-life prediction &#8594; service before failure</text>';
+  s += '<text x="'+PAD+'" y="42" font-family="Inter,sans-serif" font-size="11" fill="'+C.muted+'">CNC predictive maintenance &#8212; acoustic emission monitoring + tool-tip remaining-life model</text>';
 
-  // headline metric (amber) top-right
-  const hlX = W - PAD;
-  s += '<text x="'+hlX+'" y="24" text-anchor="end" font-family="Inter,sans-serif" font-size="18" font-weight="600" fill="'+C.amber+'">25% downtime reduction</text>';
-  s += '<text x="'+hlX+'" y="42" text-anchor="end" font-family="Inter,sans-serif" font-size="12" fill="'+C.amber+'">+$1.2M incremental weekly revenue</text>';
+  const hbY = 54, hbH = 30;
+  s += '<rect x="'+PAD+'" y="'+hbY+'" width="'+(W-PAD*2)+'" height="'+hbH+'" rx="5" fill="rgba(232,168,56,0.12)" stroke="'+C.amber+'" stroke-width="1"/>';
+  s += '<circle cx="'+(PAD+15)+'" cy="'+(hbY+hbH/2)+'" r="3.2" fill="'+C.amber+'"/>';
+  s += '<text x="'+(PAD+26)+'" y="'+(hbY+19)+'" font-family="Inter,sans-serif" font-size="14" font-weight="600" fill="'+C.amber+'">25% downtime reduction</text>';
+  s += '<text x="'+(W-PAD-12)+'" y="'+(hbY+19)+'" text-anchor="end" font-family="Inter,sans-serif" font-size="14" font-weight="600" fill="'+C.amber+'">+$1.2M incremental weekly revenue</text>';
+  s += '<line x1="'+r2(W/2)+'" y1="'+(hbY+7)+'" x2="'+r2(W/2)+'" y2="'+(hbY+hbH-7)+'" stroke="'+C.amber+'" stroke-width="1" opacity="0.4"/>';
 
-  // ================= PANEL A : SPECTROGRAM =================
-  const aX = PAD, aY = 60, aW = W - PAD*2, aTitleH = 16;
-  const labW = 78;            // left label region
-  const gridX = aX + labW;
-  const gridY = aY + aTitleH + 6;
-  const gridW = aW - labW - 8;
-  const nBands = 10;          // frequency bands
-  const nCols = 24;           // time cols
-  const cellGap = 2;
-  const gridH = 118;
-  const cw = (gridW - (nCols-1)*cellGap)/nCols;
-  const ch = (gridH - (nBands-1)*cellGap)/nBands;
+  const aX = PAD, aY = hbY + hbH + 12, aW = W - PAD*2, aH = 172;
+  s += '<rect x="'+aX+'" y="'+aY+'" width="'+aW+'" height="'+aH+'" rx="6" fill="'+C.panel+'"/>';
+  s += '<text x="'+(aX+12)+'" y="'+(aY+17)+'" font-family="Inter,sans-serif" font-size="11.5" font-weight="600" fill="'+C.text+'">(a) Acoustic emission waveform &#8212; normal signature to degradation</text>';
 
-  // panel A background
-  s += '<rect x="'+aX+'" y="'+aY+'" width="'+aW+'" height="'+(aTitleH+gridH+34)+'" rx="6" fill="'+C.panel+'"/>';
-  s += '<text x="'+(aX+12)+'" y="'+(aY+13)+'" font-family="Inter,sans-serif" font-size="11.5" font-weight="600" fill="'+C.text+'">(a) Acoustic spectrogram &#8212; degradation signature</text>';
+  const wL = aX + 12, wR = aX + aW - 12, wTop = aY + 44, wBot = aY + aH - 24;
+  const wMid = (wTop + wBot)/2, wW = wR - wL;
+  const halfAmpMax = (wBot - wTop)/2 - 3;
+  s += '<line x1="'+r2(wL)+'" y1="'+r2(wMid)+'" x2="'+r2(wR)+'" y2="'+r2(wMid)+'" stroke="'+C.grid+'" stroke-width="1"/>';
+  const transFrac = 0.52, transX = wL + wW*transFrac;
+  s += '<rect x="'+r2(wL)+'" y="'+r2(wTop)+'" width="'+r2(transX-wL)+'" height="'+r2(wBot-wTop)+'" fill="'+C.f12+'" opacity="0.5"/>';
+  s += '<line x1="'+r2(transX)+'" y1="'+r2(wTop)+'" x2="'+r2(transX)+'" y2="'+r2(wBot)+'" stroke="'+C.faint+'" stroke-width="1" stroke-dasharray="3 3"/>';
+  const lblBandY = aY + 34;
+  s += '<text x="'+r2(wL+2)+'" y="'+lblBandY+'" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="'+C.tealBright+'">Normal signature</text>';
+  s += '<text x="'+r2(wR-2)+'" y="'+lblBandY+'" text-anchor="end" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="'+C.amber+'">Anomaly &#8212; degradation</text>';
 
-  // deterministic intensity field; high-frequency anomaly band (top bands) brightens to amber over last third
-  const anomThird = Math.floor(nCols*2/3); // last third starts here
-  const noise = [0.12,0.34,0.21,0.47,0.18,0.29,0.41,0.15,0.33,0.24,0.19,0.38,0.27,0.16,0.31,0.44,0.22,0.36,0.13,0.28,0.40,0.17,0.25,0.30];
-  const tealFills = [C.f12, C.f20, C.f35]; // only allowed teal fills
-
-  for(let b=0;b<nBands;b++){
-    for(let t=0;t<nCols;t++){
-      const x = gridX + t*(cw+cellGap);
-      const y = gridY + b*(ch+cellGap);
-      const isHighFreq = b<=2; // top 3 bands carry the anomaly
-      let fill, cls='', extra='', tip;
-      const baseT = 0.18 + noise[t]*0.35 + (1-b/nBands)*0.12;
-      if(isHighFreq && t>=anomThird){
-        // anomaly: solid amber, intensity ramps via legal opacity attribute
-        const ramp = (t-anomThird)/(nCols-1-anomThird || 1); // 0..1
-        const bandBoost = (3-b)/3; // top band strongest
-        const amberW = Math.min(1, ramp*0.85 + bandBoost*0.15);
-        const op = r2(0.55 + amberW*0.45);
-        fill = C.amber;
-        extra = ' opacity="'+op+'"';
-        cls = ' class="viz_parth_anom viz_parth_cell"';
-        tip = 'High-frequency anomaly  band '+(nBands-b)+'  t'+(t+1)+'  intensity '+Math.round(op*100)+'%';
-      } else {
-        // dim teal field, quantized to one of the 3 allowed teal fills
-        const lvl = baseT<0.30 ? 0 : (baseT<0.42 ? 1 : 2);
-        fill = tealFills[lvl];
-        cls = ' class="viz_parth_cell"';
-        tip = 'band '+(nBands-b)+'  t'+(t+1);
+  const N = 320;
+  const jit = [0.12,-0.34,0.21,-0.47,0.18,-0.29,0.41,-0.15,0.33,-0.24,0.19,-0.38,0.27,-0.16,0.31,-0.44,0.22,-0.36,0.13,-0.28,0.40,-0.17,0.25,-0.30,0.36,-0.11,0.29,-0.42,0.14,-0.33,0.23,-0.19];
+  const spikes = [
+    {f:0.66, amp:0.78, red:false},
+    {f:0.74, amp:0.92, red:false},
+    {f:0.81, amp:1.20, red:true},
+    {f:0.88, amp:1.00, red:false},
+    {f:0.955, amp:1.30, red:true}
+  ];
+  const ampEnv = (f)=>{
+    if(f <= transFrac) return 0.14;
+    const g = (f - transFrac)/(1 - transFrac);
+    return 0.18 + g*g*0.42;
+  };
+  const baseFreq = (f)=> f<=transFrac ? 26 : 26 + (f-transFrac)*40;
+  const sampleY = (i)=>{
+    const f = i/N, env = ampEnv(f);
+    let val = Math.sin(f*baseFreq(f)*Math.PI*2);
+    if(f>transFrac){
+      val += 0.35*Math.sin(f*baseFreq(f)*Math.PI*5.3);
+      val += 0.18*jit[i % jit.length];
+    } else {
+      val += 0.06*jit[i % jit.length];
+    }
+    let spikeBoost = 0;
+    for(const sp of spikes){
+      const dx = f - sp.f, w = 0.012;
+      const g = Math.exp(-(dx*dx)/(2*w*w));
+      if(g>0.02){
+        const dir = (Math.round(sp.f*100) % 2 === 0) ? 1 : -1;
+        spikeBoost += dir*g*sp.amp;
       }
-      s += '<rect'+cls+' x="'+r2(x)+'" y="'+r2(y)+'" width="'+r2(cw)+'" height="'+r2(ch)+'" rx="1.5" fill="'+fill+'"'+extra+'><title>'+esc(tip)+'</title></rect>';
+    }
+    let y = wMid - (val*env + spikeBoost) * halfAmpMax / 1.4;
+    return Math.max(wTop+1, Math.min(wBot-1, y));
+  };
+  const pts = [];
+  for(let i=0;i<=N;i++){ pts.push([wL + (i/N)*wW, sampleY(i)]); }
+  const isRed = (i)=>{
+    const f = i/N;
+    for(const sp of spikes){ if(sp.red && Math.abs(f-sp.f)<0.018) return true; }
+    return false;
+  };
+  const splitI = Math.round(transFrac*N);
+  let dNorm = 'M'+r2(pts[0][0])+','+r2(pts[0][1]);
+  for(let i=1;i<=splitI;i++){ dNorm += ' L'+r2(pts[i][0])+','+r2(pts[i][1]); }
+  let dDeg = 'M'+r2(pts[splitI][0])+','+r2(pts[splitI][1]);
+  for(let i=splitI+1;i<=N;i++){ dDeg += ' L'+r2(pts[i][0])+','+r2(pts[i][1]); }
+
+  const redSegs = [];
+  let cur = null;
+  for(let i=splitI;i<=N;i++){
+    if(isRed(i)){ if(cur===null) cur=[i]; else cur.push(i); }
+    else { if(cur!==null){ redSegs.push(cur); cur=null; } }
+  }
+  if(cur!==null) redSegs.push(cur);
+  const redPaths = [];
+  for(const seg of redSegs){
+    const a = Math.max(splitI, seg[0]-1), b = Math.min(N, seg[seg.length-1]+1);
+    let dp = 'M'+r2(pts[a][0])+','+r2(pts[a][1]);
+    for(let i=a+1;i<=b;i++){ dp += ' L'+r2(pts[i][0])+','+r2(pts[i][1]); }
+    redPaths.push(dp);
+  }
+
+  s += '<path d="'+dNorm+'" fill="none" stroke="'+C.teal+'" stroke-width="3.4" opacity="0.28" stroke-linejoin="round" stroke-linecap="round"/>';
+  s += '<path d="'+dDeg+'" fill="none" stroke="'+C.amber+'" stroke-width="3.4" opacity="0.22" stroke-linejoin="round" stroke-linecap="round"/>';
+  s += '<path d="'+dNorm+'" fill="none" stroke="'+C.tealBright+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>';
+  s += '<path d="'+dDeg+'" fill="none" stroke="'+C.amber+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>';
+  for(const dp of redPaths){
+    s += '<path class="viz_parth_spike" d="'+dp+'" fill="none" stroke="'+C.red+'" stroke-width="2.1" stroke-linejoin="round" stroke-linecap="round"><title>Severe acoustic anomaly spike &#8212; tool/bearing fault signature</title></path>';
+  }
+  for(const sp of spikes){
+    if(sp.red){
+      const idx = Math.round(sp.f*N);
+      s += '<circle class="viz_parth_spike" cx="'+r2(pts[idx][0])+'" cy="'+r2(pts[idx][1])+'" r="2.6" fill="'+C.red+'"/>';
     }
   }
 
-  // anomaly bracket + label (amber) over the bright region
-  const anomX = gridX + anomThird*(cw+cellGap) - cellGap;
-  const anomBandBottom = gridY + 3*(ch+cellGap) - cellGap;
-  s += '<rect x="'+r2(anomX)+'" y="'+gridY+'" width="'+r2(gridX+gridW-anomX)+'" height="'+r2(anomBandBottom-gridY)+'" rx="2" fill="none" stroke="'+C.amber+'" stroke-width="1.1" stroke-dasharray="3 3" opacity="0.85"/>';
-  s += '<text x="'+r2(gridX+gridW)+'" y="'+r2(gridY-2)+'" text-anchor="end" font-family="Inter,sans-serif" font-size="10" fill="'+C.amber+'">anomaly band</text>';
+  s += '<text x="'+r2(wL)+'" y="'+(wBot+15)+'" font-family="Inter,sans-serif" font-size="10" fill="'+C.tick+'">t0</text>';
+  s += '<text x="'+r2(transX)+'" y="'+(wBot+15)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="'+C.tick+'">degradation onset</text>';
+  s += '<text x="'+r2(wR)+'" y="'+(wBot+15)+'" text-anchor="end" font-family="Inter,sans-serif" font-size="10" fill="'+C.tick+'">now</text>';
 
-  // y-axis label (Frequency) - rotated
-  const yMid = gridY + gridH/2;
-  s += '<text x="'+(aX+14)+'" y="'+r2(yMid)+'" transform="rotate(-90 '+(aX+14)+' '+r2(yMid)+')" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="'+C.muted+'">Frequency</text>';
-  // y ticks: high / low
-  s += '<text x="'+(gridX-6)+'" y="'+(gridY+9)+'" text-anchor="end" font-family="Inter,sans-serif" font-size="10" fill="'+C.tick+'">high</text>';
-  s += '<text x="'+(gridX-6)+'" y="'+(gridY+gridH)+'" text-anchor="end" font-family="Inter,sans-serif" font-size="10" fill="'+C.tick+'">low</text>';
-
-  // x-axis (Time)
-  const xAxisY = gridY+gridH+13;
-  s += '<text x="'+r2(gridX)+'" y="'+xAxisY+'" font-family="Inter,sans-serif" font-size="10" fill="'+C.tick+'">t0</text>';
-  s += '<text x="'+r2(gridX+gridW)+'" y="'+xAxisY+'" text-anchor="end" font-family="Inter,sans-serif" font-size="10" fill="'+C.tick+'">now</text>';
-  s += '<text x="'+r2(gridX+gridW/2)+'" y="'+(xAxisY+12)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="'+C.muted+'">Time</text>';
-
-  // ================= PANEL B : TOOL HALF-LIFE DECAY =================
-  const bY = aY + (aTitleH+gridH+34) + 12;
-  const bX = PAD, bW = W - PAD*2, bH = H - bY - PAD;
+  const bY = aY + aH + 12, bX = PAD, bW = W - PAD*2, bH = H - bY - PAD;
   s += '<rect x="'+bX+'" y="'+bY+'" width="'+bW+'" height="'+bH+'" rx="6" fill="'+C.panel+'"/>';
-  s += '<text x="'+(bX+12)+'" y="'+(bY+16)+'" font-family="Inter,sans-serif" font-size="11.5" font-weight="600" fill="'+C.text+'">(b) Tool-tip half-life decay &#8212; remaining life vs cycles</text>';
+  s += '<text x="'+(bX+12)+'" y="'+(bY+17)+'" font-family="Inter,sans-serif" font-size="11.5" font-weight="600" fill="'+C.text+'">(b) Tool-tip half-life decay &#8212; remaining life vs machining cycles</text>';
 
-  // plot region
-  const pL = bX + 46;            // left for y axis
-  const pR = bX + bW - 14;
-  const pT = bY + 26;
-  const pB = bY + bH - 24;
-  const pW = pR - pL;
-  const pH = pB - pT;
-
-  // scales: x = cycles 0..100, y = remaining life 0..100%
+  const pL = bX + 46, pR = bX + bW - 14, pT = bY + 28, pB = bY + bH - 26;
+  const pW = pR - pL, pH = pB - pT;
   const sx = (cx)=>pL + (cx/100)*pW;
   const sy = (v)=>pB - (v/100)*pH;
-
-  // gridlines + y ticks
   [0,25,50,75,100].forEach(v=>{
     const y = sy(v);
-    s += '<line x1="'+r2(pL)+'" y1="'+r2(y)+'" x2="'+r2(pR)+'" y2="'+r2(y)+'" stroke="'+C.grid+'" stroke-width="1"/>';
-    s += '<text x="'+(pL-6)+'" y="'+r2(y+3.5)+'" text-anchor="end" font-family="Inter,sans-serif" font-size="10" fill="'+C.tick+'">'+v+'</text>';
+    s += '<line x1="'+r2(pL)+'" y1="'+r2(y)+'" x2="'+r2(pR)+'" y2="'+r2(y)+'" stroke="'+(v===0?C.grid:C.faint)+'" stroke-width="1"/>';
+    s += '<text x="'+(pL-7)+'" y="'+r2(y+3.5)+'" text-anchor="end" font-family="Inter,sans-serif" font-size="10" fill="'+C.tick+'">'+v+'</text>';
   });
-  // x ticks
   [0,25,50,75,100].forEach(v=>{
     const x = sx(v);
-    s += '<text x="'+r2(x)+'" y="'+(pB+14)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="'+C.tick+'">'+v+'</text>';
+    s += '<text x="'+r2(x)+'" y="'+(pB+15)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="'+C.tick+'">'+v+'</text>';
   });
-  // axis labels
   s += '<text x="'+(bX+14)+'" y="'+r2((pT+pB)/2)+'" transform="rotate(-90 '+(bX+14)+' '+r2((pT+pB)/2)+')" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="'+C.muted+'">Remaining tool life %</text>';
-  s += '<text x="'+r2((pL+pR)/2)+'" y="'+(pB+24)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="'+C.muted+'">Machining cycles</text>';
+  s += '<text x="'+r2((pL+pR)/2)+'" y="'+(pB+26)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="'+C.muted+'">Machining cycles</text>';
 
-  // failure threshold line (dashed red), low remaining life
-  const thr = 18; // % failure threshold
-  const thrY = sy(thr);
+  const thr = 18, thrY = sy(thr);
   s += '<line class="viz_parth_thr" x1="'+r2(pL)+'" y1="'+r2(thrY)+'" x2="'+r2(pR)+'" y2="'+r2(thrY)+'" stroke="'+C.red+'" stroke-width="1.6" stroke-dasharray="6 4"/>';
-  s += '<text x="'+r2(pL)+'" y="'+r2(thrY-5)+'" font-family="Inter,sans-serif" font-size="10" fill="'+C.red+'">failure threshold</text>';
+  s += '<text x="'+r2(pL)+'" y="'+r2(thrY-5)+'" font-family="Inter,sans-serif" font-size="10" fill="'+C.red+'">failure threshold (18%)</text>';
 
-  // half-life decay curve: remaining = 100 * 0.5^(cycles / halflife)
-  const halflife = 100/Math.log2(100/thr) * 0.88; // tuned so curve crosses thr near ~88 cycles
+  const halflife = 38;
   const decay = (cx)=> 100*Math.pow(0.5, cx/halflife);
-  // build path
-  let pathPts = [];
-  for(let cx=0; cx<=100; cx+=2){
-    pathPts.push([sx(cx), sy(decay(cx))]);
-  }
+  const pathPts = [];
+  for(let cx=0; cx<=100; cx+=2){ pathPts.push([sx(cx), sy(decay(cx))]); }
   let d = 'M'+r2(pathPts[0][0])+','+r2(pathPts[0][1]);
   for(let i=1;i<pathPts.length;i++){ d += ' L'+r2(pathPts[i][0])+','+r2(pathPts[i][1]); }
-
-  // crossing cycle (decay == thr)
-  let crossCx = halflife * Math.log2(100/thr);
+  const crossCx = halflife * Math.log2(100/thr);
   const crossX = sx(crossCx), crossY = sy(thr);
 
-  // area fill under curve (subtle teal)
-  let area = d + ' L'+r2(sx(100))+','+r2(pB)+' L'+r2(sx(0))+','+r2(pB)+' Z';
+  const area = d + ' L'+r2(sx(100))+','+r2(pB)+' L'+r2(sx(0))+','+r2(pB)+' Z';
   s += '<path d="'+area+'" fill="'+C.f12+'"/>';
 
-  // the curve, with draw-on animation that rests fully drawn
   let plen = 0;
   for(let i=1;i<pathPts.length;i++){
     const dx=pathPts[i][0]-pathPts[i-1][0], dy=pathPts[i][1]-pathPts[i-1][1];
@@ -548,31 +609,25 @@ function viz_parth(){
   plen = Math.ceil(plen);
   s += '<path d="'+d+'" fill="none" stroke="'+C.tealBright+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="--vp-len:'+plen+';stroke-dasharray:'+plen+';animation:viz_parth_draw 2.2s ease-out forwards"/>';
 
-  // crossing point marker (red, semantic fault)
-  s += '<circle cx="'+r2(crossX)+'" cy="'+r2(crossY)+'" r="4.5" fill="none" stroke="'+C.red+'" stroke-width="1.6"/>';
-  s += '<text x="'+r2(crossX-7)+'" y="'+r2(crossY+15)+'" text-anchor="end" font-family="Inter,sans-serif" font-size="9.5" fill="'+C.red+'">predicted failure</text>';
+  s += '<circle cx="'+r2(crossX)+'" cy="'+r2(crossY)+'" r="4.5" fill="'+C.panel+'" stroke="'+C.red+'" stroke-width="1.6"/>';
+  s += '<text x="'+r2(crossX-8)+'" y="'+r2(crossY+15)+'" text-anchor="end" font-family="Inter,sans-serif" font-size="9.5" fill="'+C.red+'">predicted failure</text>';
 
-  // "Replace by" marker (amber) BEFORE the crossing
-  const repCx = crossCx - 16; // safely before crossing
+  const repCx = crossCx - 18;
   const repV = decay(repCx);
   const repX = sx(repCx), repY = sy(repV);
-  // guide line down to axis
   s += '<line x1="'+r2(repX)+'" y1="'+r2(repY)+'" x2="'+r2(repX)+'" y2="'+r2(pB)+'" stroke="'+C.amber+'" stroke-width="1" stroke-dasharray="2 3" opacity="0.55"/>';
-  // marker
   s += '<g class="viz_parth_marker">';
   s += '<circle cx="'+r2(repX)+'" cy="'+r2(repY)+'" r="6" fill="'+C.amber+'"/>';
   s += '<circle cx="'+r2(repX)+'" cy="'+r2(repY)+'" r="10.5" fill="none" stroke="'+C.amber+'" stroke-width="1.2" opacity="0.6"/>';
   s += '</g>';
-  // label for Replace by
-  const lblY = repY - 16;
+  const lblY = repY - 30;
   s += '<text x="'+r2(repX)+'" y="'+r2(lblY)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="'+C.amber+'">Replace by</text>';
   s += '<text x="'+r2(repX)+'" y="'+r2(lblY+12)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="'+C.amber+'">'+Math.round(repV)+'% life left</text>';
 
-  // legend strip (top-right of panel b)
-  const lgY = pT - 2;
+  const lgY = pT - 4;
   s += '<g font-family="Inter,sans-serif" font-size="9.5">';
-  s += '<line x1="'+r2(pR-150)+'" y1="'+r2(lgY)+'" x2="'+r2(pR-136)+'" y2="'+r2(lgY)+'" stroke="'+C.tealBright+'" stroke-width="2.4"/>';
-  s += '<text x="'+r2(pR-132)+'" y="'+r2(lgY+3.5)+'" fill="'+C.muted+'">remaining life</text>';
+  s += '<line x1="'+r2(pR-128)+'" y1="'+r2(lgY)+'" x2="'+r2(pR-114)+'" y2="'+r2(lgY)+'" stroke="'+C.tealBright+'" stroke-width="2.4"/>';
+  s += '<text x="'+r2(pR-110)+'" y="'+r2(lgY+3.5)+'" fill="'+C.muted+'">remaining life</text>';
   s += '</g>';
 
   s += '</svg>';
@@ -984,13 +1039,7 @@ function viz_forecastExplain(){
     svg+='<line class="viz_forecastExplain_dash" x1="'+x1.toFixed(1)+'" y1="'+yConnect.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+yConnect.toFixed(1)+'" stroke="'+COL.tick+'" stroke-width="1"/>';
   }
 
-  const lx=W-padR-176, ly=padT-2;
-  svg+='<g font-family="Inter,sans-serif" font-size="10" fill="'+COL.muted+'">';
-  svg+='<rect x="'+lx+'" y="'+ly+'" width="11" height="11" rx="2" fill="rgba(13,115,119,0.35)" stroke="'+COL.teal+'" stroke-width="1.5"/>';
-  svg+='<text x="'+(lx+16)+'" y="'+(ly+9)+'">increase</text>';
-  svg+='<rect x="'+(lx+76)+'" y="'+ly+'" width="11" height="11" rx="2" fill="rgba(199,84,80,0.22)" stroke="'+COL.red+'" stroke-width="1.5"/>';
-  svg+='<text x="'+(lx+92)+'" y="'+(ly+9)+'">decrease</text>';
-  svg+='</g>';
+  // legend removed — it merged with the waterfall bars
 
   svg+='</svg>';
   return svg;
@@ -1074,8 +1123,8 @@ function viz_salesForecast(){
 
   // Elastic Net error = 100% (relative). Ensemble = 88% (12% shorter).
   const fullH = rBaseY - barTop;   // pixels for 100%
-  const enH = fullH;               // elastic net (taller)
-  const ensH = PX(fullH * 0.88);   // ensemble (12% shorter)
+  const enH = PX(fullH * 0.84);          // elastic net (taller) — headroom left for callout
+  const ensH = PX(fullH * 0.84 * 0.88);  // ensemble (12% shorter)
   const enTopY = PX(rBaseY - enH);
   const ensTopY = PX(rBaseY - ensH);
 
@@ -1142,11 +1191,12 @@ ${rBaseline}
 <text x="${PX(b2x + barW / 2)}" y="${PX(rBaseY + 30)}" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#707070">LGBM+LSTM+TS</text>
 
 <g class="viz_salesForecast_callout">
-  <line x1="${PX(b1x + barW / 2)}" y1="${PX(enTopY - 8)}" x2="${PX(b1x + barW / 2)}" y2="${PX(ensTopY - 22)}" stroke="#E8A838" stroke-width="1"/>
-  <line x1="${PX(b2x + barW / 2)}" y1="${PX(ensTopY - 8)}" x2="${PX(b2x + barW / 2)}" y2="${PX(ensTopY - 22)}" stroke="#E8A838" stroke-width="1"/>
-  <line x1="${PX(b1x + barW / 2)}" y1="${PX(ensTopY - 22)}" x2="${PX(b2x + barW / 2)}" y2="${PX(ensTopY - 22)}" stroke="#E8A838" stroke-width="1"/>
-  <rect x="${PX((b1x + b2x) / 2 + barW / 2 - 38)}" y="${PX(ensTopY - 40)}" width="76" height="20" rx="4" fill="#1A1A1A" stroke="#E8A838" stroke-width="1"/>
-  <text x="${PX((b1x + b2x) / 2 + barW / 2)}" y="${PX(ensTopY - 26)}" text-anchor="middle" font-family="Inter,sans-serif" font-size="11.5" font-weight="600" fill="#E8A838">&#8722;12% error</text>
+  <rect x="${PX((b1x + b2x) / 2 + barW / 2 - 48)}" y="86" width="96" height="22" rx="5" fill="#1A1A1A" stroke="#E8A838" stroke-width="1.2"/>
+  <text x="${PX((b1x + b2x) / 2 + barW / 2)}" y="101" text-anchor="middle" font-family="Inter,sans-serif" font-size="11.5" font-weight="700" fill="#E8A838">&#8722;12% error</text>
+  <line x1="${PX((b1x + b2x) / 2 + barW / 2 - 14)}" y1="108" x2="${PX(b1x + barW / 2)}" y2="${PX(enTopY - 9)}" stroke="#E8A838" stroke-width="1.3"/>
+  <path d="M${PX(b1x + barW / 2 - 4)},${PX(enTopY - 10)} L${PX(b1x + barW / 2)},${PX(enTopY - 2)} L${PX(b1x + barW / 2 + 4)},${PX(enTopY - 10)} Z" fill="#E8A838"/>
+  <line x1="${PX((b1x + b2x) / 2 + barW / 2 + 14)}" y1="108" x2="${PX(b2x + barW / 2)}" y2="${PX(ensTopY - 9)}" stroke="#E8A838" stroke-width="1.3"/>
+  <path d="M${PX(b2x + barW / 2 - 4)},${PX(ensTopY - 10)} L${PX(b2x + barW / 2)},${PX(ensTopY - 2)} L${PX(b2x + barW / 2 + 4)},${PX(ensTopY - 10)} Z" fill="#E8A838"/>
 </g>
 
 <text x="${PX(rx0 - 6)}" y="${PX(lb + 50)}" font-family="Inter,sans-serif" font-size="10" fill="#707070">Bayesian hyperparameter optimization</text>
@@ -1157,131 +1207,111 @@ ${rBaseline}
 /* ==== roboCar ==== */
 function viz_roboCar(){
   var W=760,H=400,pad=16;
-  // ---- track geometry (top-down circuit, left side) ----
-  var ox=70, oy=92, ow=400, oh=250, orad=110;       // outer
-  var lane=44;                                        // lane width
-  var ix=ox+lane, iy=oy+lane, iw=ow-2*lane, ih=oh-2*lane, irad=orad-lane; // inner
-  var cx=ox+ow/2, cy=oy+oh/2;
 
-  // obstacles on the lane (fixed positions, no randomness)
-  // type: barrel(square), cone(circle), car(rect) — all lie within the lane band
+  // --- centerline of a windy closed circuit (hairpin + S-curve chicane + sweepers) ---
+  var CENTER="M 140.0 152.0 C 149.6 149.4 194.2 129.0 208.0 126.0 C 221.8 123.0 265.2 119.8 278.0 122.0 C 290.8 124.2 327.8 141.8 336.0 148.0 C 344.2 154.2 361.4 177.4 360.0 184.0 C 358.6 190.6 325.0 206.0 322.0 214.0 C 319.0 222.0 324.8 255.6 330.0 264.0 C 335.2 272.4 363.6 293.8 374.0 298.0 C 384.4 302.2 423.4 307.2 434.0 306.0 C 444.6 304.8 472.6 291.8 480.0 286.0 C 487.4 280.2 506.0 255.8 508.0 248.0 C 510.0 240.2 504.4 213.8 500.0 208.0 C 495.6 202.2 471.2 190.4 464.0 190.0 C 456.8 189.6 433.0 199.0 428.0 204.0 C 423.0 209.0 414.4 231.8 414.0 240.0 C 413.6 248.2 424.2 277.8 424.0 286.0 C 423.8 294.2 420.0 316.0 412.0 322.0 C 404.0 328.0 360.8 343.2 344.0 346.0 C 327.2 348.8 262.2 350.8 244.0 350.0 C 225.8 349.2 176.0 342.6 162.0 338.0 C 148.0 333.4 112.0 312.6 104.0 304.0 C 96.0 295.4 84.4 262.4 82.0 252.0 C 79.6 241.6 78.8 208.4 80.0 200.0 C 81.2 191.6 90.8 172.8 94.0 168.0 C 97.2 163.2 107.4 153.6 112.0 152.0 C 116.6 150.4 130.4 154.6 140.0 152.0 Z";
+  // --- chosen avoidance racing line: smooth path swerving around the obstacles, kept inside the lane ---
+  var RACE="M 140.0 151.9 C 141.1 151.5 148.8 148.5 151.4 147.1 C 154.0 145.8 165.2 139.4 168.4 137.3 C 171.5 135.2 182.9 126.4 185.9 124.5 C 189.0 122.5 198.9 116.5 201.6 115.8 C 204.4 115.1 213.0 116.4 216.1 116.8 C 219.1 117.2 231.2 119.6 234.7 120.0 C 238.2 120.4 251.2 120.9 254.5 121.0 C 257.9 121.1 268.8 121.2 271.4 121.4 C 274.0 121.5 280.2 122.5 282.5 123.1 C 284.9 123.7 294.1 127.2 296.9 128.3 C 299.7 129.5 310.6 134.3 313.4 135.7 C 316.3 137.1 325.9 141.9 328.0 143.1 C 330.2 144.3 335.4 147.5 336.8 148.7 C 338.3 149.9 342.6 154.4 343.9 156.0 C 345.2 157.6 350.0 164.3 351.0 166.3 C 352.0 168.2 354.5 175.9 354.5 177.4 C 354.5 179.0 351.7 182.8 351.1 183.1 C 350.6 183.3 349.5 179.4 348.6 180.0 C 347.7 180.6 342.8 188.0 341.2 190.0 C 339.6 192.0 333.1 200.2 331.5 202.1 C 329.9 204.1 324.4 209.6 323.5 211.1 C 322.5 212.6 321.4 216.7 321.2 218.4 C 321.1 220.2 321.5 228.2 321.8 230.6 C 322.0 233.1 323.6 242.6 324.1 245.1 C 324.6 247.6 326.7 256.0 327.4 257.9 C 328.1 259.8 330.2 264.3 331.3 265.8 C 332.5 267.3 337.9 272.6 339.8 274.3 C 341.7 275.9 349.6 282.3 351.9 284.0 C 354.1 285.6 362.3 291.4 364.3 292.6 C 366.3 293.9 372.1 297.2 374.1 297.9 C 376.0 298.5 382.9 299.7 385.5 299.8 C 388.0 299.9 399.0 299.2 402.1 298.8 C 405.2 298.4 416.5 295.7 419.2 295.3 C 421.9 295.0 429.4 295.0 431.2 295.4 C 433.0 295.7 437.0 298.7 438.9 299.0 C 440.8 299.3 449.6 299.1 452.1 298.7 C 454.5 298.2 463.1 295.1 465.3 294.2 C 467.5 293.2 474.5 289.6 476.0 288.7 C 477.6 287.7 481.2 285.0 482.5 283.7 C 483.8 282.5 488.7 277.1 490.1 275.3 C 491.6 273.6 496.9 266.5 498.3 264.6 C 499.7 262.7 504.1 256.0 505.1 254.4 C 506.1 252.9 508.4 248.8 509.1 247.3 C 509.8 245.8 511.7 240.1 512.4 238.1 C 513.0 236.1 515.7 227.6 515.9 225.3 C 516.0 223.0 515.2 214.8 514.3 212.9 C 513.4 211.1 507.6 206.1 506.0 205.2 C 504.4 204.2 498.2 203.0 496.4 202.3 C 494.5 201.7 488.1 199.0 486.2 198.2 C 484.3 197.4 477.3 194.3 475.6 193.6 C 473.8 192.8 468.0 190.7 466.6 190.4 C 465.2 190.1 461.7 190.1 460.3 190.3 C 458.9 190.5 452.9 192.2 451.1 192.8 C 449.3 193.4 442.5 196.0 440.8 196.8 C 439.0 197.6 433.2 200.4 431.9 201.2 C 430.6 202.0 427.8 204.2 427.0 205.2 C 426.1 206.3 423.6 210.9 422.8 212.4 C 422.1 214.0 419.4 220.5 418.7 222.3 C 418.0 224.1 415.9 230.7 415.5 232.3 C 415.0 233.9 414.0 238.5 414.0 240.0 C 414.0 241.5 414.8 246.8 415.2 248.7 C 415.6 250.6 417.8 258.8 418.4 261.1 C 419.0 263.4 421.3 271.9 421.9 274.0 C 422.4 276.1 423.7 282.5 423.9 284.1 C 424.1 285.7 423.8 289.6 423.6 291.1 C 423.4 292.6 422.4 298.7 422.0 300.5 C 421.7 302.3 420.1 308.8 419.6 310.7 C 419.2 312.5 418.0 318.6 417.4 320.5 C 416.7 322.4 414.1 329.4 412.4 331.3 C 410.7 333.2 401.9 339.7 398.8 341.0 C 395.6 342.2 382.1 344.4 378.3 344.9 C 374.5 345.3 360.8 345.7 357.5 345.8 C 354.2 346.0 345.5 346.6 342.2 346.8 C 339.0 347.0 326.5 347.8 322.1 348.1 C 317.7 348.3 299.6 349.2 294.5 349.4 C 289.5 349.5 271.2 350.0 266.7 350.1 C 262.3 350.1 249.4 350.2 246.0 350.1 C 242.6 350.0 233.3 349.2 229.8 348.9 C 226.3 348.5 212.1 346.9 208.0 346.3 C 204.0 345.8 189.2 343.6 185.4 343.0 C 181.7 342.3 170.0 340.1 167.2 339.4 C 164.4 338.7 157.8 336.4 155.3 335.4 C 152.9 334.3 143.1 329.4 140.2 327.8 C 137.3 326.2 126.6 320.1 123.9 318.3 C 121.2 316.5 112.2 310.3 110.5 308.6 C 108.8 306.9 105.8 301.9 105.2 299.9 C 104.7 297.9 104.7 289.6 104.3 287.1 C 103.9 284.6 101.8 274.9 100.7 272.4 C 99.6 270.0 93.5 262.0 92.0 260.1 C 90.5 258.2 85.4 253.2 84.3 251.5 C 83.3 249.8 81.4 243.8 81.0 241.6 C 80.6 239.4 79.9 230.0 79.8 227.4 C 79.6 224.8 79.4 215.3 79.4 213.0 C 79.5 210.6 79.6 203.6 79.8 202.0 C 79.9 200.4 80.8 196.5 81.2 195.0 C 81.7 193.6 83.8 188.1 84.5 186.5 C 85.2 184.9 87.9 179.2 88.6 177.7 C 89.3 176.3 91.8 171.7 92.4 170.6 C 93.0 169.5 94.4 167.1 94.8 166.2 C 95.3 165.2 97.0 161.7 97.3 160.4 C 97.7 159.1 98.6 153.4 99.1 152.0 C 99.5 150.5 101.2 145.2 102.3 144.4 C 103.3 143.6 109.0 142.8 110.4 143.1 C 111.8 143.5 116.4 147.4 117.6 148.2 C 118.9 149.0 122.9 151.2 124.2 151.7 C 125.5 152.1 130.3 152.7 131.7 152.8 C 133.0 152.8 138.3 152.3 139.0 152.2 C 139.8 152.1 138.9 152.4 140.0 151.9 Z";
+  var LANE=30; // lane width (uniform, stroked)
+
+  // obstacles ON the lane (sampled on the centerline). teal barrels/cones + two red + one moving car.
   var obs=[
-    {t:'barrel', x:180, y:108, c:'#14A8AD', s:11, label:'Barrel'},
-    {t:'cone',   x:392, y:138, c:'#14A8AD', r:7,  label:'Cone'},
-    {t:'barrel', x:430, y:262, c:'#0D7377', s:11, label:'Barrel'},
-    {t:'cone',   x:250, y:328, c:'#0D7377', r:7,  label:'Cone'},
-    {t:'cone',   x:96,  y:255, c:'#14A8AD', r:7,  label:'Cone'},
-    {t:'car',    x:300, y:114, c:'#C75450', w:22, h:13, label:'Moving car'}
+    {t:"barrel",x:203.9,y:127.1,c:"#14A8AD",s:11,label:"Barrel"},
+    {t:"cone",  x:356.9,y:188.0,c:"#0D7377",r:7, label:"Cone"},
+    {t:"car",   x:426.6,y:306.1,c:"#C75450",w:22,h:12,a:12,label:"Moving car"},
+    {t:"cone",  x:504.5,y:219.2,c:"#14A8AD",r:7, label:"Cone"},
+    {t:"barrel",x:394.5,y:330.3,c:"#0D7377",s:11,label:"Barrel"},
+    {t:"barrel",x:90.9, y:278.7,c:"#C75450",s:11,label:"Barrel"},
+    {t:"cone",  x:109.3,y:153.4,c:"#14A8AD",r:7, label:"Cone"}
   ];
+  var carX=296.9,carY=128.3; // car marker on the racing line (on the top sweeper)
 
-  // racing / avoidance line — smooth teal-bright closed loop weaving inside the lane
-  var racing="M 300 96 "
-    + "C 360 96 412 116 432 158 "
-    + "C 452 200 446 244 420 278 "
-    + "C 392 314 332 322 270 322 "
-    + "C 210 322 138 322 108 286 "
-    + "C 80 252 80 206 96 166 "
-    + "C 112 126 168 96 230 96 "
-    + "C 256 96 280 96 300 96 Z";
-
-  // marker car position — exact point on the racing path (top-right curve)
-  var carMX=432, carMY=158;
-
-  // ---- gauge geometry (right side) ----
-  var gx=625, gy=216, gr=78, gsw=22;
-  var pct=0.90;
-  var circ=2*Math.PI*gr;
-  var dash=circ*pct, gap=circ-dash;
+  // gauge
+  var gx=636,gy=210,gr=76,gsw=20,pct=0.90;
+  var circ=2*Math.PI*gr, dash=circ*pct, gap=circ-dash;
 
   var s='';
-  s+='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:760px;height:auto;display:block" role="img" aria-label="Top-down race circuit with autonomous avoidance racing line and a 90 percent obstacle-avoidance gauge">';
+  s+='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:760px;height:auto;display:block" role="img" aria-label="Top-down windy race circuit with a hairpin, an S-curve chicane and sweeping bends. Seven obstacles sit on the lane and a smooth teal avoidance racing line swerves around them. An amber gauge shows 90 percent obstacle avoidance.">';
 
-  // defs / styles
-  s+='<defs>';
-  s+='<style>'
-    + '@keyframes viz_roboCar_dash{from{stroke-dashoffset:1480}to{stroke-dashoffset:0}}'
-    + '.viz_roboCar_line{stroke-dasharray:1480;stroke-dashoffset:0;animation:viz_roboCar_dash 6s linear infinite}'
-    + '@keyframes viz_roboCar_pulse{0%,100%{opacity:.85;transform:scale(1)}50%{opacity:.4;transform:scale(1.45)}}'
-    + '.viz_roboCar_pulse{transform-box:fill-box;transform-origin:center;animation:viz_roboCar_pulse 2.6s ease-in-out infinite}'
-    + '@keyframes viz_roboCar_gaugefill{from{stroke-dashoffset:'+circ+'}to{stroke-dashoffset:'+gap+'}}'
-    + '.viz_roboCar_gauge{animation:viz_roboCar_gaugefill 1.8s ease-out forwards}'
-    + '.viz_roboCar_ob{transition:opacity .2s}.viz_roboCar_ob:hover{opacity:.75}'
-    + '</style>';
-  s+='</defs>';
+  // styles + keyframes (prefixed); resting state is complete without animation
+  s+='<defs><style>'
+    +'@keyframes viz_roboCar_dash{from{stroke-dashoffset:1370}to{stroke-dashoffset:0}}'
+    +'.viz_roboCar_line{stroke-dasharray:1370;animation:viz_roboCar_dash 7s linear infinite}'
+    +'@keyframes viz_roboCar_pulse{0%,100%{opacity:.8;transform:scale(1)}50%{opacity:.3;transform:scale(1.5)}}'
+    +'.viz_roboCar_pulse{transform-box:fill-box;transform-origin:center;animation:viz_roboCar_pulse 2.6s ease-in-out infinite}'
+    +'@keyframes viz_roboCar_gaugefill{from{stroke-dashoffset:'+circ.toFixed(1)+'}to{stroke-dashoffset:'+gap.toFixed(1)+'}}'
+    +'.viz_roboCar_gauge{animation:viz_roboCar_gaugefill 1.8s ease-out forwards}'
+    +'.viz_roboCar_ob{transition:opacity .2s}.viz_roboCar_ob:hover{opacity:.7}'
+    +'</style></defs>';
 
-  // background panel
+  // background
   s+='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#141414"/>';
 
-  // ---- titles (top-left) ----
+  // titles (top-left)
   s+='<text x="'+pad+'" y="30" font-family="Inter,sans-serif" font-size="13.5" font-weight="600" fill="#F0F0F0">LIDAR + CNN → real-time avoidance path</text>';
-  s+='<text x="'+pad+'" y="48" font-family="Inter,sans-serif" font-size="11" fill="#909090">Autonomous track navigation + avoidance gauge</text>';
+  s+='<text x="'+pad+'" y="48" font-family="Inter,sans-serif" font-size="11" fill="#909090">Top-down circuit · perception-planned racing line around obstacles</text>';
 
-  // ---- track lane (band between outer and inner rounded rects) ----
-  s+='<rect x="'+ox+'" y="'+oy+'" rx="'+orad+'" ry="'+orad+'" width="'+ow+'" height="'+oh+'" fill="rgba(13,115,119,0.12)" stroke="#262626" stroke-width="1.5"/>';
-  s+='<rect x="'+ix+'" y="'+iy+'" rx="'+irad+'" ry="'+irad+'" width="'+iw+'" height="'+ih+'" fill="#141414" stroke="#262626" stroke-width="1.5"/>';
-  // dashed centerline
-  s+='<rect x="'+(ox+lane/2)+'" y="'+(oy+lane/2)+'" rx="'+(orad-lane/2)+'" ry="'+(orad-lane/2)+'" width="'+(ow-lane)+'" height="'+(oh-lane)+'" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1.5" stroke-dasharray="6 10"/>';
+  // track lane: two parallel offset borders rendered as a wider edge stroke + asphalt fill stroke
+  s+='<path d="'+CENTER+'" fill="none" stroke="#262626" stroke-width="'+(LANE+3)+'" stroke-linejoin="round" stroke-linecap="round"/>';
+  s+='<path d="'+CENTER+'" fill="none" stroke="rgba(13,115,119,0.12)" stroke-width="'+LANE+'" stroke-linejoin="round" stroke-linecap="round"/>';
+  // dashed lane centerline marking
+  s+='<path d="'+CENTER+'" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1.2" stroke-dasharray="4 10"/>';
 
-  // infield label
-  s+='<text x="'+cx+'" y="'+(cy-6)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#909090">TRACK</text>';
-  s+='<text x="'+cx+'" y="'+(cy+10)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#707070">top-down circuit</text>';
+  // infield label (placed in the open left-loop interior, clear of the lane)
+  s+='<text x="205" y="236" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#909090">CIRCUIT</text>';
+  s+='<text x="205" y="252" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#707070">hairpin · chicane · sweepers</text>';
 
-  // ---- racing / avoidance line ----
-  s+='<path d="'+racing+'" fill="none" stroke="rgba(13,115,119,0.35)" stroke-width="7" stroke-linejoin="round"/>';
-  s+='<path class="viz_roboCar_line" d="'+racing+'" fill="none" stroke="#14A8AD" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  // avoidance racing line: dark outline + teal base + bright animated top (resting = bright line)
+  s+='<path d="'+RACE+'" fill="none" stroke="#101010" stroke-width="5.2" stroke-linejoin="round" stroke-linecap="round" opacity="0.9"/>';
+  s+='<path d="'+RACE+'" fill="none" stroke="#0D7377" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>';
+  s+='<path class="viz_roboCar_line" d="'+RACE+'" fill="none" stroke="#14A8AD" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>';
 
-  // ---- obstacles ----
+  // obstacles
   for(var i=0;i<obs.length;i++){
     var o=obs[i];
-    if(o.t==='barrel'){
-      s+='<g class="viz_roboCar_ob"><rect x="'+(o.x-o.s/2)+'" y="'+(o.y-o.s/2)+'" width="'+o.s+'" height="'+o.s+'" rx="2" fill="'+o.c+'" stroke="#101010" stroke-width="1"/><title>'+o.label+'</title></g>';
-    } else if(o.t==='cone'){
+    if(o.t==="barrel"){
+      s+='<g class="viz_roboCar_ob"><rect x="'+(o.x-o.s/2).toFixed(1)+'" y="'+(o.y-o.s/2).toFixed(1)+'" width="'+o.s+'" height="'+o.s+'" rx="2" fill="'+o.c+'" stroke="#101010" stroke-width="1"/><title>'+o.label+'</title></g>';
+    } else if(o.t==="cone"){
       s+='<g class="viz_roboCar_ob"><circle cx="'+o.x+'" cy="'+o.y+'" r="'+o.r+'" fill="'+o.c+'" stroke="#101010" stroke-width="1"/><title>'+o.label+'</title></g>';
-    } else if(o.t==='car'){
-      s+='<g class="viz_roboCar_ob"><rect x="'+(o.x-o.w/2)+'" y="'+(o.y-o.h/2)+'" width="'+o.w+'" height="'+o.h+'" rx="2.5" fill="'+o.c+'" stroke="#101010" stroke-width="1"/><title>'+o.label+' (hazard)</title></g>';
+    } else if(o.t==="car"){
+      s+='<g class="viz_roboCar_ob" transform="translate('+o.x+','+o.y+') rotate('+o.a+')"><rect x="'+(-o.w/2).toFixed(1)+'" y="'+(-o.h/2).toFixed(1)+'" width="'+o.w+'" height="'+o.h+'" rx="2.5" fill="'+o.c+'" stroke="#101010" stroke-width="1"/><title>'+o.label+' (hazard)</title></g>';
     }
   }
 
-  // ---- car marker on racing line (gentle halo pulse; resting state complete) ----
-  s+='<g transform="translate('+carMX+','+carMY+')">';
+  // car marker on the racing line (gentle halo pulse; resting state complete)
+  s+='<g transform="translate('+carX+','+carY+')">';
   s+='<circle class="viz_roboCar_pulse" cx="0" cy="0" r="9" fill="rgba(13,115,119,0.35)"/>';
   s+='<rect x="-6" y="-4" width="12" height="8" rx="2" fill="#F0F0F0" stroke="#0D7377" stroke-width="1.5"/>';
-  s+='<title>Autonomous car (on avoidance line)</title>';
-  s+='</g>';
+  s+='<title>Autonomous car (on avoidance line)</title></g>';
 
-  // legend (below track)
-  var ly=372;
+  // legend (bottom)
+  var ly=384;
   s+='<rect x="'+pad+'" y="'+(ly-9)+'" width="11" height="11" rx="2" fill="#14A8AD"/>';
-  s+='<text x="'+(pad+18)+'" y="'+(ly)+'" font-family="Inter,sans-serif" font-size="10" fill="#909090">Barrel</text>';
+  s+='<text x="'+(pad+18)+'" y="'+ly+'" font-family="Inter,sans-serif" font-size="10" fill="#909090">Barrel</text>';
   s+='<circle cx="'+(pad+82)+'" cy="'+(ly-3)+'" r="5.5" fill="#0D7377"/>';
-  s+='<text x="'+(pad+92)+'" y="'+(ly)+'" font-family="Inter,sans-serif" font-size="10" fill="#909090">Cone</text>';
+  s+='<text x="'+(pad+92)+'" y="'+ly+'" font-family="Inter,sans-serif" font-size="10" fill="#909090">Cone</text>';
   s+='<rect x="'+(pad+140)+'" y="'+(ly-8)+'" width="14" height="9" rx="2" fill="#C75450"/>';
-  s+='<text x="'+(pad+158)+'" y="'+(ly)+'" font-family="Inter,sans-serif" font-size="10" fill="#909090">Moving car</text>';
-  s+='<line x1="'+(pad+232)+'" y1="'+(ly-3)+'" x2="'+(pad+258)+'" y2="'+(ly-3)+'" stroke="#14A8AD" stroke-width="2.5"/>';
-  s+='<text x="'+(pad+264)+'" y="'+(ly)+'" font-family="Inter,sans-serif" font-size="10" fill="#909090">Avoidance line</text>';
+  s+='<text x="'+(pad+158)+'" y="'+ly+'" font-family="Inter,sans-serif" font-size="10" fill="#909090">Moving car</text>';
+  s+='<line x1="'+(pad+232)+'" y1="'+(ly-3)+'" x2="'+(pad+258)+'" y2="'+(ly-3)+'" stroke="#14A8AD" stroke-width="2.4"/>';
+  s+='<text x="'+(pad+264)+'" y="'+ly+'" font-family="Inter,sans-serif" font-size="10" fill="#909090">Avoidance line</text>';
 
-  // ---- gauge (right) ----
+  // gauge (right) — 90% filled in amber (single highlight)
   s+='<circle cx="'+gx+'" cy="'+gy+'" r="'+gr+'" fill="none" stroke="#262626" stroke-width="'+gsw+'"/>';
   s+='<g transform="rotate(-90 '+gx+' '+gy+')">';
-  s+='<circle class="viz_roboCar_gauge" cx="'+gx+'" cy="'+gy+'" r="'+gr+'" fill="none" stroke="#E8A838" stroke-width="'+gsw+'" stroke-linecap="round" stroke-dasharray="'+dash+' '+gap+'" stroke-dashoffset="'+gap+'"/>';
+  s+='<circle class="viz_roboCar_gauge" cx="'+gx+'" cy="'+gy+'" r="'+gr+'" fill="none" stroke="#E8A838" stroke-width="'+gsw+'" stroke-linecap="round" stroke-dasharray="'+dash.toFixed(1)+' '+gap.toFixed(1)+'" stroke-dashoffset="'+gap.toFixed(1)+'"/>';
   s+='</g>';
   s+='<text x="'+gx+'" y="'+(gy+4)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="34" font-weight="700" fill="#E8A838">90%</text>';
-  s+='<text x="'+gx+'" y="'+(gy+26)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#909090">avoidance rate</text>';
-  s+='<text x="'+gx+'" y="'+(gy-gr-16)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#F0F0F0">Obstacle avoidance</text>';
+  s+='<text x="'+gx+'" y="'+(gy+24)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#909090">obstacle avoidance</text>';
+  s+='<text x="'+gx+'" y="'+(gy-gr-14)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#F0F0F0">Avoidance rate</text>';
 
-  // ---- stat note (right column, below gauge) ----
-  var sx=540, syb=328;
-  s+='<line x1="'+sx+'" y1="'+(syb-14)+'" x2="'+(sx+170)+'" y2="'+(syb-14)+'" stroke="#262626" stroke-width="1"/>';
-  var stats=[
-    ['9','NASCAR / F1-style tracks'],
-    ['200+','obstacles encountered'],
-    ['7','unplanned stops'],
-    ['LIDAR+CNN','sensing + perception']
-  ];
+  // stat note (right, below gauge)
+  var sx=552,syb=316;
+  s+='<line x1="'+sx+'" y1="'+(syb-14)+'" x2="'+(sx+184)+'" y2="'+(syb-14)+'" stroke="#262626" stroke-width="1"/>';
+  var stats=[["9","NASCAR / F1-style tracks"],["200+","obstacles encountered"],["7","unplanned stops"],["LIDAR+CNN","sensing + perception"]];
   for(var j=0;j<stats.length;j++){
     var yy=syb+j*16;
     s+='<text x="'+sx+'" y="'+yy+'" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#14A8AD">'+stats[j][0]+'</text>';
-    s+='<text x="'+(sx+72)+'" y="'+yy+'" font-family="Inter,sans-serif" font-size="10" fill="#909090">'+stats[j][1]+'</text>';
+    s+='<text x="'+(sx+74)+'" y="'+yy+'" font-family="Inter,sans-serif" font-size="10" fill="#909090">'+stats[j][1]+'</text>';
   }
 
   s+='</svg>';
@@ -1960,7 +1990,7 @@ function viz_battery(){
 @keyframes viz_battery_grow{0%{transform:scaleY(0)}100%{transform:scaleY(1)}}
 </style>
 <rect x="0" y="0" width="${W}" height="${H}" fill="#101010"/>
-<text x="${pad}" y="30" font-family="Inter,sans-serif" font-size="13.5" font-weight="600" fill="${text}">Store-item clustering + RMSE gain</text>
+<text x="${pad}" y="30" font-family="Inter,sans-serif" font-size="13.5" font-weight="600" fill="${text}">Store-item clustering + RMSE improved</text>
 <text x="${pad}" y="48" font-family="Inter,sans-serif" font-size="11" fill="${muted}">Cluster the noise out &#8594; forecast &#8594; disaggregate</text>
 <rect x="${sx0}" y="${sy0}" width="${sx1-sx0}" height="${sy1-sy0}" fill="${surf}" stroke="${faint}" stroke-width="1"/>
 ${grid}
@@ -1990,8 +2020,8 @@ ${bgrid}
 <line x1="${bxRaw+bw/2}" y1="${rawTop.toFixed(1)}" x2="${bxRaw+bw/2}" y2="${afterTop.toFixed(1)}" stroke="${amber}" stroke-width="1.2" stroke-dasharray="3 2" opacity="0.8"/>
 <line x1="${bxRaw+bw/2}" y1="${afterTop.toFixed(1)}" x2="${bxAfter+bw/2}" y2="${afterTop.toFixed(1)}" stroke="${amber}" stroke-width="1.2" stroke-dasharray="3 2" opacity="0.8"/>
 <rect x="${bxRaw+bw+14}" y="${(rawTop+afterTop)/2-22}" width="62" height="42" rx="5" fill="rgba(232,168,56,0.12)" stroke="${amber}" stroke-width="1"/>
-<text x="${bxRaw+bw+45}" y="${(rawTop+afterTop)/2-3}" font-family="Inter,sans-serif" font-size="17" font-weight="600" fill="${amber}" text-anchor="middle">&#8722;${gain}%</text>
-<text x="${bxRaw+bw+45}" y="${(rawTop+afterTop)/2+13}" font-family="Inter,sans-serif" font-size="9" fill="${amber}" text-anchor="middle">RMSE gain</text>
+<text x="${bxRaw+bw+45}" y="${(rawTop+afterTop)/2-3}" font-family="Inter,sans-serif" font-size="17" font-weight="600" fill="${amber}" text-anchor="middle">${gain}%</text>
+<text x="${bxRaw+bw+45}" y="${(rawTop+afterTop)/2+13}" font-family="Inter,sans-serif" font-size="8.5" fill="${amber}" text-anchor="middle">lower RMSE</text>
 <text x="${bx0}" y="${H-22}" font-family="Inter,sans-serif" font-size="10" fill="${muted}">Forecast at cluster level &#8594; disaggregate to store-item.</text>
 <text x="${bx0}" y="${H-9}" font-family="Inter,sans-serif" font-size="10" fill="${muted}">Recall thresholds maintained.</text>
 </svg>`;
@@ -1999,153 +2029,145 @@ ${bgrid}
 
 /* ==== plugPredict ==== */
 function viz_plugPredict(){
-  const W=760;
-  const H=400;
-  const pad=16;
-  // layout anchors
-  const axisY=176;            // baseline of the patient timeline
-  const axisX0=40;            // left start of timeline
-  const nowX=372;             // 'now' divider
-  const axisX1=712;           // right edge for fan reach
-  // past events (proportional positions along time axis)
+  const W=760, H=440, pad=16;
+  const axisY=210, axisX0=44, nowX=296;
+  const rightEdge=W-pad-16;
+
   const events=[
-    {t:0.06,label:"Dx",sub:"Diagnosis",c:"#14A8AD"},
-    {t:0.26,label:"Rx",sub:"Prescription",c:"#14A8AD"},
-    {t:0.46,label:"Proc",sub:"Procedure",c:"#14A8AD"},
-    {t:0.66,label:"Surg",sub:"Surgery",c:"#14A8AD"},
-    {t:0.88,label:"Note",sub:"Clinical note",c:"#14A8AD"}
+    {t:0.06,label:"Dx",sub:"Initial diagnosis"},
+    {t:0.27,label:"Rx",sub:"Prescription"},
+    {t:0.49,label:"Proc",sub:"Procedure"},
+    {t:0.71,label:"Surg",sub:"Surgery"},
+    {t:0.93,label:"Note",sub:"Clinical note"}
   ];
-  const ex=t=>axisX0+(nowX-axisX0-14)*t;
+  const ex=t=>axisX0+(nowX-axisX0-20)*t;
 
-  // prediction horizons (fan)
   const horizons=[
-    {m:"3 mo",x:nowX+96, spread:34, chips:[["Rx","Drug regimen"]]},
-    {m:"6 mo",x:nowX+196,spread:58, chips:[["Proc","Procedure"]]},
-    {m:"12 mo",x:nowX+300,spread:86,chips:[["Dx","Diagnosis"]]}
+    {m:"3 mo",x:nowX+34},
+    {m:"6 mo",x:nowX+82},
+    {m:"12 mo",x:nowX+132}
   ];
 
-  // gauge geometry (72% precision, amber)
-  const gx=648, gy=300, gr=44, gsw=10;
+  const nodeCx=410, nodeCy=axisY-46, nodeW=130, nodeH=48;
+  const nodeL=nodeCx-nodeW/2, nodeR=nodeCx+nodeW/2;
+  const recX=556, recW=156, recH=42;
+  const recRxY=axisY-70, recPrY=axisY+2;
+
+  const bandTop=axisY-108, bandBot=axisY+96;
+
+  const gx=118, gy=H-78, gr=29, gsw=8;
   const pct=0.72;
   const circ=2*Math.PI*gr;
-  const dash=circ*pct;
-  const gap=circ-dash;
+  const dash=circ*pct, gap=circ-dash;
 
   let s='';
-  s+=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;max-width:760px;height:auto;display:block" role="img" aria-label="Patient history to 3, 6 and 12-month next-step prediction with 72 percent precision">`;
+  s+=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;max-width:760px;height:auto;display:block" role="img" aria-label="Patient history timeline leading to a predicted future diagnosis that drives recommended drug regimen and procedures, with 72 percent precision">`;
 
-  // styles + gentle animation (prefixed). Resting state is fully visible (opacity:1).
   s+=`<style>
-    .viz_plugPredict_chip{opacity:1;animation:viz_plugPredict_in .7s ease both}
-    .viz_plugPredict_d1{animation-delay:.30s}
-    .viz_plugPredict_d2{animation-delay:.55s}
-    .viz_plugPredict_d3{animation-delay:.80s}
-    @keyframes viz_plugPredict_in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    .viz_plugPredict_flow{stroke-dasharray:5 4;animation:viz_plugPredict_dash 1.5s linear infinite}
+    @keyframes viz_plugPredict_dash{to{stroke-dashoffset:-18}}
     .viz_plugPredict_pulse{animation:viz_plugPredict_pl 3.2s ease-in-out infinite}
-    @keyframes viz_plugPredict_pl{0%,100%{opacity:.6}50%{opacity:1}}
+    @keyframes viz_plugPredict_pl{0%,100%{opacity:.55}50%{opacity:1}}
     .viz_plugPredict_ev:hover circle{stroke:#F0F0F0}
+    .viz_plugPredict_chip:hover rect{stroke:#14A8AD}
   </style>`;
 
-  // background panel
+  s+=`<defs>`;
+  s+=`<marker id="viz_plugPredict_arr" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#14A8AD"/></marker>`;
+  s+=`</defs>`;
+
   s+=`<rect x="0" y="0" width="${W}" height="${H}" fill="#141414"/>`;
   s+=`<rect x="${pad}" y="${pad}" width="${W-2*pad}" height="${H-2*pad}" rx="10" fill="#1A1A1A" stroke="#262626"/>`;
 
-  // title block
-  s+=`<text x="${pad+18}" y="48" font-family="Inter,sans-serif" font-size="13.5" font-weight="600" fill="#F0F0F0">Patient history &#8594; 3/6/12-month next-step prediction</text>`;
-  s+=`<text x="${pad+18}" y="68" font-family="Inter,sans-serif" font-size="11" fill="#909090">Deep neural net + ensemble on time-series patient data</text>`;
+  s+=`<text x="${pad+18}" y="46" font-family="Inter,sans-serif" font-size="13.5" font-weight="600" fill="#F0F0F0">Patient history &#8594; predicted diagnosis &#8594; drug &amp; procedure recommendations</text>`;
+  s+=`<text x="${pad+18}" y="66" font-family="Inter,sans-serif" font-size="11" fill="#909090">The model predicts the likely future diagnosis, which drives the drug &amp; procedure recommendations</text>`;
 
-  // legend (left = history, right = forecast)
-  s+=`<g font-family="Inter,sans-serif" font-size="10" fill="#707070">`;
-  s+=`<rect x="${pad+18}" y="96" width="10" height="10" rx="2" fill="rgba(13,115,119,0.35)" stroke="#14A8AD"/>`;
-  s+=`<text x="${pad+34}" y="105" fill="#909090">Recorded events</text>`;
-  s+=`<rect x="${pad+150}" y="96" width="10" height="10" rx="2" fill="rgba(13,115,119,0.12)" stroke="#0D7377" stroke-dasharray="2 2"/>`;
-  s+=`<text x="${pad+166}" y="105" fill="#909090">Predicted next step</text>`;
+  s+=`<g font-family="Inter,sans-serif" font-size="10">`;
+  s+=`<rect x="${pad+18}" y="86" width="10" height="10" rx="2" fill="rgba(13,115,119,0.35)" stroke="#14A8AD"/>`;
+  s+=`<text x="${pad+34}" y="95" fill="#909090">Recorded history</text>`;
+  s+=`<rect x="${pad+148}" y="86" width="10" height="10" rx="2" fill="rgba(13,115,119,0.12)" stroke="#0D7377" stroke-dasharray="2 2"/>`;
+  s+=`<text x="${pad+164}" y="95" fill="#909090">Predicted output</text>`;
   s+=`</g>`;
 
-  // ===== forecast fan (drawn first so it sits behind chips) =====
-  const fanTop=axisY-90;
-  const fanBot=axisY+90;
-  s+=`<path d="M ${nowX} ${axisY} L ${axisX1} ${fanTop} L ${axisX1} ${fanBot} Z" fill="rgba(13,115,119,0.12)"/>`;
-  // fan guide spokes
-  s+=`<path d="M ${nowX} ${axisY} L ${axisX1} ${fanTop+22}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
-  s+=`<path d="M ${nowX} ${axisY} L ${axisX1} ${axisY}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
-  s+=`<path d="M ${nowX} ${axisY} L ${axisX1} ${fanBot-22}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
+  s+=`<rect x="${nowX}" y="${bandTop}" width="${rightEdge-nowX}" height="${bandBot-bandTop}" rx="8" fill="rgba(13,115,119,0.12)"/>`;
+  s+=`<text x="${rightEdge-8}" y="${bandTop-7}" font-family="Inter,sans-serif" font-size="10" fill="#707070" text-anchor="end">prediction horizon (3 / 6 / 12 mo)</text>`;
 
-  // ===== timeline axis =====
-  // history segment (solid)
   s+=`<line x1="${axisX0}" y1="${axisY}" x2="${nowX}" y2="${axisY}" stroke="#0D7377" stroke-width="2.5"/>`;
-  // future segment (dashed) along center spoke
-  s+=`<line x1="${nowX}" y1="${axisY}" x2="${axisX1}" y2="${axisY}" stroke="#0D7377" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.7"/>`;
+  s+=`<line x1="${nowX}" y1="${axisY}" x2="${rightEdge-8}" y2="${axisY}" stroke="#0D7377" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.6"/>`;
+  s+=`<text x="${axisX0}" y="${axisY+44}" font-family="Inter,sans-serif" font-size="10" fill="#707070">earlier history</text>`;
 
-  // axis tick labels (past / now)
-  s+=`<text x="${axisX0}" y="${axisY+78}" font-family="Inter,sans-serif" font-size="10" fill="#707070">earlier history</text>`;
+  horizons.forEach(h=>{
+    s+=`<line x1="${h.x}" y1="${axisY}" x2="${h.x}" y2="${axisY+24}" stroke="#262626" stroke-width="1" stroke-dasharray="2 3"/>`;
+    s+=`<circle cx="${h.x}" cy="${axisY}" r="3" fill="#0D7377" stroke="#14A8AD" stroke-width="1.2" class="viz_plugPredict_pulse"/>`;
+    s+=`<text x="${h.x}" y="${axisY+38}" font-family="Inter,sans-serif" font-size="10.5" font-weight="600" fill="#14A8AD" text-anchor="middle">${h.m}</text>`;
+  });
 
-  // ===== past event markers =====
   events.forEach((e,i)=>{
     const x=ex(e.t);
     const up=i%2===0;
     const ly=up?axisY-22:axisY+22;
-    const ty=up?axisY-30:axisY+38;
-    // connector tick
+    const ty=up?axisY-37:axisY+24;
     s+=`<line x1="${x}" y1="${axisY}" x2="${x}" y2="${ly}" stroke="#262626" stroke-width="1"/>`;
     s+=`<g class="viz_plugPredict_ev"><title>${e.sub}</title>`;
     s+=`<circle cx="${x}" cy="${axisY}" r="5.5" fill="#1A1A1A" stroke="#14A8AD" stroke-width="2"/>`;
     s+=`<circle cx="${x}" cy="${axisY}" r="2" fill="#14A8AD"/>`;
-    // label chip
     const lw=e.label.length*6.6+14;
-    s+=`<rect x="${x-lw/2}" y="${ty-(up?12:0)}" width="${lw}" height="15" rx="4" fill="rgba(13,115,119,0.2)" stroke="#0D7377"/>`;
-    s+=`<text x="${x}" y="${ty-(up?1:-11)}" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="#F0F0F0" text-anchor="middle">${e.label}</text>`;
+    s+=`<rect x="${x-lw/2}" y="${ty}" width="${lw}" height="15" rx="4" fill="rgba(13,115,119,0.2)" stroke="#0D7377"/>`;
+    s+=`<text x="${x}" y="${ty+11}" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="#F0F0F0" text-anchor="middle">${e.label}</text>`;
     s+=`</g>`;
   });
 
-  // ===== NOW divider =====
-  s+=`<line x1="${nowX}" y1="${axisY-104}" x2="${nowX}" y2="${axisY+104}" stroke="#909090" stroke-width="1.5" stroke-dasharray="3 4"/>`;
+  s+=`<line x1="${nowX}" y1="${axisY-112}" x2="${nowX}" y2="${axisY+112}" stroke="#909090" stroke-width="1.5" stroke-dasharray="3 4"/>`;
   s+=`<circle cx="${nowX}" cy="${axisY}" r="6" fill="#1A1A1A" stroke="#F0F0F0" stroke-width="1.5"/>`;
-  s+=`<rect x="${nowX-22}" y="${axisY-126}" width="44" height="17" rx="4" fill="#101010" stroke="#262626"/>`;
-  s+=`<text x="${nowX}" y="${axisY-114}" font-family="Inter,sans-serif" font-size="10.5" font-weight="600" fill="#F0F0F0" text-anchor="middle">NOW</text>`;
+  s+=`<rect x="${nowX-22}" y="${axisY-130}" width="44" height="17" rx="4" fill="#101010" stroke="#262626"/>`;
+  s+=`<text x="${nowX}" y="${axisY-118}" font-family="Inter,sans-serif" font-size="10.5" font-weight="600" fill="#F0F0F0" text-anchor="middle">NOW</text>`;
 
-  // ===== horizon chips =====
-  horizons.forEach((h,i)=>{
-    const cls=`viz_plugPredict_chip viz_plugPredict_d${i+1}`;
-    // horizon marker on center axis
-    s+=`<circle cx="${h.x}" cy="${axisY}" r="3.5" fill="#0D7377" stroke="#14A8AD" stroke-width="1.5" class="viz_plugPredict_pulse"/>`;
-    // horizon time label below axis
-    s+=`<g class="${cls}">`;
-    s+=`<text x="${h.x}" y="${axisY+76}" font-family="Inter,sans-serif" font-size="10.5" font-weight="600" fill="#14A8AD" text-anchor="middle">${h.m}</text>`;
-    // predicted-step chip above axis; chips climb with the fan spread
-    const [tag,full]=h.chips[0];
-    const cw=92, ch=30;
-    const cxp=h.x-cw/2;
-    const chipY=axisY-58-(h.spread-34);
-    s+=`<line x1="${h.x}" y1="${axisY}" x2="${h.x}" y2="${chipY+ch}" stroke="#262626" stroke-width="1" stroke-dasharray="2 3"/>`;
-    s+=`<rect x="${cxp}" y="${chipY}" width="${cw}" height="${ch}" rx="6" fill="rgba(13,115,119,0.12)" stroke="#0D7377" stroke-dasharray="3 2"><title>Predicted ${full} at ${h.m}</title></rect>`;
-    s+=`<text x="${h.x}" y="${chipY+13}" font-family="Inter,sans-serif" font-size="10.5" font-weight="600" fill="#F0F0F0" text-anchor="middle">${tag}</text>`;
-    s+=`<text x="${h.x}" y="${chipY+24}" font-family="Inter,sans-serif" font-size="8.5" fill="#909090" text-anchor="middle">${full}</text>`;
+  s+=`<path class="viz_plugPredict_flow" d="M ${nowX+8} ${axisY-14} C ${nowX+34} ${axisY-14}, ${nodeL-30} ${nodeCy}, ${nodeL-4} ${nodeCy}" fill="none" stroke="#14A8AD" stroke-width="2" marker-end="url(#viz_plugPredict_arr)"/>`;
+  s+=`<text x="${(nowX+nodeL)/2}" y="${nodeCy-20}" font-family="Inter,sans-serif" font-size="9" fill="#707070" text-anchor="middle">predict</text>`;
+
+  s+=`<g class="viz_plugPredict_chip"><title>The model predicts the likely future diagnosis first</title>`;
+  s+=`<rect x="${nodeL}" y="${nodeCy-nodeH/2}" width="${nodeW}" height="${nodeH}" rx="8" fill="rgba(13,115,119,0.35)" stroke="#14A8AD" stroke-width="1.5"/>`;
+  s+=`<circle cx="${nodeL+16}" cy="${nodeCy-nodeH/2+15}" r="8" fill="#0D7377" stroke="#14A8AD" stroke-width="1"/>`;
+  s+=`<text x="${nodeL+16}" y="${nodeCy-nodeH/2+18.5}" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#F0F0F0" text-anchor="middle">1</text>`;
+  s+=`<text x="${nodeCx+10}" y="${nodeCy-5}" font-family="Inter,sans-serif" font-size="8.5" fill="#909090" text-anchor="middle">PREDICTED</text>`;
+  s+=`<text x="${nodeCx+10}" y="${nodeCy+12}" font-family="Inter,sans-serif" font-size="13" font-weight="600" fill="#F0F0F0" text-anchor="middle">Diagnosis</text>`;
+  s+=`</g>`;
+
+  s+=`<path class="viz_plugPredict_flow" d="M ${nodeR+2} ${nodeCy-6} C ${nodeR+34} ${nodeCy-6}, ${recX-34} ${recRxY+recH/2}, ${recX-4} ${recRxY+recH/2}" fill="none" stroke="#14A8AD" stroke-width="2" marker-end="url(#viz_plugPredict_arr)"/>`;
+  s+=`<path class="viz_plugPredict_flow" d="M ${nodeR+2} ${nodeCy+10} C ${nodeR+34} ${nodeCy+10}, ${recX-34} ${recPrY+recH/2}, ${recX-4} ${recPrY+recH/2}" fill="none" stroke="#14A8AD" stroke-width="2" marker-end="url(#viz_plugPredict_arr)"/>`;
+  s+=`<text x="${(nodeR+recX)/2}" y="${nodeCy-26}" font-family="Inter,sans-serif" font-size="9" fill="#707070" text-anchor="middle">informs</text>`;
+
+  function recChip(y,n,tag,full){
+    s+=`<g class="viz_plugPredict_chip"><title>${full}, recommended from the predicted diagnosis</title>`;
+    s+=`<rect x="${recX}" y="${y}" width="${recW}" height="${recH}" rx="8" fill="rgba(13,115,119,0.12)" stroke="#0D7377" stroke-dasharray="3 2"/>`;
+    s+=`<rect x="${recX}" y="${y}" width="3" height="${recH}" rx="1.5" fill="#14A8AD"/>`;
+    s+=`<circle cx="${recX+18}" cy="${y+14}" r="8" fill="#1A1A1A" stroke="#0D7377" stroke-width="1"/>`;
+    s+=`<text x="${recX+18}" y="${y+17.5}" font-family="Inter,sans-serif" font-size="9" font-weight="700" fill="#14A8AD" text-anchor="middle">${n}</text>`;
+    s+=`<text x="${recX+34}" y="${y+18}" font-family="Inter,sans-serif" font-size="11.5" font-weight="600" fill="#F0F0F0">${tag}</text>`;
+    s+=`<text x="${recX+14}" y="${y+34}" font-family="Inter,sans-serif" font-size="9.5" fill="#909090">${full}</text>`;
     s+=`</g>`;
-  });
+  }
+  recChip(recRxY,"2","Drug regimen","Recommended medications");
+  recChip(recPrY,"3","Procedures","Recommended interventions");
 
-  // forecast bracket label
-  s+=`<text x="${(nowX+axisX1)/2}" y="${axisY-96}" font-family="Inter,sans-serif" font-size="10" fill="#707070" text-anchor="middle">predicted next steps</text>`;
-
-  // ===== precision gauge (amber headline metric) =====
   s+=`<g transform="translate(${gx},${gy})">`;
   s+=`<circle r="${gr}" fill="none" stroke="#262626" stroke-width="${gsw}"/>`;
   s+=`<circle r="${gr}" fill="none" stroke="#E8A838" stroke-width="${gsw}" stroke-linecap="round" stroke-dasharray="${dash.toFixed(1)} ${gap.toFixed(1)}" transform="rotate(-90)">`;
   s+=`<animate attributeName="stroke-dasharray" from="0 ${circ.toFixed(1)}" to="${dash.toFixed(1)} ${gap.toFixed(1)}" dur="1.2s" begin="0s" fill="freeze" calcMode="spline" keySplines="0.25 0.1 0.25 1"/>`;
   s+=`</circle>`;
-  s+=`<text x="0" y="2" font-family="Inter,sans-serif" font-size="22" font-weight="700" fill="#E8A838" text-anchor="middle">72%</text>`;
-  s+=`<text x="0" y="18" font-family="Inter,sans-serif" font-size="9" fill="#909090" text-anchor="middle">precision</text>`;
+  s+=`<text x="0" y="2" font-family="Inter,sans-serif" font-size="17" font-weight="700" fill="#E8A838" text-anchor="middle">72%</text>`;
+  s+=`<text x="0" y="15" font-family="Inter,sans-serif" font-size="8" fill="#909090" text-anchor="middle">precision</text>`;
   s+=`</g>`;
-  s+=`<text x="${gx}" y="${gy+gr+22}" font-family="Inter,sans-serif" font-size="10" fill="#707070" text-anchor="middle">next-step accuracy</text>`;
+  s+=`<text x="${gx+gr+16}" y="${gy-4}" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#F0F0F0">Diagnosis prediction precision</text>`;
+  s+=`<text x="${gx+gr+16}" y="${gy+12}" font-family="Inter,sans-serif" font-size="10" fill="#707070">measured on held-out patient histories</text>`;
 
-  // ===== footnote stats =====
-  const fy=H-30;
+  const fy=H-24;
   s+=`<g font-family="Inter,sans-serif">`;
-  // stat 1
   s+=`<text x="${pad+18}" y="${fy}" font-size="11"><tspan fill="#14A8AD" font-weight="600">12</tspan><tspan fill="#909090"> therapy areas</tspan></text>`;
   s+=`<line x1="${pad+148}" y1="${fy-11}" x2="${pad+148}" y2="${fy+1}" stroke="#262626"/>`;
-  // stat 2 (highlighted reduction)
   s+=`<text x="${pad+162}" y="${fy}" font-size="11"><tspan fill="#E8A838" font-weight="600">2/3</tspan><tspan fill="#909090"> reduction in doctor prep time</tspan></text>`;
+  s+=`<line x1="${pad+388}" y1="${fy-11}" x2="${pad+388}" y2="${fy+1}" stroke="#262626"/>`;
+  s+=`<text x="${pad+402}" y="${fy}" font-size="11"><tspan fill="#909090">deep neural net + ensemble</tspan></text>`;
   s+=`</g>`;
 
   s+=`</svg>`;
@@ -2154,165 +2176,150 @@ function viz_plugPredict(){
 
 /* ==== vaccine ==== */
 function viz_vaccine(){
-  const W = 760, H = 400;
-  const padL = 56, padR = 18, padT = 64, padB = 70;
+  const W = 760, H = 470;
+  const padL = 52, padR = 18, padT = 88, padB = 116;
   const plotW = W - padL - padR;
   const plotH = H - padT - padB;
   const x0 = padL, y0 = padT;
   const x1 = padL + plotW, y1 = padT + plotH;
+  const PX = (n) => '' + (Math.round(n * 100) / 100);
 
+  const months = ["Jul","Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar","Apr","May","Jun"];
   const maxUnits = 1000;
-  const sx = (t) => x0 + (t / 28) * plotW;
+  const sx = (i) => x0 + (plotW * i) / (months.length - 1);
   const sy = (u) => y1 - (u / maxUnits) * plotH;
 
-  // On-hand inventory sawtooth: declines with demand, jumps at each auto-reorder.
-  const pts = [
-    {t:0,  u:920},
-    {t:2,  u:760},
-    {t:4,  u:600},
-    {t:5,  u:430},
-    {t:6,  u:880},
-    {t:8,  u:700},
-    {t:10, u:520},
-    {t:11, u:380},
-    {t:12, u:840},
-    {t:14, u:640},
-    {t:16, u:430},
-    {t:17, u:300},
-    {t:18, u:820},
-    {t:20, u:660},
-    {t:22, u:500},
-    {t:23, u:360},
-    {t:24, u:810},
-    {t:26, u:640},
-    {t:28, u:500}
+  // Pre-season forecast: set early, steadier baseline routine stock (broad seasonal plateau).
+  const preseason = [200, 280, 400, 520, 600, 640, 630, 560, 440, 320, 240, 200];
+  // In-season forecast: reactive, tracks the actual demand surge (sharper, higher fall/winter peak).
+  const inseason  = [180, 250, 420, 650, 850, 920, 830, 640, 440, 300, 220, 185];
+  // On-hand inventory: replenished by orders; sawtooth declining with demand, jumping on each order.
+  const onhand    = [560, 470, 600, 410, 560, 350, 540, 470, 600, 520, 470, 540];
+
+  // Routine orders: scheduled/baseline, driven by the pre-season plan (small teal squares).
+  const routine = [
+    {i:0, u:onhand[0]},
+    {i:2, u:onhand[2]},
+    {i:6, u:onhand[6]},
+    {i:8, u:onhand[8]}
+  ];
+  // Ad-hoc orders: reactive spikes triggered when in-season demand exceeds plan (amber dots).
+  const adhoc = [
+    {i:4, u:onhand[4]},
+    {i:5, u:onhand[5]}
   ];
 
-  // Dynamic reorder threshold per period (varies slightly), stepwise.
-  const thr = [
-    {t:0,  u:420},
-    {t:6,  u:420},
-    {t:6,  u:400},
-    {t:12, u:400},
-    {t:12, u:380},
-    {t:18, u:380},
-    {t:18, u:410},
-    {t:24, u:410},
-    {t:24, u:430},
-    {t:28, u:430}
-  ];
-
-  // Auto-order events (amber dots) where inventory crosses threshold.
-  const orders = [
-    {t:5,  u:430},
-    {t:11, u:380},
-    {t:17, u:300},
-    {t:23, u:360}
-  ];
-
-  const invPath = pts.map((p,i)=> (i===0?"M":"L") + sx(p.t).toFixed(1) + " " + sy(p.u).toFixed(1)).join(" ");
-  const invArea = "M" + sx(pts[0].t).toFixed(1) + " " + y1.toFixed(1) + " " +
-    pts.map(p=> "L" + sx(p.t).toFixed(1) + " " + sy(p.u).toFixed(1)).join(" ") +
-    " L" + sx(pts[pts.length-1].t).toFixed(1) + " " + y1.toFixed(1) + " Z";
-  const thrPath = thr.map((p,i)=> (i===0?"M":"L") + sx(p.t).toFixed(1) + " " + sy(p.u).toFixed(1)).join(" ");
-
-  // Stockout-avoided zone: vertical band around the deep trough (t 16 -> 18).
-  const zL = sx(16.0), zR = sx(18.0);
-  const zoneTopU = 380;
-  const zoneTopY = sy(zoneTopU);
-
-  // Axis ticks
   const yTicks = [0, 250, 500, 750, 1000];
-  const xTicks = [0, 7, 14, 21, 28];
+
+  const pathOf = (arr) => arr.map((v,i)=> (i===0?"M":"L") + PX(sx(i)) + " " + PX(sy(v))).join(" ");
+  const dPre = pathOf(preseason);
+  const dIn  = pathOf(inseason);
+  const dInv = pathOf(onhand);
+
+  // Light demand envelope fill under the in-season line.
+  const inArea = "M" + PX(sx(0)) + " " + PX(y1) + " " +
+    inseason.map((v,i)=> "L" + PX(sx(i)) + " " + PX(sy(v))).join(" ") +
+    " L" + PX(sx(months.length-1)) + " " + PX(y1) + " Z";
+
+  // Surge gap band: where in-season exceeds pre-season (drives the ad-hoc orders).
+  const gapIdx = [3,4,5,6];
+  let gapPts = gapIdx.map(i=> PX(sx(i)) + "," + PX(sy(inseason[i]))).join(" ") + " " +
+    gapIdx.slice().reverse().map(i=> PX(sx(i)) + "," + PX(sy(preseason[i]))).join(" ");
 
   let s = '';
-  s += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:760px;height:auto;display:block" role="img" aria-label="Threshold crossed, order fires automatically: an on-hand inventory sawtooth declines with demand and jumps at each auto-reorder. A dashed dynamic reorder threshold triggers automatic orders, marked by amber dots, with a stockout-avoided zone near a deep trough that stays above zero. Reorder point per SKU per channel; pilot to full rollout achieved about 34 percent stockout reduction.">';
+  s += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:760px;height:auto;display:block" role="img" aria-label="Pre-season plus in-season forecasts driving routine and ad-hoc vaccine orders across a flu season. A steadier pre-season forecast line sets baseline routine stock while a reactive in-season forecast tracks the autumn-winter demand surge. An on-hand inventory line is replenished by scheduled routine orders shown as small teal squares and by reactive ad-hoc orders shown as amber dots that fire when in-season demand exceeds the pre-season plan. Pilot to full rollout cut stockouts by 34 percent.">';
 
-  // defs
-  s += '<defs>';
-  s += '<style>'+
-    '@keyframes viz_vaccinePulse{0%,100%{r:4.4;opacity:1}50%{r:6.6;opacity:.55}}'+
-    '@keyframes viz_vaccineDraw{from{stroke-dashoffset:2600}to{stroke-dashoffset:0}}'+
-    '.viz_vaccine-dot{animation:viz_vaccinePulse 3.2s ease-in-out infinite}'+
-    '.viz_vaccine-inv{stroke-dasharray:2600;stroke-dashoffset:0;animation:viz_vaccineDraw 2.6s ease-out forwards}'+
-    '</style>';
-  s += '</defs>';
+  // defs: gentle, additive animation. Resting state is fully drawn (dashoffset defaults to 0; inventory keeps its 5 4 dash).
+  s += '<defs><style>'+
+    '@keyframes viz_vaccineDraw{from{stroke-dashoffset:1600}to{stroke-dashoffset:0}}'+
+    '@keyframes viz_vaccineFade{from{opacity:0}to{opacity:1}}'+
+    '@keyframes viz_vaccinePop{0%,100%{transform:scale(1)}50%{transform:scale(1.16)}}'+
+    '@media (prefers-reduced-motion: no-preference){'+
+      '.viz_vaccine-fline{stroke-dasharray:1600;animation:viz_vaccineDraw 1.8s ease-out}'+
+      '.viz_vaccine-l2{animation-delay:.3s}'+
+      '.viz_vaccine-inv{animation:viz_vaccineFade 1s ease-out .55s both}'+
+      '.viz_vaccine-adhoc{transform-box:fill-box;transform-origin:center;animation:viz_vaccinePop 3s ease-in-out infinite 2s}'+
+    '}'+
+    '.viz_vaccine-hit{transition:opacity .15s}.viz_vaccine-hit:hover{opacity:1}'+
+    '</style></defs>';
 
-  // background panel
+  // panels
   s += '<rect x="0" y="0" width="'+W+'" height="'+H+'" rx="10" fill="#141414"/>';
-  s += '<rect x="'+x0+'" y="'+y0+'" width="'+plotW+'" height="'+plotH+'" fill="#101010"/>';
+  s += '<rect x="'+x0+'" y="'+y0+'" width="'+plotW+'" height="'+plotH+'" fill="#101010" stroke="#262626" stroke-width="1"/>';
 
   // title block
-  s += '<text x="16" y="26" font-family="Inter,sans-serif" font-size="13.5" font-weight="600" fill="#F0F0F0">Threshold crossed → order fires automatically</text>';
-  s += '<text x="16" y="44" font-family="Inter,sans-serif" font-size="11" fill="#909090">Smart reorder: on-hand inventory vs. dynamic threshold</text>';
+  s += '<text x="16" y="28" font-family="Inter,sans-serif" font-size="13.5" font-weight="600" fill="#F0F0F0">Pre-season + in-season forecasts &#8594; routine &amp; ad-hoc orders</text>';
+  s += '<text x="16" y="46" font-family="Inter,sans-serif" font-size="11" fill="#909090">Smart vaccine ordering across a flu season &#183; forecast tracks demand, orders replenish stock</text>';
+
+  // headline metric chip (amber, prominent) top-right
+  const chipW = 150, chipH = 40, chipX = W - padR - chipW, chipY = 12;
+  s += '<rect x="'+chipX+'" y="'+chipY+'" width="'+chipW+'" height="'+chipH+'" rx="6" fill="rgba(13,115,119,0.12)" stroke="#262626"/>';
+  s += '<text x="'+(chipX+12)+'" y="'+(chipY+28)+'" font-family="Inter,sans-serif" font-size="20" font-weight="600" fill="#E8A838">&#8722;34%</text>';
+  s += '<text x="'+(chipX+70)+'" y="'+(chipY+18)+'" font-family="Inter,sans-serif" font-size="10" fill="#F0F0F0">stockouts</text>';
+  s += '<text x="'+(chipX+70)+'" y="'+(chipY+31)+'" font-family="Inter,sans-serif" font-size="10" fill="#909090">vs. baseline</text>';
 
   // gridlines + y ticks
   for(const v of yTicks){
     const yy = sy(v);
-    s += '<line x1="'+x0+'" y1="'+yy.toFixed(1)+'" x2="'+x1+'" y2="'+yy.toFixed(1)+'" stroke="#262626" stroke-width="1"/>';
-    s += '<text x="'+(x0-8)+'" y="'+(yy+3.5).toFixed(1)+'" text-anchor="end" font-family="Inter,sans-serif" font-size="10" fill="#707070">'+v+'</text>';
+    s += '<line x1="'+x0+'" y1="'+PX(yy)+'" x2="'+x1+'" y2="'+PX(yy)+'" stroke="#262626" stroke-width="1"/>';
+    s += '<text x="'+(x0-8)+'" y="'+PX(yy+3.5)+'" text-anchor="end" font-family="Inter,sans-serif" font-size="10" fill="#707070">'+v+'</text>';
   }
-  // x ticks
-  for(const v of xTicks){
-    const xx = sx(v);
-    s += '<text x="'+xx.toFixed(1)+'" y="'+(y1+18)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#707070">w'+v+'</text>';
-  }
+  // x ticks (months)
+  months.forEach((m,i)=>{
+    s += '<text x="'+PX(sx(i))+'" y="'+(y1+17)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#707070">'+m+'</text>';
+  });
   // axis labels
-  s += '<text x="'+((x0+x1)/2).toFixed(0)+'" y="'+(y1+38)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#707070">time (weeks)</text>';
-  s += '<text x="14" y="'+((y0+y1)/2).toFixed(0)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#707070" transform="rotate(-90 14 '+((y0+y1)/2).toFixed(0)+')">units on hand</text>';
+  s += '<text x="'+PX((x0+x1)/2)+'" y="'+(y1+34)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#707070">flu season (months, peak fall/winter)</text>';
+  s += '<text x="13" y="'+PX((y0+y1)/2)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#707070" transform="rotate(-90 13 '+PX((y0+y1)/2)+')">doses (units)</text>';
 
-  // stockout-avoided zone (shaded band near deep trough, stays above zero)
-  s += '<rect x="'+zL.toFixed(1)+'" y="'+zoneTopY.toFixed(1)+'" width="'+(zR-zL).toFixed(1)+'" height="'+(y1-zoneTopY).toFixed(1)+'" fill="rgba(13,115,119,0.2)" stroke="#0D7377" stroke-width="1" stroke-dasharray="3 3">';
-  s += '<title>Stockout avoided: deepest trough held at 300 units, above zero</title></rect>';
-  s += '<text x="'+((zL+zR)/2).toFixed(1)+'" y="'+(zoneTopY-6).toFixed(1)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#14A8AD">stockout avoided</text>';
+  // demand envelope fill + surge gap band
+  s += '<path d="'+inArea+'" fill="rgba(13,115,119,0.12)"/>';
+  s += '<polygon points="'+gapPts+'" fill="rgba(13,115,119,0.2)"/>';
 
-  // inventory area fill
-  s += '<path d="'+invArea+'" fill="rgba(13,115,119,0.12)"/>';
+  // pre-season forecast line (steadier, darker teal)
+  s += '<path class="viz_vaccine-fline" d="'+dPre+'" fill="none" stroke="#0D7377" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>';
+  // in-season forecast line (reactive, teal-bright)
+  s += '<path class="viz_vaccine-fline viz_vaccine-l2" d="'+dIn+'" fill="none" stroke="#14A8AD" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>';
+  // on-hand inventory line (muted dashed, replenished by orders) -- own fade so the 5 4 dash is preserved
+  s += '<path class="viz_vaccine-inv" d="'+dInv+'" fill="none" stroke="#909090" stroke-width="1.4" stroke-dasharray="5 4" stroke-linejoin="round" stroke-linecap="round"/>';
 
-  // dynamic threshold (dashed)
-  s += '<path d="'+thrPath+'" fill="none" stroke="#909090" stroke-width="1.5" stroke-dasharray="6 4"/>';
+  // surge annotation near the peak
+  s += '<text x="'+PX(sx(5))+'" y="'+PX(sy(inseason[5])-9)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#E8A838">demand &gt; plan</text>';
 
-  // inventory sawtooth line (resting state fully drawn; animation only re-draws it)
-  s += '<path class="viz_vaccine-inv" d="'+invPath+'" fill="none" stroke="#14A8AD" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>';
-
-  // auto-order amber dots at crossings
-  for(const o of orders){
-    const cx = sx(o.t), cy = sy(o.u);
-    s += '<line x1="'+cx.toFixed(1)+'" y1="'+cy.toFixed(1)+'" x2="'+cx.toFixed(1)+'" y2="'+sy(o.u+460).toFixed(1)+'" stroke="#E8A838" stroke-width="1" stroke-dasharray="2 3" opacity="0.5"/>';
-    s += '<circle class="viz_vaccine-dot" cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="4.4" fill="#E8A838" stroke="#101010" stroke-width="1.4">';
-    s += '<title>Auto-order fired at week '+o.t+' — inventory '+o.u+' units hit reorder point</title></circle>';
+  // routine order markers (small teal squares on the inventory line)
+  for(const o of routine){
+    const cx = sx(o.i), cy = sy(o.u);
+    s += '<rect class="viz_vaccine-hit" x="'+PX(cx-4)+'" y="'+PX(cy-4)+'" width="8" height="8" rx="1" fill="#0D7377" stroke="#F0F0F0" stroke-width="1" opacity="0.95"><title>Routine order &#183; '+months[o.i]+' &#8212; scheduled replenishment from the pre-season plan</title></rect>';
   }
-  // arrow label for the order mechanic (on first order)
-  s += '<text x="'+sx(5).toFixed(1)+'" y="'+sy(900).toFixed(1)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#E8A838">auto-order</text>';
+  // ad-hoc order markers (amber dots, reactive) with leaders up to in-season demand
+  for(const o of adhoc){
+    const cx = sx(o.i), cy = sy(o.u);
+    s += '<line x1="'+PX(cx)+'" y1="'+PX(cy)+'" x2="'+PX(cx)+'" y2="'+PX(sy(inseason[o.i]))+'" stroke="#E8A838" stroke-width="1" stroke-dasharray="2 3" opacity="0.5"/>';
+    s += '<circle class="viz_vaccine-adhoc viz_vaccine-hit" cx="'+PX(cx)+'" cy="'+PX(cy)+'" r="4.8" fill="#E8A838" stroke="#101010" stroke-width="1.4"><title>Ad-hoc order &#183; '+months[o.i]+' &#8212; reactive top-up: in-season demand exceeded the pre-season plan</title></circle>';
+  }
 
-  // headline metric chip (amber, prominent) top-right
-  const chipW = 158, chipH = 40, chipX = W - padR - chipW, chipY = 14;
-  s += '<rect x="'+chipX+'" y="'+chipY+'" width="'+chipW+'" height="'+chipH+'" rx="6" fill="rgba(13,115,119,0.12)" stroke="#262626"/>';
-  s += '<text x="'+(chipX+12)+'" y="'+(chipY+27)+'" font-family="Inter,sans-serif" font-size="20" font-weight="600" fill="#E8A838">-34%</text>';
-  s += '<text x="'+(chipX+72)+'" y="'+(chipY+18)+'" font-family="Inter,sans-serif" font-size="10" fill="#F0F0F0">stockout</text>';
-  s += '<text x="'+(chipX+72)+'" y="'+(chipY+31)+'" font-family="Inter,sans-serif" font-size="10" fill="#909090">reduction</text>';
+  // note line (under axis, above legend)
+  s += '<text x="16" y="'+(y1+52)+'" font-family="Inter,sans-serif" font-size="10" fill="#909090">reorder point per SKU per channel &#183; pilot &#8594; full rollout</text>';
 
-  // legend (bottom)
-  const lgY = H - 16;
+  // ---- legend: two rows (forecasts | orders) ----
+  const lgY1 = H - 34, lgY2 = H - 14;
   let lx = 16;
-  // on-hand inventory
-  s += '<line x1="'+lx+'" y1="'+(lgY-4)+'" x2="'+(lx+20)+'" y2="'+(lgY-4)+'" stroke="#14A8AD" stroke-width="2.2"/>';
-  s += '<text x="'+(lx+26)+'" y="'+(lgY)+'" font-family="Inter,sans-serif" font-size="11" fill="#909090">on-hand inventory</text>';
-  lx += 150;
-  // dynamic threshold
-  s += '<line x1="'+lx+'" y1="'+(lgY-4)+'" x2="'+(lx+20)+'" y2="'+(lgY-4)+'" stroke="#909090" stroke-width="1.5" stroke-dasharray="6 4"/>';
-  s += '<text x="'+(lx+26)+'" y="'+(lgY)+'" font-family="Inter,sans-serif" font-size="11" fill="#909090">dynamic reorder threshold</text>';
-  lx += 196;
-  // auto-order event
-  s += '<circle cx="'+(lx+8)+'" cy="'+(lgY-4)+'" r="4.4" fill="#E8A838" stroke="#101010" stroke-width="1.2"/>';
-  s += '<text x="'+(lx+20)+'" y="'+(lgY)+'" font-family="Inter,sans-serif" font-size="11" fill="#909090">auto-order event</text>';
-  lx += 132;
-  // stockout avoided swatch
-  s += '<rect x="'+lx+'" y="'+(lgY-10)+'" width="14" height="11" fill="rgba(13,115,119,0.2)" stroke="#0D7377" stroke-width="1" stroke-dasharray="3 3"/>';
-  s += '<text x="'+(lx+20)+'" y="'+(lgY)+'" font-family="Inter,sans-serif" font-size="11" fill="#909090">stockout avoided</text>';
+  s += '<text x="'+lx+'" y="'+lgY1+'" font-family="Inter,sans-serif" font-size="10" fill="#707070">Forecasts</text>'; lx += 62;
+  s += '<line x1="'+lx+'" y1="'+(lgY1-4)+'" x2="'+(lx+20)+'" y2="'+(lgY1-4)+'" stroke="#0D7377" stroke-width="2.6"/>';
+  s += '<text x="'+(lx+26)+'" y="'+lgY1+'" font-family="Inter,sans-serif" font-size="11" fill="#909090">Pre-season (baseline)</text>'; lx += 160;
+  s += '<line x1="'+lx+'" y1="'+(lgY1-4)+'" x2="'+(lx+20)+'" y2="'+(lgY1-4)+'" stroke="#14A8AD" stroke-width="2.6"/>';
+  s += '<text x="'+(lx+26)+'" y="'+lgY1+'" font-family="Inter,sans-serif" font-size="11" fill="#909090">In-season (reactive)</text>'; lx += 152;
+  s += '<line x1="'+lx+'" y1="'+(lgY1-4)+'" x2="'+(lx+20)+'" y2="'+(lgY1-4)+'" stroke="#909090" stroke-width="1.4" stroke-dasharray="5 4"/>';
+  s += '<text x="'+(lx+26)+'" y="'+lgY1+'" font-family="Inter,sans-serif" font-size="11" fill="#909090">On-hand inventory</text>';
 
-  // note line (above legend, under plot)
-  s += '<text x="16" y="'+(H-34)+'" font-family="Inter,sans-serif" font-size="10" fill="#909090">reorder point per SKU per channel · pilot → full rollout</text>';
+  let mx = 16;
+  s += '<text x="'+mx+'" y="'+lgY2+'" font-family="Inter,sans-serif" font-size="10" fill="#707070">Orders</text>'; mx += 62;
+  s += '<rect x="'+mx+'" y="'+(lgY2-8)+'" width="8" height="8" rx="1" fill="#0D7377" stroke="#F0F0F0" stroke-width="1"/>';
+  s += '<text x="'+(mx+16)+'" y="'+lgY2+'" font-family="Inter,sans-serif" font-size="11" fill="#909090">Routine (scheduled)</text>'; mx += 156;
+  s += '<circle cx="'+(mx+4)+'" cy="'+(lgY2-4)+'" r="4.8" fill="#E8A838" stroke="#101010" stroke-width="1.2"/>';
+  s += '<text x="'+(mx+14)+'" y="'+lgY2+'" font-family="Inter,sans-serif" font-size="11" fill="#909090">Ad-hoc (reactive)</text>'; mx += 140;
+  s += '<rect x="'+mx+'" y="'+(lgY2-9)+'" width="14" height="10" fill="rgba(13,115,119,0.2)"/>';
+  s += '<text x="'+(mx+20)+'" y="'+lgY2+'" font-family="Inter,sans-serif" font-size="11" fill="#909090">demand &gt; plan</text>';
 
   s += '</svg>';
   return s;
@@ -2321,52 +2328,54 @@ function viz_vaccine(){
 /* ==== patientCare ==== */
 function viz_patientCare(){
   const W = 760;
-  const rows = ["Oncology","Cardiology","Immunology","Neurology","Respiratory","Endocrine","Rare Disease","Dermatology"];
-  const cols = ["Patient finding","Adherence","Next-best-action","Concomitant-symptom detection","HCP targeting","Treatment reco","Risk scoring","Journey mapping","Channel optimization"];
-  // delivery-quality matrix, values 2..4 (most cells well filled). value 5 = flagship (amber).
+  const rows = ["Dermatology","Allergy","ENT","Pulmonology","Oncology","Rare Disease","Gastroenterology","Immunology"];
+  const cols = ["New Patient Prediction","Next Best Action","Smart Alerts","Customer Journey","Next Best Content","HCP Targeting","Competitive Launch Readiness","Patient Support","OCCP"];
+  // delivery-coverage matrix, values 2..4 (most cells well covered = consistent delivery). value 5 = flagship (amber), exactly 5 cells.
   const m = [
-    [5,3,3,2,4,4,3,3,3],
-    [4,4,3,3,3,3,5,3,2],
-    [3,3,4,3,3,4,3,3,3],
-    [3,2,3,5,3,3,3,2,3],
-    [3,3,3,3,4,3,3,3,4],
-    [3,3,3,2,3,3,4,3,3],
-    [4,2,3,3,2,5,3,2,2],
-    [3,3,4,3,3,3,3,3,5]
+    [5,3,4,3,3,4,3,3,3],
+    [4,3,3,3,4,3,3,3,2],
+    [3,3,3,4,3,3,2,3,3],
+    [3,4,3,3,3,5,3,2,3],
+    [4,3,3,3,3,3,4,3,5],
+    [3,2,4,3,3,3,3,4,3],
+    [3,3,3,3,5,3,2,3,3],
+    [4,3,3,3,3,4,3,5,3]
   ];
-  // teal fill ramp by quality
+  // teal fill ramp by coverage
   const tealFill = (v)=>{
     if(v<=1) return "rgba(13,115,119,0.12)";
-    if(v===2) return "rgba(13,115,119,0.20)";
+    if(v===2) return "rgba(13,115,119,0.2)";
     if(v===3) return "rgba(13,115,119,0.35)";
     return "#0D7377"; // v===4 strongest teal
   };
   const tealStroke = (v)=> v>=4 ? "#14A8AD" : "#262626";
   // layout
   const padL = 16, padT = 16;
-  const labelW = 116;          // left row-label column
-  const topLabelH = 122;       // rotated column labels (raised to clear title/subtitle)
+  const labelW = 116;             // left row-label column (fits "Gastroenterology")
+  const topLabelH = 112;          // rotated column labels (clears "Competitive Launch Readiness")
+  const titleSub = 44;            // title + subtitle vertical space
   const gridX = padL + labelW;
-  const gridTop = padT + 26 + topLabelH; // title space + col labels
-  const sideW = 168;           // right metric block
-  const gridRight = W - padL - sideW - 18;
+  const gridTop = padT + titleSub + topLabelH;
+  const sideW = 176;              // right metric block
+  const sideGap = 18;
+  const gridRight = W - padL - sideW - sideGap;
   const gridW = gridRight - gridX;
   const nCols = cols.length, nRows = rows.length;
   const gap = 4;
   const cellW = (gridW - gap*(nCols-1)) / nCols;
-  const cellH = 27;
+  const cellH = 23;
   const gridH = cellH*nRows + gap*(nRows-1);
-  const H = gridTop + gridH + 38;
+  const H = gridTop + gridH + 36;
 
   let s = "";
-  s += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;max-width:760px;height:auto;display:block" role="img" aria-label="Consistent delivery matrix: 8 therapy indications by 9 use cases, shaded teal by delivery quality with five amber flagship cells, and a side metric block showing 120 million dollars profit impact across 12 use cases and 8 indications">`;
+  s += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;max-width:760px;height:auto;display:block" role="img" aria-label="Patient-care portfolio coverage matrix: 8 therapy indications by 9 use cases, shaded teal by delivery coverage with five amber flagship cells, alongside a side metric block showing about 120 million dollars profit impact across 12 use cases delivered and 8 indications">`;
 
-  // style / animation (resting state is fully visible; fade is from 0 to 1)
+  // style: gentle fade-in on cells, pulse on flagship cells, hover highlight + tooltips (resting state fully visible)
   s += `<style>`
      + `.viz_patientCare-cell{opacity:1;animation:viz_patientCare-fade 0.5s ease both}`
      + `@keyframes viz_patientCare-fade{from{opacity:0}to{opacity:1}}`
      + `.viz_patientCare-cell:hover{stroke:#14A8AD;stroke-width:1.5}`
-     + `.viz_patientCare-flag{animation:viz_patientCare-pulse 3.2s ease-in-out infinite}`
+     + `.viz_patientCare-flag{animation:viz_patientCare-pulse 3.4s ease-in-out infinite}`
      + `@keyframes viz_patientCare-pulse{0%,100%{opacity:1}50%{opacity:0.82}}`
      + `</style>`;
 
@@ -2374,22 +2383,21 @@ function viz_patientCare(){
   s += `<rect x="0" y="0" width="${W}" height="${H}" fill="#141414"/>`;
   s += `<rect x="${padL-6}" y="${padT-6}" width="${W-2*padL+12}" height="${H-2*padT+12}" rx="8" fill="#1A1A1A" stroke="#262626"/>`;
 
-  // title (spec headline) + sublabel
-  s += `<text x="${padL+2}" y="${padT+14}" font-family="Inter,sans-serif" font-size="13.5" font-weight="600" fill="#F0F0F0">Consistent delivery: 8 indications x use-case portfolio</text>`;
-  s += `<text x="${padL+2}" y="${padT+31}" font-family="Inter,sans-serif" font-size="11" fill="#909090">Delivery-quality coverage across the patient-care use-case grid</text>`;
+  // title + subtitle
+  s += `<text x="${padL+2}" y="${padT+14}" font-family="Inter,sans-serif" font-size="13.5" font-weight="600" fill="#F0F0F0">Patient-care portfolio: 8 indications x 9 use cases</text>`;
+  s += `<text x="${padL+2}" y="${padT+31}" font-family="Inter,sans-serif" font-size="11" fill="#909090">Delivery coverage across the patient-care use-case grid</text>`;
 
-  // rotated column labels
+  // rotated column labels (anchored at start, rotate -42deg so long labels clear the title and each other)
   for(let c=0;c<nCols;c++){
     const cx = gridX + c*(cellW+gap) + cellW/2;
-    const cy = gridTop - 8;
-    s += `<text transform="translate(${cx.toFixed(1)} ${cy}) rotate(-45)" font-family="Inter,sans-serif" font-size="10" fill="#909090" text-anchor="start">${cols[c]}</text>`;
+    const cy = gridTop - 9;
+    s += `<text transform="translate(${cx.toFixed(1)} ${cy}) rotate(-42)" font-family="Inter,sans-serif" font-size="10" fill="#909090" text-anchor="start">${cols[c]}</text>`;
   }
 
   // row labels + cells
   let delay = 0;
   for(let r=0;r<nRows;r++){
     const ry = gridTop + r*(cellH+gap);
-    // row label
     s += `<text x="${gridX-10}" y="${(ry+cellH/2+3.5).toFixed(1)}" font-family="Inter,sans-serif" font-size="11" fill="#F0F0F0" text-anchor="end">${rows[r]}</text>`;
     for(let c=0;c<nCols;c++){
       const cx = gridX + c*(cellW+gap);
@@ -2399,19 +2407,19 @@ function viz_patientCare(){
       const stroke = flag ? "#E8A838" : tealStroke(v);
       const cls = flag ? "viz_patientCare-cell viz_patientCare-flag" : "viz_patientCare-cell";
       const qLabel = flag ? "flagship" : (v>=4?"strong":v===3?"consistent":v===2?"developing":"early");
-      delay += 0.014;
+      delay += 0.013;
       s += `<rect class="${cls}" x="${cx.toFixed(1)}" y="${ry.toFixed(1)}" width="${cellW.toFixed(1)}" height="${cellH}" rx="3" fill="${fill}" stroke="${stroke}" stroke-width="${flag?1.2:0.75}" style="animation-delay:${delay.toFixed(2)}s">`
          + `<title>${rows[r]} · ${cols[c]} — ${qLabel} delivery</title></rect>`;
       if(flag){
-        s += `<circle cx="${(cx+cellW/2).toFixed(1)}" cy="${(ry+cellH/2).toFixed(1)}" r="2.6" fill="#1A1A1A"/>`;
+        s += `<circle cx="${(cx+cellW/2).toFixed(1)}" cy="${(ry+cellH/2).toFixed(1)}" r="2.4" fill="#1A1A1A"/>`;
       }
     }
   }
 
-  // legend (bottom-left)
+  // legend (bottom-left under grid)
   const legY = gridTop + gridH + 22;
   const legItems = [
-    {f:"rgba(13,115,119,0.20)",t:"developing"},
+    {f:"rgba(13,115,119,0.2)",t:"developing"},
     {f:"rgba(13,115,119,0.35)",t:"consistent"},
     {f:"#0D7377",t:"strong"},
     {f:"#E8A838",t:"flagship"}
@@ -2423,34 +2431,34 @@ function viz_patientCare(){
     lx += 17 + legItems[i].t.length*5.6 + 18;
   }
 
-  // ===== side metric block (amber) =====
-  const sx = gridRight + 18;
+  // ===== side metric block (amber accent) =====
+  const sx = gridRight + sideGap;
   const sy = gridTop;
   const sH = gridH;
   s += `<rect x="${sx}" y="${sy.toFixed(1)}" width="${sideW}" height="${sH.toFixed(1)}" rx="6" fill="#101010" stroke="#262626"/>`;
   s += `<rect x="${sx}" y="${sy.toFixed(1)}" width="3" height="${sH.toFixed(1)}" rx="1.5" fill="#E8A838"/>`;
 
   s += `<text x="${sx+16}" y="${(sy+22).toFixed(1)}" font-family="Inter,sans-serif" font-size="11" fill="#909090">Profit impact</text>`;
-  s += `<text x="${sx+16}" y="${(sy+54).toFixed(1)}" font-family="Inter,sans-serif" font-size="32" font-weight="600" fill="#E8A838">~$120M</text>`;
-  s += `<text x="${sx+16}" y="${(sy+72).toFixed(1)}" font-family="Inter,sans-serif" font-size="10" fill="#707070">delivered across portfolio</text>`;
+  s += `<text x="${sx+16}" y="${(sy+52).toFixed(1)}" font-family="Inter,sans-serif" font-size="30" font-weight="600" fill="#E8A838">~$120M</text>`;
+  s += `<text x="${sx+16}" y="${(sy+69).toFixed(1)}" font-family="Inter,sans-serif" font-size="10" fill="#707070">delivered across portfolio</text>`;
 
   // divider
-  s += `<line x1="${sx+16}" y1="${(sy+90).toFixed(1)}" x2="${sx+sideW-16}" y2="${(sy+90).toFixed(1)}" stroke="#262626"/>`;
+  s += `<line x1="${sx+16}" y1="${(sy+86).toFixed(1)}" x2="${sx+sideW-16}" y2="${(sy+86).toFixed(1)}" stroke="#262626"/>`;
 
   const stats = [
-    {n:"12", l:"use cases"},
+    {n:"12", l:"use cases delivered"},
     {n:"8", l:"indications"}
   ];
-  let syy = sy+118;
+  let syy = sy+114;
   for(let i=0;i<stats.length;i++){
     s += `<text x="${sx+16}" y="${syy.toFixed(1)}" font-family="Inter,sans-serif" font-size="22" font-weight="600" fill="#F0F0F0">${stats[i].n}</text>`;
     s += `<text x="${sx+50}" y="${syy.toFixed(1)}" font-family="Inter,sans-serif" font-size="11" fill="#909090">${stats[i].l}</text>`;
-    syy += 34;
+    syy += 32;
   }
 
   // small footer note inside block
-  s += `<text x="${sx+16}" y="${(sy+sH-16).toFixed(1)}" font-family="Inter,sans-serif" font-size="10" fill="#707070">5 flagship cells</text>`;
-  s += `<rect x="${sx+sideW-26}" y="${(sy+sH-25).toFixed(1)}" width="10" height="10" rx="2" fill="#E8A838"/>`;
+  s += `<text x="${sx+16}" y="${(sy+sH-14).toFixed(1)}" font-family="Inter,sans-serif" font-size="10" fill="#707070">5 flagship cells</text>`;
+  s += `<rect x="${sx+sideW-26}" y="${(sy+sH-23).toFixed(1)}" width="10" height="10" rx="2" fill="#E8A838"/>`;
 
   s += `</svg>`;
   return s;
@@ -3184,9 +3192,124 @@ function viz_itemPlan(){
   return s;
 }
 
+/* ==== skillsMap ==== */
+function viz_skillsMap(){
+  const NS='viz_skillsMap';
+  const W=760, H=620;
+
+  // ---- helpers (self-contained) ----
+  const PX=v=>Math.round(v*100)/100;
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const charW=6.18, padX=11, pillH=23;
+  const pillW=t=>Math.round(t.length*charW+padX*2);
+
+  // ---- category clusters (NON-quantified: no scores / numbers) ----
+  const cats=[
+    {name:'MODELING & ML', skills:['Causal Inference','Time Series Forecasting','Deep Learning','Reinforcement Learning','Unsupervised (t-SNE, LDA, K-means)','Ensemble Methods','Explainability','Predictive Maintenance']},
+    {name:'NLP & SIGNAL', skills:['Topic Modeling','Intent Matching','Transliteration','FFT / Spectrograms','NLP Pipelines']},
+    {name:'ENGINEERING & PLATFORMS', skills:['Python','R','SQL','Spark','GCP','AWS','Azure','Snowflake','MLFlow','Docker','Anaplan']},
+    {name:'DOMAINS', skills:['Healthcare & Life Sciences','CPG & Retail','Energy & Utilities','Manufacturing','Financial Planning']}
+  ];
+
+  // ---- layout anchors: two balanced columns, hub centered above each pillset ----
+  const LX=200, RX=560;          // hub centre x: left column / right column
+  const HUB_TOP=96;              // top-row hub y
+  const rowgap=31, pillStart=38; // vertical rhythm
+
+  // vertical stack of centred pills below a hub
+  const colCluster=(cx,hy,skills)=>{
+    const out=[]; let y=hy+pillStart;
+    for(const s of skills){ const w=pillW(s); out.push({t:s,x:cx-w/2,y:y,w:w}); y+=rowgap; }
+    return {pills:out, bottom:y-rowgap+pillH};
+  };
+  // wrapped grid of centred rows below a hub (for many short pills)
+  const gridCluster=(cx,hy,skills,rows)=>{
+    const out=[]; let y=hy+pillStart, i=0; const colgap=10;
+    for(const cnt of rows){
+      const rs=skills.slice(i,i+cnt); i+=cnt;
+      const ws=rs.map(pillW);
+      let total=ws.reduce((a,b)=>a+b,0)+colgap*(rs.length-1);
+      let x=cx-total/2;
+      for(let k=0;k<rs.length;k++){ out.push({t:rs[k],x:x,y:y,w:ws[k]}); x+=ws[k]+colgap; }
+      y+=rowgap;
+    }
+    return {pills:out, bottom:y-rowgap+pillH};
+  };
+
+  const mod=colCluster(LX,HUB_TOP,cats[0].skills);
+  const nlp=colCluster(RX,HUB_TOP,cats[1].skills);
+  const BOTHUB=Math.max(mod.bottom,nlp.bottom)+42;
+  const eng=gridCluster(LX,BOTHUB,cats[2].skills,[3,3,3,2]); // 11 short pills, balanced rows
+  const dom=colCluster(RX,BOTHUB,cats[3].skills);
+
+  const regions=[
+    {name:cats[0].name, hub:[LX,HUB_TOP], pills:mod.pills},
+    {name:cats[1].name, hub:[RX,HUB_TOP], pills:nlp.pills},
+    {name:cats[2].name, hub:[LX,BOTHUB], pills:eng.pills},
+    {name:cats[3].name, hub:[RX,BOTHUB], pills:dom.pills}
+  ];
+
+  let svg='';
+  svg+=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px;height:auto;display:block" role="img" aria-label="Skillset map: a clustered network of four skill categories — Modeling and ML, NLP and Signal, Engineering and Platforms, and Domains — each a labelled hub connected to its skills as pill labels.">`;
+
+  // prefixed styles: gentle resting-safe hub pulse + hover highlight on pills
+  svg+=`<style>`;
+  svg+=`@keyframes ${NS}-pulse{0%,100%{opacity:.55}50%{opacity:1}}`;
+  svg+=`@media (prefers-reduced-motion: no-preference){.${NS}-ring{transform-box:fill-box;transform-origin:center;animation:${NS}-pulse 3.6s ease-in-out infinite}}`;
+  svg+=`.${NS}-pill:hover .${NS}-pb{stroke:#14A8AD;stroke-width:1.5;fill:rgba(13,115,119,0.2)}`;
+  svg+=`.${NS}-pill:hover .${NS}-pt{fill:#F0F0F0}`;
+  svg+=`</style>`;
+
+  // background
+  svg+=`<rect x="0" y="0" width="${W}" height="${H}" fill="#1A1A1A"/>`;
+
+  // faint vertical gutter divider between the two columns
+  svg+=`<line x1="${W/2}" y1="84" x2="${W/2}" y2="${H-22}" stroke="#262626" stroke-width="1"/>`;
+
+  // title block
+  svg+=`<text x="24" y="32" font-family="Inter,sans-serif" font-size="13.5" font-weight="600" fill="#F0F0F0">Skillset map</text>`;
+  svg+=`<text x="24" y="51" font-family="Inter,sans-serif" font-size="11" fill="#909090">Modeling &#183; Signal &#183; Engineering &#183; Domains</text>`;
+  svg+=`<text x="${W-24}" y="44" text-anchor="end" font-family="Inter,sans-serif" font-size="10" fill="#707070">four clusters &#183; hover a skill to highlight</text>`;
+
+  // ---- connectors first (under pills): hub bottom -> each pill top-centre ----
+  for(const r of regions){
+    const [hx,hy]=r.hub;
+    for(const p of r.pills){
+      const tx=p.x+p.w/2, ty=p.y;          // pill top-centre
+      const my=(hy+ty)/2;                  // control midpoint
+      svg+=`<path d="M${PX(hx)},${PX(hy+9)} C${PX(hx)},${PX(my)} ${PX(tx)},${PX(ty-12)} ${PX(tx)},${PX(ty)}" fill="none" stroke="rgba(13,115,119,0.35)" stroke-width="1"/>`;
+    }
+  }
+
+  // ---- hubs (teal-bright dot + single amber accent ring) + category label ----
+  for(const r of regions){
+    const [hx,hy]=r.hub;
+    svg+=`<g><title>${esc(r.name)} &#8212; ${r.pills.length} skills</title>`;
+    svg+=`<circle class="${NS}-ring" cx="${hx}" cy="${hy}" r="9.5" fill="none" stroke="#E8A838" stroke-width="1.4"/>`;
+    svg+=`<circle cx="${hx}" cy="${hy}" r="5" fill="#14A8AD"/>`;
+    svg+=`<circle cx="${hx}" cy="${hy}" r="2" fill="#101010"/>`;
+    svg+=`</g>`;
+    // category label centred above the dot
+    svg+=`<text x="${hx}" y="${hy-16}" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="600" letter-spacing="0.6" fill="#F0F0F0">${esc(r.name)}</text>`;
+  }
+
+  // ---- skill pills ----
+  for(const r of regions){
+    for(const p of r.pills){
+      svg+=`<g class="${NS}-pill"><title>${esc(r.name)}: ${esc(p.t)}</title>`;
+      svg+=`<rect class="${NS}-pb" x="${PX(p.x)}" y="${PX(p.y)}" width="${p.w}" height="${pillH}" rx="${pillH/2}" fill="#1A1A1A" stroke="#0D7377" stroke-width="1"/>`;
+      svg+=`<text class="${NS}-pt" x="${PX(p.x+p.w/2)}" y="${PX(p.y+pillH/2+3.8)}" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#F0F0F0">${esc(p.t)}</text>`;
+      svg+=`</g>`;
+    }
+  }
+
+  svg+=`</svg>`;
+  return svg;
+}
+
 /* ==== registry + wiring ==== */
 var NAME2KEY = {"Voice & Sensor Home Automation":"homeAuto","Library Book Recommendation System":"libraryRec","Major US Retailer | Item Plan & Demand Forecasting":"itemPlan","License Plate Recognition": "licensePlate", "RoboCar": "roboCar", "Music Mood Recommendation System": "musicMood", "Gujarati/Hindi → English Transliteration": "transliteration", "Natural Language → Python Platform": "nlToPython", "Plug & Predict — Treatment Pathway Predictor": "plugPredict", "Depression Detection via Social Media": "depression", "NYC Cab Demand Prediction + Dynamic Routing": "cabDemand", "Crypto Sentiment Analysis — Twitter → Bitcoin Price": "crypto", "PARTH — Predictive Analytics & Real-Time Heuristics": "parth", "Annual Sales Forecasting Revamp": "salesForecast", "Major US Energy Utility | Distribution Fault Prediction & Rerouting": "energyGrid", "Global Battery Manufacturer | Demand Forecasting": "battery", "Global Pharma Client | Patient Care Portfolio": "patientCare", "Global Pharma Client | Vaccine Smart Ordering": "vaccine", "CPG Manufacturer | Forecast Explainability": "forecastExplain"};
-var VIZ = {homeAuto:viz_homeAuto,libraryRec:viz_libraryRec,itemPlan:viz_itemPlan,licensePlate:viz_licensePlate, musicMood:viz_musicMood, depression:viz_depression, parth:viz_parth, energyGrid:viz_energyGrid, causalML:viz_causalML, forecastExplain:viz_forecastExplain, salesForecast:viz_salesForecast, roboCar:viz_roboCar, crypto:viz_crypto, nlToPython:viz_nlToPython, transliteration:viz_transliteration, cabDemand:viz_cabDemand, battery:viz_battery, plugPredict:viz_plugPredict, vaccine:viz_vaccine, patientCare:viz_patientCare, impactDashboard:viz_impactDashboard, skillsRadar:viz_skillsRadar, domainDonut:viz_domainDonut};
+var VIZ = {skillsMap:viz_skillsMap,homeAuto:viz_homeAuto,libraryRec:viz_libraryRec,itemPlan:viz_itemPlan,licensePlate:viz_licensePlate, musicMood:viz_musicMood, depression:viz_depression, parth:viz_parth, energyGrid:viz_energyGrid, causalML:viz_causalML, forecastExplain:viz_forecastExplain, salesForecast:viz_salesForecast, roboCar:viz_roboCar, crypto:viz_crypto, nlToPython:viz_nlToPython, transliteration:viz_transliteration, cabDemand:viz_cabDemand, battery:viz_battery, plugPredict:viz_plugPredict, vaccine:viz_vaccine, patientCare:viz_patientCare, impactDashboard:viz_impactDashboard, skillsRadar:viz_skillsRadar, domainDonut:viz_domainDonut};
 
 (function(){
   function put(id, fn){
@@ -3194,7 +3317,7 @@ var VIZ = {homeAuto:viz_homeAuto,libraryRec:viz_libraryRec,itemPlan:viz_itemPlan
     if(el && typeof fn==='function'){ try{ el.innerHTML=fn(); }catch(e){ console.error('viz '+id+' failed', e); } }
   }
   function init(){
-    put('skillsRadarViz', typeof viz_skillsRadar==='function' ? viz_skillsRadar : null);
+    put('skillsMapViz', typeof viz_skillsMap==='function' ? viz_skillsMap : null);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
