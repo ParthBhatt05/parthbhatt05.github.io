@@ -371,6 +371,7 @@ footer{border-top:1px solid var(--line);padding:32px 0;text-align:center;font-si
   </div>
 </section>
 
+<script src="viz.js"></script>
 <script>
 /* ════════ DATA ════════ */
 
@@ -854,16 +855,45 @@ ERAS.forEach((era,i)=>{
         <div style="display:flex;gap:12px;align-items:flex-start"><span class="badge">${p.badge}</span><span class="expand-ind">+</span></div>
       </div>
       <div class="proj-body"><div class="proj-body-inner">
-        <div class="flow"></div>
+        <div class="viz-host"></div>
         ${p.tech?`<p class="tech"><b>Tech:</b> ${p.tech}</p>`:""}
         ${p.note?`<p class="note">${p.note}</p>`:""}
         ${p.impact?`<p class="impact">${p.impact}</p>`:""}
       </div></div>`;
-    const head=card.querySelector(".proj-head"), body=card.querySelector(".proj-body"), flowEl=card.querySelector(".flow");
+    const head=card.querySelector(".proj-head"), body=card.querySelector(".proj-body"), hostEl=card.querySelector(".viz-host");
+    function buildViz(){
+      if(hostEl.dataset.built) return; hostEl.dataset.built="1";
+      const N2K=window.NAME2KEY||{}, REG=window.VIZ||{};
+      const key=N2K[p.name];
+      const hasViz=key&&typeof REG[key]==="function";
+      const pipe=p.flow?('<div class="flow-label">Pipeline</div>'+flowSVG(p.flow)):"";
+      if(hasViz){
+        let viz=""; try{ viz=REG[key](); }catch(e){ viz=""; }
+        const vizPanel='<div class="viz-label">Signature visual</div><div class="signature-viz">'+viz+'</div>';
+        if(pipe){
+          hostEl.innerHTML='<div class="viz-toggle"><button class="on" data-t="viz">Visual</button><button data-t="pipe">Pipeline</button></div>'
+            +'<div class="viz-panel vizp on">'+vizPanel+'</div>'
+            +'<div class="viz-panel pipep">'+pipe+'</div>';
+          const tog=hostEl.querySelector(".viz-toggle");
+          tog.addEventListener("click",e=>{
+            const b=e.target.closest("button"); if(!b)return;
+            tog.querySelectorAll("button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
+            const isViz=b.dataset.t==="viz";
+            hostEl.querySelector(".vizp").classList.toggle("on",isViz);
+            hostEl.querySelector(".pipep").classList.toggle("on",!isViz);
+            body.style.maxHeight="none";
+          });
+        } else {
+          hostEl.innerHTML='<div class="viz-wrap">'+vizPanel+'</div>';
+        }
+      } else if(pipe){
+        hostEl.innerHTML='<div class="viz-wrap">'+pipe+'</div>';
+      }
+    }
     head.addEventListener("click",()=>{
       const open=card.classList.toggle("open");
       if(open){
-        if(!flowEl.innerHTML && p.flow) flowEl.innerHTML='<div class="flow-label">Pipeline</div>'+flowSVG(p.flow);
+        buildViz();
         body.style.maxHeight=body.scrollHeight+"px";
         setTimeout(()=>{ if(card.classList.contains("open")) body.style.maxHeight="none"; },480);
       } else {
