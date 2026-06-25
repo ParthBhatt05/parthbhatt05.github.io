@@ -1149,7 +1149,7 @@ ${rBaseline}
   <text x="${PX((b1x + b2x) / 2 + barW / 2)}" y="${PX(ensTopY - 26)}" text-anchor="middle" font-family="Inter,sans-serif" font-size="11.5" font-weight="600" fill="#E8A838">&#8722;12% error</text>
 </g>
 
-<text x="${PX(rx0 - 6)}" y="${PX(lb + 34)}" font-family="Inter,sans-serif" font-size="10" fill="#707070">Bayesian hyperparameter optimization</text>
+<text x="${PX(rx0 - 6)}" y="${PX(lb + 50)}" font-family="Inter,sans-serif" font-size="10" fill="#707070">Bayesian hyperparameter optimization</text>
 </svg>`;
   return svg;
 }
@@ -2583,240 +2583,610 @@ function viz_impactDashboard(){
 
 /* ==== skillsRadar ==== */
 function viz_skillsRadar(){
-  const cx = 380, cy = 244, R = 158;
-  const N = 7;
-  const axes = [
-    { label: "Causal Inference", v: 0.92 },
-    { label: "Forecasting",      v: 0.88 },
-    { label: "Deep Learning",    v: 0.95 },
-    { label: "NLP",              v: 0.84 },
-    { label: "Optimization",     v: 0.82 },
-    { label: "Explainability",   v: 0.90 },
-    { label: "Leadership",       v: 0.97 }
+  const W=460,H=366,cx=230,cy=204,R=112;
+  const axes=[
+    {k:"Causal Inference",v:0.95},
+    {k:"Forecasting",v:0.92},
+    {k:"Deep Learning",v:0.90},
+    {k:"NLP",v:0.86},
+    {k:"Optimization",v:0.82},
+    {k:"Explainability",v:0.90},
+    {k:"Leadership",v:0.94}
   ];
-  const headlineIdx = 6;
-  const pt = (a, r) => [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
-  const ang = i => -Math.PI / 2 + i * 2 * Math.PI / N;
-  const f2 = n => Math.round(n * 10) / 10;
-
-  const rings = [0.25, 0.5, 0.75, 1.0];
-  let gridStr = "";
-  rings.forEach(rf => {
-    const pts = [];
-    for (let i = 0; i < N; i++) { const [x, y] = pt(ang(i), R * rf); pts.push(f2(x) + "," + f2(y)); }
-    gridStr += '<polygon points="' + pts.join(" ") + '" fill="none" stroke="#262626" stroke-width="1"/>';
+  const n=axes.length;
+  const ang=i=>(-90+i*360/n)*Math.PI/180;
+  const PX=x=>Math.round(x*100)/100;
+  const pt=(i,r)=>[PX(cx+r*Math.cos(ang(i))),PX(cy+r*Math.sin(ang(i)))];
+  let rings="";
+  [0.25,0.5,0.75,1].forEach(level=>{
+    let p="";
+    for(let i=0;i<n;i++){const a=pt(i,R*level);p+=(i?"L":"M")+a[0]+" "+a[1]+" ";}
+    rings+=`<path d="${p}Z" fill="none" stroke="#262626" stroke-width="1"/>`;
   });
+  let spokes="";
+  for(let i=0;i<n;i++){const a=pt(i,R);spokes+=`<line x1="${cx}" y1="${cy}" x2="${a[0]}" y2="${a[1]}" stroke="#262626" stroke-width="1"/>`;}
+  let poly="",dots="";
+  for(let i=0;i<n;i++){const a=pt(i,R*axes[i].v);poly+=(i?"L":"M")+a[0]+" "+a[1]+" ";dots+=`<circle cx="${a[0]}" cy="${a[1]}" r="3.2" fill="#14A8AD"/>`;}
+  poly+="Z";
+  let labels="";
+  for(let i=0;i<n;i++){
+    const a=ang(i),co=Math.cos(a),si=Math.sin(a);
+    const lx=PX(cx+(R+16)*co),ly=PX(cy+(R+16)*si);
+    const anchor=co>0.25?"start":(co<-0.25?"end":"middle");
+    const dy=si>0.4?12:(si<-0.4?-2:4);
+    labels+=`<text x="${lx}" y="${ly+dy}" text-anchor="${anchor}" font-family="Inter,sans-serif" font-size="12" fill="#C8C8C8">${axes[i].k}</text>`;
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px;height:auto;display:block" role="img" aria-label="Capability radar across seven dimensions — causal inference, forecasting, deep learning, NLP, optimization, explainability and leadership — all rated high.">
+  <style>@keyframes viz_skillsRadar_in{from{transform:scale(0.15);opacity:0}to{transform:scale(1);opacity:1}}
+  @media (prefers-reduced-motion: no-preference){.viz_skillsRadar_poly{transform-box:fill-box;transform-origin:${cx}px ${cy}px;animation:viz_skillsRadar_in .9s cubic-bezier(.22,1,.36,1) forwards}}</style>
+  <rect x="0" y="0" width="${W}" height="${H}" fill="#1A1A1A"/>
+  <text x="18" y="28" font-family="Inter,sans-serif" font-size="14" font-weight="600" fill="#F0F0F0">Capability profile</text>
+  <text x="18" y="46" font-family="Inter,sans-serif" font-size="11" fill="#909090">Proficiency across seven dimensions</text>
+  ${rings}${spokes}
+  <g class="viz_skillsRadar_poly"><path d="${poly}" fill="rgba(20,168,173,0.22)" stroke="#14A8AD" stroke-width="2" stroke-linejoin="round"/>${dots}</g>
+  ${labels}
+</svg>`;
+}
 
-  let spokeStr = "";
-  for (let i = 0; i < N; i++) {
-    const [ox, oy] = pt(ang(i), R);
-    spokeStr += '<line x1="' + cx + '" y1="' + cy + '" x2="' + f2(ox) + '" y2="' + f2(oy) + '" stroke="#262626" stroke-width="1"/>';
+function viz_domainDonut(){
+  const W=520,H=300,cx=120,cy=166,r=76,sw=26;
+  const circ=2*Math.PI*r;
+  const PX=x=>Math.round(x*100)/100;
+  const segs=[
+    {k:"Healthcare & Life Sciences",v:30,c:"#E8A838"},
+    {k:"CPG & Retail",v:22,c:"#14A8AD"},
+    {k:"Energy & Utilities",v:20,c:"#0D7377"},
+    {k:"Manufacturing",v:16,c:"#2f8f86"},
+    {k:"Financial Planning",v:12,c:"#5cb0a8"}
+  ];
+  let arcs="",acc=0;
+  segs.forEach(s=>{
+    const dash=PX(s.v/100*circ);
+    arcs+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${s.c}" stroke-width="${sw}" stroke-dasharray="${dash} ${PX(circ-dash)}" stroke-dashoffset="${PX(-acc/100*circ)}" transform="rotate(-90 ${cx} ${cy})"><title>${s.k}: ${s.v}%</title></circle>`;
+    acc+=s.v;
+  });
+  let legend="",lx=242,ly0=94,step=33;
+  segs.forEach((s,i)=>{
+    const y=ly0+i*step;
+    legend+=`<rect x="${lx}" y="${y-12}" width="14" height="14" rx="3" fill="${s.c}"/>`;
+    legend+=`<text x="${lx+22}" y="${y}" font-family="Inter,sans-serif" font-size="13" fill="#D0D0D0">${s.k}</text>`;
+    legend+=`<text x="${W-18}" y="${y}" text-anchor="end" font-family="Inter,sans-serif" font-size="13" font-weight="600" fill="${i===0?'#E8A838':'#909090'}">${s.v}%</text>`;
+  });
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px;height:auto;display:block" role="img" aria-label="Domain coverage: Healthcare and Life Sciences 30 percent, CPG and Retail 22 percent, Energy and Utilities 20 percent, Manufacturing 16 percent, Financial Planning 12 percent.">
+  <style>@keyframes viz_domainDonut_in{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+  @media (prefers-reduced-motion: no-preference){.viz_domainDonut_ring{transform-box:fill-box;transform-origin:${cx}px ${cy}px;animation:viz_domainDonut_in .8s cubic-bezier(.22,1,.36,1) forwards}}</style>
+  <rect x="0" y="0" width="${W}" height="${H}" fill="#1A1A1A"/>
+  <text x="18" y="28" font-family="Inter,sans-serif" font-size="14" font-weight="600" fill="#F0F0F0">Where the work lands</text>
+  <text x="18" y="46" font-family="Inter,sans-serif" font-size="11" fill="#909090">Engagements by industry</text>
+  <g class="viz_domainDonut_ring">${arcs}</g>
+  <text x="${cx}" y="${cy-2}" text-anchor="middle" font-family="Inter,sans-serif" font-size="16" font-weight="700" fill="#F0F0F0">Domains</text>
+  <text x="${cx}" y="${cy+16}" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" fill="#909090">5 industries</text>
+  ${legend}
+</svg>`;
+}
+
+/* ==== homeAuto ==== */
+function viz_homeAuto(){
+  const NS='viz_homeAuto';
+  const W=760, H=444;
+
+  // ---------- deterministic stylised waveform samples (no Math.random) ----------
+  const owner=[0.22,0.40,0.62,0.85,0.70,0.48,0.66,0.92,0.78,0.55,0.74,0.96,0.82,0.60,0.78,0.90,0.66,0.44,0.62,0.80,0.58,0.38,0.52,0.34,0.24,0.16];
+  const unkn =[0.30,0.18,0.46,0.26,0.58,0.34,0.20,0.52,0.30,0.62,0.24,0.44,0.66,0.28,0.50,0.22,0.40,0.60,0.26,0.48,0.32,0.18,0.42,0.24,0.36,0.20];
+
+  const n=owner.length;
+
+  // helper: build a centred waveform strip inside a box
+  const waveStrip=(x,y,w,h,data,stroke)=>{
+    const midY=y+h/2;
+    const gap=2.2;
+    const bw=(w-(n-1)*gap)/n;
+    let s='';
+    for(let i=0;i<n;i++){
+      const bx=x+i*(bw+gap);
+      const bh=Math.max(2,data[i]*(h*0.86));
+      s+=`<rect x="${bx.toFixed(2)}" y="${(midY-bh/2).toFixed(2)}" width="${bw.toFixed(2)}" height="${bh.toFixed(2)}" rx="${Math.min(1.6,bw/2).toFixed(2)}" fill="${stroke}"/>`;
+    }
+    return s;
+  };
+
+  let svg='';
+  svg+=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;max-width:760px;height:auto;display:block" role="img" aria-label="Owner-only home automation. Panel A: a CNN speaker-identification gate accepts the owner voice (teal, check) and rejects an unknown voice (red, x); false-acceptance rate under 0.1 percent at sub-200 millisecond latency. Panel B: a self-learned 24-hour schedule with on-windows for lights, thermostat, water heater and coffee maker, inferred automatically from routine on a Raspberry Pi.">`;
+
+  // ---------- prefixed styles: gentle, resting-safe ----------
+  svg+=`<style>`
+    +`@keyframes ${NS}-flow{0%,100%{opacity:.45}50%{opacity:1}}`
+    +`.${NS}-flow{animation:${NS}-flow 3.6s ease-in-out infinite;}`
+    +`@keyframes ${NS}-acc{0%,100%{opacity:.85}50%{opacity:1}}`
+    +`.${NS}-acc{animation:${NS}-acc 4s ease-in-out infinite;}`
+    +`@keyframes ${NS}-bar{0%,100%{opacity:.9}50%{opacity:1}}`
+    +`.${NS}-now{animation:${NS}-bar 3.8s ease-in-out infinite;}`
+    +`.${NS}-strip:hover rect{fill:#14A8AD;}`
+    +`</style>`;
+
+  // ---------- background ----------
+  svg+=`<rect x="0" y="0" width="${W}" height="${H}" fill="#101010"/>`;
+
+  // ---------- title block ----------
+  svg+=`<text x="24" y="30" font-family="Inter,sans-serif" font-size="13.5" font-weight="600" fill="#F0F0F0">Owner-only voice control + self-learned routine</text>`;
+  svg+=`<text x="24" y="48" font-family="Inter,sans-serif" font-size="11" fill="#909090">Voice + IoT-sensor home automation that responds only to its owner</text>`;
+
+  // ---------- headline metric (amber, reserved) ----------
+  svg+=`<text x="${W-24}" y="34" text-anchor="end" font-family="Inter,sans-serif" font-size="24" font-weight="700" fill="#E8A838">&lt; 0.1%</text>`;
+  svg+=`<text x="${W-24}" y="50" text-anchor="end" font-family="Inter,sans-serif" font-size="11" fill="#909090">false-acceptance rate &#183; sub-200ms latency</text>`;
+
+  // ========================================================================
+  // PANEL A — speaker-identity gate
+  // ========================================================================
+  const aY=70, aH=146;
+  svg+=`<rect x="16" y="${aY}" width="${W-32}" height="${aH}" rx="6" fill="#141414" stroke="#262626" stroke-width="1"/>`;
+  svg+=`<text x="32" y="${aY+22}" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#909090">A &#183; Speaker-identity gate</text>`;
+
+  // strip geometry
+  const stripW=190, stripH=58, stripY=aY+38;
+  const leftX=36, rightX=W-36-stripW;
+
+  // central CNN node
+  const cnnCX=W/2, cnnY=aY+38, cnnW=130, cnnH=38;
+  const cnnX=cnnCX-cnnW/2;
+
+  // -- Owner strip (left) --
+  svg+=`<text x="${leftX}" y="${stripY-8}" font-family="Inter,sans-serif" font-size="11" fill="#F0F0F0">Owner</text>`;
+  svg+=`<rect x="${leftX}" y="${stripY}" width="${stripW}" height="${stripH}" rx="4" fill="#101010" stroke="#262626" stroke-width="1"/>`;
+  svg+=`<g class="${NS}-strip">${waveStrip(leftX+8,stripY,stripW-16,stripH,owner,'#14A8AD')}<title>Owner voice sample &#8594; enrolled speaker embedding</title></g>`;
+
+  // -- Unknown strip (right) --
+  svg+=`<text x="${rightX}" y="${stripY-8}" font-family="Inter,sans-serif" font-size="11" fill="#F0F0F0">Unknown voice</text>`;
+  svg+=`<rect x="${rightX}" y="${stripY}" width="${stripW}" height="${stripH}" rx="4" fill="#101010" stroke="#262626" stroke-width="1"/>`;
+  svg+=`<g class="${NS}-strip">${waveStrip(rightX+8,stripY,stripW-16,stripH,unkn,'#0D7377')}<title>Unknown voice sample &#8594; does not match enrolled speaker</title></g>`;
+
+  // -- flow arrows from each strip into central CNN node --
+  const stripMidY=stripY+stripH/2;
+  // left -> cnn
+  svg+=`<line class="${NS}-flow" x1="${leftX+stripW}" y1="${stripMidY}" x2="${cnnX-7}" y2="${stripMidY}" stroke="#0D7377" stroke-width="1.4"/>`;
+  svg+=`<path d="M${cnnX-7},${stripMidY-4} L${cnnX},${stripMidY} L${cnnX-7},${stripMidY+4} Z" fill="#14A8AD"/>`;
+  // right -> cnn
+  svg+=`<line class="${NS}-flow" x1="${rightX}" y1="${stripMidY}" x2="${cnnX+cnnW+7}" y2="${stripMidY}" stroke="#0D7377" stroke-width="1.4"/>`;
+  svg+=`<path d="M${cnnX+cnnW+7},${stripMidY-4} L${cnnX+cnnW},${stripMidY} L${cnnX+cnnW+7},${stripMidY+4} Z" fill="#14A8AD"/>`;
+
+  // -- central CNN speaker-ID node --
+  svg+=`<rect x="${cnnX}" y="${cnnY}" width="${cnnW}" height="${cnnH}" rx="5" fill="rgba(13,115,119,0.2)" stroke="#14A8AD" stroke-width="1.2"/>`;
+  svg+=`<text x="${cnnCX}" y="${cnnY+16}" text-anchor="middle" font-family="Inter,sans-serif" font-size="11.5" font-weight="700" fill="#F0F0F0">CNN speaker ID</text>`;
+  svg+=`<text x="${cnnCX}" y="${cnnY+30}" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#909090">embedding match gate</text>`;
+
+  // -- decision badges below each strip --
+  const badgeY=stripY+stripH+14, badgeH=26;
+  // ACCEPT (left, teal, check)
+  const accW=132, accX=leftX+(stripW-accW)/2;
+  svg+=`<g class="${NS}-acc"><rect x="${accX}" y="${badgeY}" width="${accW}" height="${badgeH}" rx="13" fill="rgba(13,115,119,0.35)" stroke="#14A8AD" stroke-width="1.4"/>`;
+  svg+=`<path d="M${accX+22},${badgeY+13} l4,5 l8,-10" fill="none" stroke="#14A8AD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  svg+=`<text x="${accX+44}" y="${badgeY+17}" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="#F0F0F0">ACCEPT</text></g>`;
+  // REJECT (right, red, x)
+  const rejW=132, rejX=rightX+(stripW-rejW)/2;
+  svg+=`<rect x="${rejX}" y="${badgeY}" width="${rejW}" height="${badgeH}" rx="13" fill="#1A1A1A" stroke="#C75450" stroke-width="1.4"/>`;
+  svg+=`<path d="M${rejX+22},${badgeY+9} l10,8 M${rejX+32},${badgeY+9} l-10,8" fill="none" stroke="#C75450" stroke-width="2" stroke-linecap="round"/>`;
+  svg+=`<text x="${rejX+46}" y="${badgeY+17}" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="#C75450">REJECT</text>`;
+
+  // ========================================================================
+  // PANEL B — self-learned daily schedule
+  // ========================================================================
+  const bY=228, bH=185;
+  svg+=`<rect x="16" y="${bY}" width="${W-32}" height="${bH}" rx="6" fill="#141414" stroke="#262626" stroke-width="1"/>`;
+  svg+=`<text x="32" y="${bY+20}" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#909090">B &#183; Self-learned daily schedule</text>`;
+
+  // sensor-context chips (top-right of panel B), right-aligned
+  let chx=W-32;
+  const chipY=bY+9, chipH=18;
+  const chipDefs=[['light',58],['motion',64],['temp',52]];
+  for(let i=0;i<chipDefs.length;i++){
+    const cw=chipDefs[i][1];
+    chx-=cw;
+    svg+=`<rect x="${chx}" y="${chipY}" width="${cw}" height="${chipH}" rx="9" fill="#101010" stroke="#0D7377" stroke-width="1"/>`;
+    svg+=`<circle cx="${chx+11}" cy="${chipY+chipH/2}" r="2.6" fill="#14A8AD"/>`;
+    svg+=`<text x="${chx+19}" y="${chipY+13}" font-family="Inter,sans-serif" font-size="10" fill="#909090">${chipDefs[i][0]}</text>`;
+    chx-=8;
   }
 
-  let labelStr = "";
-  for (let i = 0; i < N; i++) {
-    const a = ang(i);
-    const [lx, ly] = pt(a, R + 26);
-    const c = Math.cos(a);
-    const anchor = c > 0.25 ? "start" : (c < -0.25 ? "end" : "middle");
-    let dy = 0;
-    if (i === 0) dy = -3;
-    const sy = Math.sin(a);
-    if (sy > 0.4) dy = 9;
-    const isHead = i === headlineIdx;
-    const fill = isHead ? "#E8A838" : "#909090";
-    const weight = isHead ? "600" : "400";
-    labelStr += '<text x="' + f2(lx) + '" y="' + f2(ly + dy) + '" font-family="Inter,sans-serif" font-size="11.5" font-weight="' + weight + '" fill="' + fill + '" text-anchor="' + anchor + '">' + axes[i].label + '</text>';
-    labelStr += '<text x="' + f2(lx) + '" y="' + f2(ly + dy + 13) + '" font-family="Inter,sans-serif" font-size="10" fill="#707070" text-anchor="' + anchor + '">' + Math.round(axes[i].v * 100) + '</text>';
+  // timeline geometry
+  const tlX=140, tlRight=W-40, tlW=tlRight-tlX;
+  const rowsTop=bY+40, rowH=22, rowGap=6;
+  const hourToX=(h)=>tlX+(h/24)*tlW;
+
+  // appliance rows with learned ON windows (24h)
+  const rows=[
+    {name:'Lights',      win:[[18,23]]},
+    {name:'Thermostat',  win:[[18,22]]},
+    {name:'Water heater',win:[[6,7],[19,21]]},
+    {name:'Coffee maker',win:[[6,8]]}
+  ];
+
+  // vertical gridlines + axis ticks at 0,6,12,18,24
+  const ticks=[0,6,12,18,24];
+  const gridBottom=rowsTop+rows.length*(rowH+rowGap)-rowGap;
+  for(let i=0;i<ticks.length;i++){
+    const gx=hourToX(ticks[i]);
+    svg+=`<line x1="${gx.toFixed(1)}" y1="${rowsTop-6}" x2="${gx.toFixed(1)}" y2="${gridBottom+4}" stroke="#262626" stroke-width="1"/>`;
+    svg+=`<text x="${gx.toFixed(1)}" y="${gridBottom+16}" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#707070">${ticks[i]}h</text>`;
   }
 
-  const verts = [];
-  for (let i = 0; i < N; i++) { const [x, y] = pt(ang(i), R * axes[i].v); verts.push([f2(x), f2(y)]); }
-  const polyPts = verts.map(p => p[0] + "," + p[1]).join(" ");
+  // muted "now" indicator at 6.4h (time cursor; amber reserved for the headline + key learned rule)
+  const nowH=6.4, nowX=hourToX(nowH);
 
-  let tickStr = "";
-  rings.forEach(rf => {
-    tickStr += '<text x="' + (cx + 6) + '" y="' + f2(cy - R * rf - 3) + '" font-family="Inter,sans-serif" font-size="9" fill="#707070" text-anchor="start">' + Math.round(rf * 100) + '</text>';
-  });
+  // rows: label + track + learned bars
+  for(let r=0;r<rows.length;r++){
+    const ry=rowsTop+r*(rowH+rowGap);
+    const cy=ry+rowH/2;
+    // label
+    svg+=`<text x="${tlX-12}" y="${cy+4}" text-anchor="end" font-family="Inter,sans-serif" font-size="11" fill="#F0F0F0">${rows[r].name}</text>`;
+    // track baseline
+    svg+=`<rect x="${tlX}" y="${ry}" width="${tlW}" height="${rowH}" rx="4" fill="#101010" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
+    // learned ON windows
+    const isCoffee=rows[r].name==='Coffee maker';
+    for(let w=0;w<rows[r].win.length;w++){
+      const a=rows[r].win[w][0], b=rows[r].win[w][1];
+      const bx=hourToX(a), bw=hourToX(b)-hourToX(a);
+      const hilite=isCoffee; // single amber highlight: the self-learned 6-8am coffee rule
+      if(hilite){
+        svg+=`<rect class="${NS}-now" x="${bx.toFixed(1)}" y="${ry+4}" width="${bw.toFixed(1)}" height="${rowH-8}" rx="3" fill="rgba(232,168,56,0.35)" stroke="#E8A838" stroke-width="1.4"><title>${rows[r].name}: learned ON ${a}:00&#8211;${b}:00 &#183; headline self-learned rule</title></rect>`;
+      } else {
+        svg+=`<rect x="${bx.toFixed(1)}" y="${ry+4}" width="${bw.toFixed(1)}" height="${rowH-8}" rx="3" fill="rgba(13,115,119,0.35)" stroke="#14A8AD" stroke-width="1.2"><title>${rows[r].name}: learned ON ${a}:00&#8211;${b}:00</title></rect>`;
+      }
+    }
+  }
 
-  const style =
-    '<style>' +
-    '@keyframes viz_skillsRadar_grow{from{transform:scale(0.001);opacity:0}60%{opacity:1}to{transform:scale(1);opacity:1}}' +
-    '@keyframes viz_skillsRadar_fade{from{opacity:0}to{opacity:1}}' +
-    '.viz_skillsRadar_shape{transform-origin:' + cx + 'px ' + cy + 'px;animation:viz_skillsRadar_grow 1.15s cubic-bezier(.22,.61,.36,1) both}' +
-    '.viz_skillsRadar_dots{animation:viz_skillsRadar_fade .5s ease-out .95s both}' +
-    '.viz_skillsRadar_dotc circle{transition:r .15s ease}' +
-    '.viz_skillsRadar_dotc:hover circle{r:6}' +
-    '</style>';
+  // muted "now" vertical line drawn last so it sits above tracks
+  svg+=`<line x1="${nowX.toFixed(1)}" y1="${rowsTop-6}" x2="${nowX.toFixed(1)}" y2="${gridBottom+4}" stroke="#909090" stroke-width="1.2" stroke-dasharray="3 2"/>`;
+  svg+=`<text x="${nowX.toFixed(1)}" y="${rowsTop-10}" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#909090">now</text>`;
 
-  const svg =
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 452" style="width:100%;max-width:760px;height:auto;display:block" role="img" aria-label="Capability profile radar across seven dimensions: Causal Inference 92, Forecasting 88, Deep Learning 95, NLP 84, Optimization 82, Explainability 90, Leadership 97 out of 100.">' +
-    style +
-    '<rect x="0" y="0" width="760" height="452" fill="#141414"/>' +
-    '<text x="20" y="34" font-family="Inter,sans-serif" font-size="13.5" font-weight="600" fill="#F0F0F0">Capability profile</text>' +
-    '<text x="20" y="52" font-family="Inter,sans-serif" font-size="11" fill="#909090">Senior proficiency across seven dimensions &#183; score out of 100</text>' +
-    '<g>' + gridStr + spokeStr + '</g>' +
-    '<g>' + labelStr + '</g>' +
-    '<g class="viz_skillsRadar_shape">' +
-    '<polygon points="' + polyPts + '" fill="rgba(13,115,119,0.2)" stroke="#14A8AD" stroke-width="2" stroke-linejoin="round"/>' +
-    '</g>' +
-    '<g>' + tickStr + '</g>' +
-    '<g class="viz_skillsRadar_dots">' +
-    verts.map((p, i) => {
-      const isHead = i === headlineIdx;
-      const r = isHead ? 4.2 : 3;
-      const fill = isHead ? "#E8A838" : "#14A8AD";
-      return '<g class="viz_skillsRadar_dotc"><circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + r + '" fill="' + fill + '" stroke="#101010" stroke-width="1.2"><title>' + axes[i].label + ': ' + Math.round(axes[i].v * 100) + ' / 100</title></circle></g>';
-    }).join("") +
-    '</g>' +
-    '<g>' +
-    '<rect x="20" y="424" width="11" height="11" rx="2" fill="rgba(13,115,119,0.35)" stroke="#14A8AD" stroke-width="1.5"/>' +
-    '<text x="37" y="433" font-family="Inter,sans-serif" font-size="11" fill="#909090">Capability score (0&#8211;100)</text>' +
-    '<circle cx="245" cy="430" r="4.2" fill="#E8A838"/>' +
-    '<text x="256" y="433" font-family="Inter,sans-serif" font-size="11" fill="#909090">Top strength &#183; Leadership</text>' +
-    '<text x="740" y="433" font-family="Inter,sans-serif" font-size="22" font-weight="600" fill="#E8A838" text-anchor="end">97</text>' +
-    '<text x="697" y="433" font-family="Inter,sans-serif" font-size="10" fill="#707070" text-anchor="end">peak</text>' +
-    '</g>' +
-    '</svg>';
+  // legend for ON window
+  const lgY=gridBottom+30;
+  svg+=`<rect x="140" y="${lgY-9}" width="14" height="10" rx="2" fill="rgba(13,115,119,0.35)" stroke="#14A8AD" stroke-width="1.1"/>`;
+  svg+=`<text x="160" y="${lgY}" font-family="Inter,sans-serif" font-size="10" fill="#707070">learned ON window</text>`;
+  svg+=`<rect x="296" y="${lgY-9}" width="14" height="10" rx="2" fill="rgba(232,168,56,0.35)" stroke="#E8A838" stroke-width="1.1"/>`;
+  svg+=`<text x="316" y="${lgY}" font-family="Inter,sans-serif" font-size="10" fill="#707070">key morning rule</text>`;
 
+  // ---------- footnote ----------
+  svg+=`<text x="24" y="${H-12}" font-family="Inter,sans-serif" font-size="10.5" fill="#909090">Schedule rules learned automatically from routine &#8212; no manual programming &#183; Raspberry Pi</text>`;
+
+  svg+=`</svg>`;
   return svg;
 }
 
-/* ==== domainDonut ==== */
-function viz_domainDonut(){
-  // --- data (real proportional values) ---
-  const data = [
-    { name: "Healthcare & Life Sciences", pct: 34, color: "#E8A838", lead: true },
-    { name: "CPG & Retail",               pct: 24, color: "#14A8AD", lead: false },
-    { name: "Energy & Utilities",         pct: 18, color: "#0D7377", lead: false },
-    { name: "Manufacturing",              pct: 14, color: "#14A8AD", lead: false },
-    { name: "Financial Planning",         pct: 10, color: "#0D7377", lead: false }
+/* ==== libraryRec ==== */
+function viz_libraryRec(){
+  const W=760, H=496;
+  const COL={bg:"#141414",panel:"#1A1A1A",panel2:"#101010",teal:"#14A8AD",tealDim:"#0D7377",
+    f12:"rgba(13,115,119,0.12)",f20:"rgba(13,115,119,0.2)",f35:"rgba(13,115,119,0.35)",
+    amber:"#E8A838",text:"#F0F0F0",muted:"#909090",tick:"#707070",grid:"#262626",faint:"rgba(255,255,255,0.06)"};
+  const NS="viz_libraryRec";
+
+  // (1) LDA topic mixture — sums to 100
+  const topics=[
+    {name:"Mystery",pct:38},
+    {name:"Historical",pct:27},
+    {name:"Sci-Fi",pct:21},
+    {name:"Biography",pct:14}
   ];
-  // alternate the two teal tones so adjacent teal segments read apart
-  const tealTones = ["#14A8AD", "#0D7377", "#14A8AD", "#0D7377"];
-  let ti = 0;
-  for (let i = 0; i < data.length; i++){
-    if (!data[i].lead) { data[i].color = tealTones[ti % tealTones.length]; ti++; }
+  // (4) Ranked recommendations — genre labels + relevance scores
+  const recs=[
+    {label:"Historical fiction",score:0.94,top:true},
+    {label:"Mystery / thriller",score:0.89},
+    {label:"Literary fiction",score:0.83},
+    {label:"Sci-fi",score:0.77},
+    {label:"Biography",score:0.71}
+  ];
+
+  let svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:760px;height:auto;display:block" role="img" aria-label="Library book recommender pipeline: user-intent LDA topic mixture (Mystery 38 percent, Historical 27 percent, Sci-Fi 21 percent, Biography 14 percent) plus a reading-history vector feed a CatBoost plus AdaBoost ensemble, producing a ranked recommendation list led by Historical fiction at 0.94, then Mystery thriller 0.89, Literary fiction 0.83, Sci-fi 0.77, Biography 0.71. Deployed live on the library site.">';
+
+  // prefixed styles: resting-safe animation + hover
+  svg+='<style>'
+    +'@keyframes '+NS+'-flow{0%,100%{opacity:.4}50%{opacity:1}}'
+    +'.'+NS+'-flow{animation:'+NS+'-flow 3.4s ease-in-out infinite}'
+    +'@keyframes '+NS+'-grow{from{transform:scaleX(.001)}to{transform:scaleX(1)}}'
+    +'.'+NS+'-bar{transform-origin:left center;animation:'+NS+'-grow .9s cubic-bezier(.4,0,.2,1) both}'
+    +'.'+NS+'-row:hover .'+NS+'-rowbg{stroke:#14A8AD;stroke-width:1.4}'
+    +'.'+NS+'-tbar:hover{opacity:.85}'
+    +'</style>';
+
+  svg+='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="'+COL.bg+'"/>';
+
+  // ---- title block ----
+  svg+='<text x="22" y="30" font-family="Inter,sans-serif" font-size="13.5" font-weight="600" fill="'+COL.text+'">Intent + history &#8594; ranked recommendations</text>';
+  svg+='<text x="22" y="48" font-family="Inter,sans-serif" font-size="11" fill="'+COL.muted+'">LDA intent mixture + reading-history vector &#8594; gradient-boosting ensemble</text>';
+
+  // headline tag (amber, reserved) — deployed live
+  const tagText="Deployed live on the library site", tagW=224, tagX=W-22-tagW, tagY=20, tagH=24;
+  svg+='<rect x="'+tagX+'" y="'+tagY+'" width="'+tagW+'" height="'+tagH+'" rx="12" fill="rgba(232,168,56,0.12)" stroke="'+COL.amber+'" stroke-width="1.2"/>';
+  svg+='<circle cx="'+(tagX+16)+'" cy="'+(tagY+tagH/2)+'" r="3.4" fill="'+COL.amber+'"/>';
+  svg+='<text x="'+(tagX+28)+'" y="'+(tagY+tagH/2+4)+'" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="'+COL.amber+'">'+tagText+'</text>';
+
+  // ================= INPUTS COLUMN (left) =================
+  const inX=22, inW=300;
+
+  // (1) LDA topic mixture panel
+  const lpY=74, lpH=132;
+  svg+='<rect x="'+inX+'" y="'+lpY+'" width="'+inW+'" height="'+lpH+'" rx="6" fill="'+COL.panel+'" stroke="'+COL.grid+'" stroke-width="1"/>';
+  svg+='<text x="'+(inX+14)+'" y="'+(lpY+20)+'" font-family="Inter,sans-serif" font-size="11.5" font-weight="600" fill="'+COL.text+'">User-intent topic mixture</text>';
+  svg+='<text x="'+(inX+14)+'" y="'+(lpY+35)+'" font-family="Inter,sans-serif" font-size="10" fill="'+COL.tick+'">LDA &#183; 4 topics &#183; sums to 100%</text>';
+
+  const barX=inX+96, barTrack=(inX+inW-14)-barX, tBarH=12, tGap=20, tStartY=lpY+52;
+  for(let i=0;i<topics.length;i++){
+    const t=topics[i], by=tStartY+i*tGap, bw=barTrack*(t.pct/100);
+    svg+='<text x="'+(barX-8)+'" y="'+(by+tBarH-2.5)+'" text-anchor="end" font-family="Inter,sans-serif" font-size="10.5" fill="'+COL.muted+'">'+t.name+'</text>';
+    svg+='<rect x="'+barX+'" y="'+by+'" width="'+barTrack+'" height="'+tBarH+'" rx="3" fill="'+COL.faint+'"/>';
+    svg+='<g class="'+NS+'-tbar"><title>'+t.name+' &#183; '+t.pct+'% of intent</title>';
+    svg+='<rect class="'+NS+'-bar" style="animation-delay:'+(0.05*i).toFixed(2)+'s" x="'+barX+'" y="'+by+'" width="'+bw.toFixed(1)+'" height="'+tBarH+'" rx="3" fill="'+COL.f35+'" stroke="'+COL.teal+'" stroke-width="1"/>';
+    svg+='</g>';
+    svg+='<text x="'+(barX+bw+8)+'" y="'+(by+tBarH-2.5)+'" font-family="Inter,sans-serif" font-size="10.5" font-weight="600" fill="'+COL.teal+'">'+t.pct+'%</text>';
   }
 
-  // --- layout ---
-  const W = 760, H = 288;
-  const pad = 16;
-  // donut center on the left side (cy lowered so the ring clears the title block)
-  const cx = 188, cy = 164;
-  const R = 92;          // mid-radius of the stroked ring
-  const ringW = 28;      // stroke width
-  const C = 2 * Math.PI * R;
-  const gapDeg = 2;      // small gap between segments
-  const startDeg = 0;    // baseline 3 o'clock; outer group rotates -90 so drawing begins at top
+  // (2) reading-history vector chip
+  const cY=lpY+lpH+14, cH=44;
+  svg+='<rect x="'+inX+'" y="'+cY+'" width="'+inW+'" height="'+cH+'" rx="6" fill="'+COL.panel2+'" stroke="'+COL.grid+'" stroke-width="1"/>';
+  svg+='<text x="'+(inX+14)+'" y="'+(cY+18)+'" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="'+COL.text+'">Reading-history vector</text>';
+  // small token cells
+  const tokVals=[0.8,0.3,0.95,0.55,0.2,0.7,0.4,0.85];
+  const tokX=inX+150, tokW=15, tokG=3, tokTop=cY+12, tokH=20;
+  svg+='<text x="'+(inX+14)+'" y="'+(cY+34)+'" font-family="Inter,sans-serif" font-size="10" fill="'+COL.tick+'">embedded token</text>';
+  for(let i=0;i<tokVals.length;i++){
+    const tx=tokX+i*(tokW+tokG), op=(0.12+0.23*tokVals[i]).toFixed(3);
+    svg+='<rect x="'+tx+'" y="'+tokTop+'" width="'+tokW+'" height="'+tokH+'" rx="2" fill="rgba(13,115,119,'+op+')" stroke="'+COL.tealDim+'" stroke-width="1"/>';
+  }
 
-  const fmt = (n) => (Math.round(n * 10) / 10).toString();
+  // ================= ENSEMBLE NODE (center-right of inputs) =================
+  const nodeX=inX+inW+62, nodeW=298, nodeY=120, nodeH=70;
+  // (3) arrows from inputs into node
+  const aFromX=inX+inW, aMidX=nodeX-10;
+  const lda_cy=lpY+lpH/2, hist_cy=cY+cH/2, node_cy=nodeY+nodeH/2;
+  svg+='<path class="'+NS+'-flow" d="M'+aFromX+','+lda_cy.toFixed(1)+' C'+(aFromX+30)+','+lda_cy.toFixed(1)+' '+(aMidX-30)+','+node_cy+' '+aMidX+','+node_cy+'" fill="none" stroke="'+COL.tealDim+'" stroke-width="1.4"/>';
+  svg+='<path class="'+NS+'-flow" d="M'+aFromX+','+hist_cy.toFixed(1)+' C'+(aFromX+30)+','+hist_cy.toFixed(1)+' '+(aMidX-30)+','+node_cy+' '+aMidX+','+node_cy+'" fill="none" stroke="'+COL.tealDim+'" stroke-width="1.4"/>';
+  svg+='<path d="M'+(aMidX-7)+','+(node_cy-5)+' L'+aMidX+','+node_cy+' L'+(aMidX-7)+','+(node_cy+5)+'" fill="none" stroke="'+COL.teal+'" stroke-width="1.4"/>';
 
-  // --- build donut segments as stroked circle arcs via dasharray ---
-  // Each circle is rotated so its arc begins at the right place; the arc
-  // length is its pct of circumference. Static stroke-dasharray already holds
-  // the final value, so the resting (animation-stripped) state is complete.
-  let segSVG = "";
-  let accDeg = startDeg;
-  const total = data.reduce((s, d) => s + d.pct, 0);
-  data.forEach((d, i) => {
-    const fullDeg = (d.pct / total) * 360;
-    const drawDeg = Math.max(fullDeg - gapDeg, 0.5);
-    const arcLen = (drawDeg / 360) * C;
-    const rot = accDeg + gapDeg / 2; // where this arc starts (deg from +x axis)
-    const dash = `${arcLen.toFixed(2)} ${(C - arcLen).toFixed(2)}`;
-    const delay = (i * 0.22).toFixed(2);
+  // node box
+  svg+='<rect x="'+nodeX+'" y="'+nodeY+'" width="'+nodeW+'" height="'+nodeH+'" rx="8" fill="'+COL.f12+'" stroke="'+COL.teal+'" stroke-width="1.4"/>';
+  svg+='<text x="'+(nodeX+nodeW/2)+'" y="'+(nodeY+30)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="'+COL.text+'">CatBoost + AdaBoost ensemble</text>';
+  svg+='<text x="'+(nodeX+nodeW/2)+'" y="'+(nodeY+50)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" fill="'+COL.muted+'">combines topic vector + history vector</text>';
 
-    segSVG += `
-      <g transform="rotate(${rot.toFixed(3)} ${cx} ${cy})">
-        <circle class="viz_domainDonut_seg" cx="${cx}" cy="${cy}" r="${R}"
-          fill="none" stroke="${d.color}" stroke-width="${ringW}" stroke-linecap="butt"
-          stroke-dasharray="${dash}">
-          <title>${d.name}: ${fmt(d.pct)}%</title>
-          <animate attributeName="stroke-dasharray"
-            from="0 ${C.toFixed(2)}" to="${dash}"
-            dur="0.9s" begin="${delay}s" fill="freeze"
-            calcMode="spline" keySplines="0.22 1 0.36 1"/>
-        </circle>
-      </g>`;
-    accDeg += fullDeg;
-  });
+  // arrow from node DOWN into ranked list
+  const listY=286;
+  const nodeBotX=nodeX+nodeW/2;
+  svg+='<line class="'+NS+'-flow" x1="'+nodeBotX+'" y1="'+(nodeY+nodeH)+'" x2="'+nodeBotX+'" y2="'+(listY-22)+'" stroke="'+COL.tealDim+'" stroke-width="1.4"/>';
+  svg+='<path class="'+NS+'-flow" d="M'+(nodeBotX-5)+','+(listY-28)+' L'+nodeBotX+','+(listY-20)+' L'+(nodeBotX+5)+','+(listY-28)+'" fill="none" stroke="'+COL.teal+'" stroke-width="1.4"/>';
+  // caption placed BESIDE the arrow (left-aligned) so it never overlaps the connector/arrowhead
+  svg+='<text x="'+(nodeBotX+12)+'" y="'+(nodeY+nodeH+15)+'" font-family="Inter,sans-serif" font-size="10" fill="'+COL.tick+'">rank by relevance score</text>';
 
-  // --- center text ---
-  const center = `
-    <g text-anchor="middle" font-family="Inter,sans-serif">
-      <text x="${cx}" y="${cy - 4}" font-size="26" font-weight="700" fill="#F0F0F0" letter-spacing="0.2">Domains</text>
-      <text x="${cx}" y="${cy + 18}" font-size="11" fill="#909090" letter-spacing="0.4">5 industries</text>
-    </g>`;
+  // ================= CENTERPIECE: RANKED RECOMMENDATION LIST =================
+  const listX=22, listW=W-44;
+  svg+='<text x="'+listX+'" y="'+(listY-6)+'" font-family="Inter,sans-serif" font-size="11.5" font-weight="600" fill="'+COL.text+'">Ranked recommendations</text>';
+  svg+='<text x="'+(listX+listW)+'" y="'+(listY-6)+'" text-anchor="end" font-family="Inter,sans-serif" font-size="10" fill="'+COL.tick+'">relevance score &#8226; top match highlighted</text>';
 
-  // --- legend (to the right) ---
-  const lx = 360;
-  const lyTop = 70;
-  const rowH = 38;
-  let legend = "";
-  data.forEach((d, i) => {
-    const y = lyTop + i * rowH;
-    const swY = y - 9;
-    const isLead = d.lead;
-    const labelFill = "#F0F0F0";
-    const pctFill = isLead ? "#E8A838" : "#909090";
-    const pctWeight = isLead ? "700" : "600";
-    // bar track + value bar for a subtle proportional read
-    const barX = lx + 22;
-    const barMaxW = 250;
-    const barW = (d.pct / data[0].pct) * barMaxW;
-    legend += `
-      <g font-family="Inter,sans-serif">
-        <rect x="${lx}" y="${swY}" width="12" height="12" rx="3" fill="${d.color}"/>
-        <text x="${barX}" y="${y - 12}" font-size="12.5" font-weight="600" fill="${labelFill}">${d.name}</text>
-        <rect x="${barX}" y="${y - 2}" width="${barMaxW}" height="5" rx="2.5" fill="rgba(255,255,255,0.06)"/>
-        <rect x="${barX}" y="${y - 2}" width="${barW.toFixed(1)}" height="5" rx="2.5" fill="${d.color}">
-          <animate attributeName="width" from="0" to="${barW.toFixed(1)}" dur="0.8s" begin="${(0.3 + i*0.12).toFixed(2)}s" fill="freeze" calcMode="spline" keySplines="0.22 1 0.36 1"/>
-        </rect>
-        <text x="${barX + barMaxW}" y="${y - 9}" text-anchor="end" font-size="13" font-weight="${pctWeight}" fill="${pctFill}">${fmt(d.pct)}%</text>
-      </g>`;
-  });
+  const rowH=32, rowG=6, rankW=30, labelX=listX+rankW+14, scoreBarX=listX+300;
+  const scoreTrack=(listX+listW-58)-scoreBarX, maxScore=1.0;
+  for(let i=0;i<recs.length;i++){
+    const r=recs[i], ry=listY+8+i*(rowH+rowG);
+    const isTop=r.top;
+    const rowStroke=isTop?COL.amber:COL.grid;
+    const rowFill=isTop?"rgba(232,168,56,0.10)":COL.panel;
+    const barFill=isTop?COL.amber:COL.f35;
+    const barStroke=isTop?COL.amber:COL.teal;
+    const scoreColor=isTop?COL.amber:COL.teal;
+    const labelColor=COL.text;
+    const bw=scoreTrack*(r.score/maxScore);
 
-  // lead callout note under legend
-  const note = `
-    <g font-family="Inter,sans-serif">
-      <text x="${lx}" y="${lyTop + data.length*rowH + 4}" font-size="10.5" fill="#707070">
-        <tspan fill="#E8A838" font-weight="600">Healthcare &amp; Life Sciences</tspan> leads engagement share.
-      </text>
-    </g>`;
+    svg+='<g class="'+NS+'-row"><title>#'+(i+1)+' '+r.label+' &#183; relevance '+r.score.toFixed(2)+(isTop?' &#183; top match':'')+'</title>';
+    svg+='<rect class="'+NS+'-rowbg" x="'+listX+'" y="'+ry+'" width="'+listW+'" height="'+rowH+'" rx="5" fill="'+rowFill+'" stroke="'+rowStroke+'" stroke-width="'+(isTop?'1.4':'1')+'"/>';
+    // rank number
+    svg+='<text x="'+(listX+16)+'" y="'+(ry+rowH/2+4.5)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="700" fill="'+(isTop?COL.amber:COL.tick)+'">'+(i+1)+'</text>';
+    // label
+    svg+='<text x="'+labelX+'" y="'+(ry+rowH/2+4.5)+'" font-family="Inter,sans-serif" font-size="'+(isTop?'12.5':'12')+'" font-weight="'+(isTop?'600':'500')+'" fill="'+labelColor+'">'+r.label+(isTop?'  &#9733;':'')+'</text>';
+    // score bar track
+    svg+='<rect x="'+scoreBarX+'" y="'+(ry+rowH/2-5)+'" width="'+scoreTrack+'" height="10" rx="3" fill="'+COL.faint+'"/>';
+    svg+='<rect class="'+NS+'-bar" style="animation-delay:'+(0.08*i).toFixed(2)+'s" x="'+scoreBarX+'" y="'+(ry+rowH/2-5)+'" width="'+bw.toFixed(1)+'" height="10" rx="3" fill="'+barFill+'" stroke="'+barStroke+'" stroke-width="1"/>';
+    // score value
+    svg+='<text x="'+(listX+listW-8)+'" y="'+(ry+rowH/2+4)+'" text-anchor="end" font-family="Inter,sans-serif" font-size="11.5" font-weight="'+(isTop?'700':'600')+'" fill="'+scoreColor+'">'+r.score.toFixed(2)+'</text>';
+    svg+='</g>';
+  }
 
-  // --- title block ---
-  const titleBlock = `
-    <g font-family="Inter,sans-serif">
-      <text x="${pad}" y="${pad + 14}" font-size="13.5" font-weight="600" fill="#F0F0F0">Where the work lands</text>
-      <text x="${pad}" y="${pad + 30}" font-size="11" fill="#909090">Share of engagements by industry</text>
-    </g>`;
-
-  const style = `
-    <style>
-      .viz_domainDonut_seg{ transition: opacity .2s ease; }
-      .viz_domainDonut_seg:hover{ opacity: 0.82; }
-    </style>`;
-
-  const svg =
-`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;max-width:760px;height:auto;display:block" role="img" aria-label="Domain coverage donut chart. Healthcare and Life Sciences leads at 34 percent, followed by CPG and Retail 24 percent, Energy and Utilities 18 percent, Manufacturing 14 percent, and Financial Planning 10 percent across 5 industries.">
-  ${style}
-  <rect x="0" y="0" width="${W}" height="${H}" rx="14" fill="#141414"/>
-  ${titleBlock}
-  <g transform="rotate(-90 ${cx} ${cy})">
-    <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#262626" stroke-width="${ringW}"/>
-    ${segSVG}
-  </g>
-  ${center}
-  ${legend}
-  ${note}
-</svg>`;
+  svg+='</svg>';
   return svg;
+}
+
+/* ==== itemPlan ==== */
+function viz_itemPlan(){
+  const W = 760;
+  const C = {
+    bg:'#141414', panel:'#1A1A1A', deep:'#101010', grid:'#262626',
+    teal:'#0D7377', tealBright:'#14A8AD',
+    f12:'rgba(13,115,119,0.12)', f20:'rgba(13,115,119,0.2)', f35:'rgba(13,115,119,0.35)',
+    amber:'#E8A838', text:'#F0F0F0', muted:'#909090', tick:'#707070',
+    faint:'rgba(255,255,255,0.06)'
+  };
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const r1 = n => Math.round(n*10)/10;
+
+  // ---- data ----
+  const cols = ['Flagship','Urban','Suburban','Rural'];
+  const rows = ['Seasonal','Core','Premium','Value','Local'];
+  // relative store count per cluster (sums ~1.0); Suburban largest, Flagship smallest
+  const share = { Flagship:0.10, Urban:0.24, Suburban:0.42, Rural:0.24 };
+  const storeN = { Flagship:248, Urban:596, Suburban:1042, Rural:596 };
+  // assortment depth 1..4 per [row][col]; depth 5 marks the amber priority cells
+  // priority cells: Premium x Flagship, Local x Rural, Seasonal x Urban
+  const depth = [
+    // Flagship, Urban, Suburban, Rural
+    [3, 5, 4, 2],  // Seasonal  -> Urban priority
+    [4, 4, 4, 3],  // Core
+    [5, 3, 3, 1],  // Premium   -> Flagship priority
+    [2, 3, 4, 4],  // Value
+    [2, 2, 3, 5]   // Local     -> Rural priority
+  ];
+  const tealFill = v => v<=1 ? C.f12 : v===2 ? C.f20 : v===3 ? C.f35 : C.teal;
+  const tealStroke = v => v>=4 ? C.tealBright : C.grid;
+  const depthWord = v => v>=4 ? 'deep' : v===3 ? 'broad' : v===2 ? 'curated' : 'edited';
+
+  // ---- layout ----
+  const padL = 16, padT = 16;
+  const labelW = 86;
+  const gridX = padL + labelW + 8;
+  const gridRight = W - padL - 18;
+  const gridW = gridRight - gridX;
+  const nCols = cols.length, nRows = rows.length;
+  const gap = 6;
+  const cellW = (gridW - gap*(nCols-1)) / nCols;
+  const colCx = i => gridX + i*(cellW+gap) + cellW/2;
+
+  // cluster band (part a)
+  const bubY = 118;          // bubble centre row
+  const matTop = 200;        // matrix cells start
+  const cellH = 30;
+  const gridH = cellH*nRows + gap*(nRows-1);
+  const matBottom = matTop + gridH;
+  const colLabY = matBottom + 15;   // column labels under matrix
+  const legY = matBottom + 42;      // legend + sparkline band (extra gap below col labels)
+  const noteY = legY + 24;
+  const H = noteY + 14;
+
+  let s = '';
+  s += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;max-width:760px;height:auto;display:block" role="img" aria-label="Two-part retail item plan. Part a: four store clusters from K-means, Flagship Urban Suburban and Rural, shown as bubbles sized by relative store count with Suburban the largest. Part b centerpiece: a five-by-four assortment-depth matrix, rows Seasonal Core Premium Value Local against the four clusters, cells shaded teal by planned assortment depth with three amber priority cells, Seasonal in Urban, Premium in Flagship and Local in Rural. Headline: forecasting at store-item granularity across about 2,482 stores.">`;
+
+  // ---- styles (prefixed, resting state complete) ----
+  s += `<style>`
+    + `.viz_itemPlan_cell{opacity:1;animation:viz_itemPlan_fade .5s ease both}`
+    + `@keyframes viz_itemPlan_fade{from{opacity:0}to{opacity:1}}`
+    + `.viz_itemPlan_cell:hover{stroke:${C.tealBright};stroke-width:1.6}`
+    + `.viz_itemPlan_pri{animation:viz_itemPlan_pulse 3.2s ease-in-out infinite}`
+    + `@keyframes viz_itemPlan_pulse{0%,100%{opacity:1}50%{opacity:.82}}`
+    + `.viz_itemPlan_bub{transition:opacity .15s ease}`
+    + `.viz_itemPlan_bub:hover{opacity:.8}`
+    + `.viz_itemPlan_spark{stroke-dasharray:240;stroke-dashoffset:0;animation:viz_itemPlan_draw 1.6s ease-out both}`
+    + `@keyframes viz_itemPlan_draw{from{stroke-dashoffset:240}to{stroke-dashoffset:0}}`
+    + `</style>`;
+
+  // ---- background ----
+  s += `<rect x="0" y="0" width="${W}" height="${H}" fill="${C.bg}"/>`;
+  s += `<rect x="${padL-6}" y="${padT-6}" width="${W-2*padL+12}" height="${H-2*padT+12}" rx="8" fill="${C.panel}" stroke="${C.grid}"/>`;
+
+  // ---- title block ----
+  s += `<text x="${padL+2}" y="${padT+14}" font-family="Inter,sans-serif" font-size="13.5" font-weight="600" fill="${C.text}">Cluster stores &#8594; plan assortment per cluster</text>`;
+  s += `<text x="${padL+2}" y="${padT+31}" font-family="Inter,sans-serif" font-size="11" fill="${C.muted}">K-means store clusters &#183; assortment depth planned for each cluster</text>`;
+
+  // ---- headline metric (amber, top-right) ----
+  const hx = W - padL - 2;
+  s += `<text x="${hx}" y="${padT+15}" text-anchor="end" font-family="Inter,sans-serif" font-size="20" font-weight="700" fill="${C.amber}">~2,482 stores</text>`;
+  s += `<text x="${hx}" y="${padT+31}" text-anchor="end" font-family="Inter,sans-serif" font-size="11" fill="${C.muted}">forecast at store-item granularity</text>`;
+
+  // ---- section (a) label ----
+  s += `<text x="${padL+2}" y="68" font-family="Inter,sans-serif" font-size="10" fill="${C.tick}">(a) STORE CLUSTERS &#183; sized by relative store count</text>`;
+  s += `<text x="${hx}" y="68" text-anchor="end" font-family="Inter,sans-serif" font-size="10" fill="${C.tick}">sales velocity &#183; format &#183; regional demand &#183; item perf.</text>`;
+
+  // ---- cluster bubbles (part a) ----
+  for(let i=0;i<nCols;i++){
+    const name = cols[i];
+    const cx = colCx(i);
+    const rr = 11 + Math.sqrt(share[name]) * 32;   // area ~ store count
+    const isLargest = name==='Suburban';
+    const fill = isLargest ? C.f35 : C.f20;
+    const stroke = isLargest ? C.tealBright : C.teal;
+    s += `<g class="viz_itemPlan_bub">`
+      + `<title>${esc(name)} cluster &#183; ${storeN[name]} stores (${Math.round(share[name]*100)}% of fleet)</title>`
+      + `<circle cx="${r1(cx)}" cy="${bubY}" r="${r1(rr)}" fill="${fill}" stroke="${stroke}" stroke-width="1.2"/>`
+      + `<text x="${r1(cx)}" y="${bubY+4}" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="${C.text}">${Math.round(share[name]*100)}%</text>`
+      + `</g>`;
+    // cluster name + count under bubble
+    s += `<text x="${r1(cx)}" y="${bubY+rr+16}" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="${C.text}">${name}</text>`;
+    s += `<text x="${r1(cx)}" y="${bubY+rr+29}" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="${C.muted}">${storeN[name]} stores</text>`;
+  }
+
+  // ---- divider between (a) and (b) ----
+  s += `<line x1="${padL+2}" y1="180" x2="${W-padL-2}" y2="180" stroke="${C.grid}"/>`;
+  s += `<text x="${padL+2}" y="${matTop-8}" font-family="Inter,sans-serif" font-size="10" fill="${C.tick}">(b) ASSORTMENT PLAN &#183; category depth per cluster</text>`;
+
+  // ---- column header connectors (link bubbles to matrix columns) ----
+  for(let i=0;i<nCols;i++){
+    const cx = colCx(i);
+    s += `<line x1="${r1(cx)}" y1="184" x2="${r1(cx)}" y2="${matTop-4}" stroke="${C.faint}" stroke-width="1"/>`;
+  }
+
+  // ---- matrix cells (part b, centerpiece) ----
+  let delay = 0;
+  for(let r=0;r<nRows;r++){
+    const ry = matTop + r*(cellH+gap);
+    // row label (right-aligned, fully legible)
+    s += `<text x="${gridX-12}" y="${r1(ry+cellH/2+3.5)}" text-anchor="end" font-family="Inter,sans-serif" font-size="11" fill="${C.text}">${rows[r]}</text>`;
+    for(let c=0;c<nCols;c++){
+      const cx = gridX + c*(cellW+gap);
+      const v = depth[r][c];
+      const pri = v===5;
+      const fill = pri ? C.amber : tealFill(v);
+      const stroke = pri ? C.amber : tealStroke(v);
+      const cls = pri ? 'viz_itemPlan_cell viz_itemPlan_pri' : 'viz_itemPlan_cell';
+      const word = pri ? 'priority &#183; expanded assortment' : depthWord(v)+' assortment';
+      delay += 0.018;
+      s += `<rect class="${cls}" x="${r1(cx)}" y="${r1(ry)}" width="${r1(cellW)}" height="${cellH}" rx="3" fill="${fill}" stroke="${stroke}" stroke-width="${pri?1.3:0.75}" style="animation-delay:${delay.toFixed(2)}s">`
+        + `<title>${rows[r]} &#215; ${cols[c]} &#8212; ${word}</title></rect>`;
+      // depth label inside cell + priority glyph (always light-on-fill, never dark-on-dark)
+      if(pri){
+        s += `<text x="${r1(cx+cellW/2)}" y="${r1(ry+cellH/2+4)}" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" font-weight="700" fill="${C.deep}">PRIORITY</text>`;
+      } else {
+        const col = v>=4 ? C.text : C.muted;
+        s += `<text x="${r1(cx+cellW/2)}" y="${r1(ry+cellH/2+4)}" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="${col}">${depthWord(v)}</text>`;
+      }
+    }
+  }
+
+  // ---- compact column labels under the matrix ----
+  for(let i=0;i<nCols;i++){
+    const cx = colCx(i);
+    s += `<text x="${r1(cx)}" y="${colLabY}" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="${C.muted}">${cols[i]}</text>`;
+  }
+
+  // ---- legend: depth ramp (bottom-left) ----
+  const legItems = [
+    {f:C.f12, t:'edited'},
+    {f:C.f20, t:'curated'},
+    {f:C.f35, t:'broad'},
+    {f:C.teal, t:'deep'},
+    {f:C.amber, t:'priority'}
+  ];
+  let lx = gridX - 12;
+  s += `<text x="${lx}" y="${legY+1}" font-family="Inter,sans-serif" font-size="10" fill="${C.tick}">depth</text>`;
+  lx += 36;
+  for(let i=0;i<legItems.length;i++){
+    s += `<rect x="${lx}" y="${legY-9}" width="12" height="12" rx="2" fill="${legItems[i].f}" stroke="${C.grid}" stroke-width="0.75"/>`;
+    s += `<text x="${lx+17}" y="${legY+1}" font-family="Inter,sans-serif" font-size="10" fill="${C.muted}">${legItems[i].t}</text>`;
+    lx += 17 + legItems[i].t.length*5.8 + 16;
+  }
+
+  // ---- tiny item-level forecast sparkline (corner: legend row, right side) ----
+  const pts = [0.30,0.42,0.36,0.55,0.48,0.66,0.60,0.78,0.86];
+  const spkW = 70, spkH = 18;
+  const spkX = W - padL - 18 - spkW;
+  const spkY = legY - 12;          // top of spark band
+  const baseY = spkY + spkH;
+  const stepx = spkW/(pts.length-1);
+  let d = '';
+  for(let p=0;p<pts.length;p++){
+    const px = spkX + p*stepx;
+    const py = baseY - pts[p]*spkH;
+    d += (p===0?'M':'L') + r1(px) + ' ' + r1(py) + ' ';
+  }
+  const area = d + `L${r1(spkX+spkW)} ${r1(baseY)} L${r1(spkX)} ${r1(baseY)} Z`;
+  s += `<text x="${spkX-8}" y="${legY+1}" text-anchor="end" font-family="Inter,sans-serif" font-size="10" fill="${C.tick}">item forecast</text>`;
+  s += `<path d="${area}" fill="${C.f12}" stroke="none"/>`;
+  s += `<path class="viz_itemPlan_spark" d="${d.trim()}" fill="none" stroke="${C.tealBright}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const lastX = spkX+(pts.length-1)*stepx, lastY = baseY-pts[pts.length-1]*spkH;
+  s += `<circle cx="${r1(lastX)}" cy="${r1(lastY)}" r="2.4" fill="${C.tealBright}"/>`;
+
+  // ---- footer note ----
+  s += `<text x="${padL+2}" y="${noteY}" font-family="Inter,sans-serif" font-size="10" fill="${C.tick}">forecast at store-item granularity &#183; assortment aligned to local demand</text>`;
+
+  s += `</svg>`;
+  return s;
 }
 
 /* ==== registry + wiring ==== */
-var NAME2KEY = {"License Plate Recognition": "licensePlate", "RoboCar": "roboCar", "Music Mood Recommendation System": "musicMood", "Gujarati/Hindi → English Transliteration": "transliteration", "Natural Language → Python Platform": "nlToPython", "Plug & Predict — Treatment Pathway Predictor": "plugPredict", "Depression Detection via Social Media": "depression", "NYC Cab Demand Prediction + Dynamic Routing": "cabDemand", "Crypto Sentiment Analysis — Twitter → Bitcoin Price": "crypto", "PARTH — Predictive Analytics & Real-Time Heuristics": "parth", "Annual Sales Forecasting Revamp": "salesForecast", "Major US Energy Utility | Distribution Fault Prediction & Rerouting": "energyGrid", "Global Battery Manufacturer | Demand Forecasting": "battery", "Global Pharma Client | Patient Care Portfolio": "patientCare", "Global Pharma Client | Vaccine Smart Ordering": "vaccine", "CPG Manufacturer | Forecast Explainability": "forecastExplain"};
-var VIZ = {licensePlate:viz_licensePlate, musicMood:viz_musicMood, depression:viz_depression, parth:viz_parth, energyGrid:viz_energyGrid, causalML:viz_causalML, forecastExplain:viz_forecastExplain, salesForecast:viz_salesForecast, roboCar:viz_roboCar, crypto:viz_crypto, nlToPython:viz_nlToPython, transliteration:viz_transliteration, cabDemand:viz_cabDemand, battery:viz_battery, plugPredict:viz_plugPredict, vaccine:viz_vaccine, patientCare:viz_patientCare, impactDashboard:viz_impactDashboard, skillsRadar:viz_skillsRadar, domainDonut:viz_domainDonut};
+var NAME2KEY = {"Voice & Sensor Home Automation":"homeAuto","Library Book Recommendation System":"libraryRec","Major US Retailer | Item Plan & Demand Forecasting":"itemPlan","License Plate Recognition": "licensePlate", "RoboCar": "roboCar", "Music Mood Recommendation System": "musicMood", "Gujarati/Hindi → English Transliteration": "transliteration", "Natural Language → Python Platform": "nlToPython", "Plug & Predict — Treatment Pathway Predictor": "plugPredict", "Depression Detection via Social Media": "depression", "NYC Cab Demand Prediction + Dynamic Routing": "cabDemand", "Crypto Sentiment Analysis — Twitter → Bitcoin Price": "crypto", "PARTH — Predictive Analytics & Real-Time Heuristics": "parth", "Annual Sales Forecasting Revamp": "salesForecast", "Major US Energy Utility | Distribution Fault Prediction & Rerouting": "energyGrid", "Global Battery Manufacturer | Demand Forecasting": "battery", "Global Pharma Client | Patient Care Portfolio": "patientCare", "Global Pharma Client | Vaccine Smart Ordering": "vaccine", "CPG Manufacturer | Forecast Explainability": "forecastExplain"};
+var VIZ = {homeAuto:viz_homeAuto,libraryRec:viz_libraryRec,itemPlan:viz_itemPlan,licensePlate:viz_licensePlate, musicMood:viz_musicMood, depression:viz_depression, parth:viz_parth, energyGrid:viz_energyGrid, causalML:viz_causalML, forecastExplain:viz_forecastExplain, salesForecast:viz_salesForecast, roboCar:viz_roboCar, crypto:viz_crypto, nlToPython:viz_nlToPython, transliteration:viz_transliteration, cabDemand:viz_cabDemand, battery:viz_battery, plugPredict:viz_plugPredict, vaccine:viz_vaccine, patientCare:viz_patientCare, impactDashboard:viz_impactDashboard, skillsRadar:viz_skillsRadar, domainDonut:viz_domainDonut};
 
 (function(){
   function put(id, fn){
@@ -2824,7 +3194,6 @@ var VIZ = {licensePlate:viz_licensePlate, musicMood:viz_musicMood, depression:vi
     if(el && typeof fn==='function'){ try{ el.innerHTML=fn(); }catch(e){ console.error('viz '+id+' failed', e); } }
   }
   function init(){
-    put('impactViz',   typeof viz_impactDashboard==='function' ? viz_impactDashboard : null);
     put('skillsRadarViz', typeof viz_skillsRadar==='function' ? viz_skillsRadar : null);
     put('domainDonutViz', typeof viz_domainDonut==='function' ? viz_domainDonut : null);
   }
