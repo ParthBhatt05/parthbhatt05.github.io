@@ -313,7 +313,7 @@ footer{border-top:1px solid var(--line);padding:32px 0;text-align:center;font-si
     <div class="thread-grid fade">
       <div class="thread-card"><div class="thread-card-name">Lutalica</div><div class="thread-card-desc">Founding member of a mental health expression platform (poetry, prose, open mics) in Ahmedabad — promoting wellbeing through community expression before mental health was a mainstream conversation.</div></div>
       <div class="thread-card"><div class="thread-card-name">Depression Detection</div><div class="thread-card-desc">Passive behavioral signals from Twitter → clinical severity triage → geo-matched therapist routing. Reaching people who wouldn't have self-reported.</div></div>
-      <div class="thread-card"><div class="thread-card-name">Patient Care & Vaccines</div><div class="thread-card-desc">$120M profit impact from smarter HCP matching. 34% stockout reduction in vaccine supply chains. Better treatment, fewer gaps in access.</div></div>
+      <div class="thread-card"><div class="thread-card-name">Patient Care & Vaccines</div><div class="thread-card-desc">$2B business impact from smarter HCP matching. 34% stockout reduction in vaccine supply chains. Better treatment, fewer gaps in access.</div></div>
       <div class="thread-card"><div class="thread-card-name">Energy Grid</div><div class="thread-card-desc">22% reduction in circuit faults for a major US utility. Every fault prevented is a household that keeps its lights on — $18M annual improvement with real reliability behind it.</div></div>
       <div class="thread-card"><div class="thread-card-name">Predictive Maintenance</div><div class="thread-card-desc">CNC failure prediction at Danfoss reduced unplanned downtime 25%. Less industrial waste, safer factory floors, $1.2M weekly revenue that stays in productive output rather than scrap.</div></div>
       <div class="thread-card"><div class="thread-card-name">Transliteration</div><div class="thread-card-desc">Gujarati and Hindi speakers heard and understood in English — not just translated, but preserved. Language access as a form of inclusion.</div></div>
@@ -326,10 +326,7 @@ footer{border-top:1px solid var(--line);padding:32px 0;text-align:center;font-si
 <section id="stack">
   <div class="wrap">
     <div class="sec-label fade">Skills</div>
-    <div class="stack-visuals fade">
-      <div class="v-panel"><div id="skillsMapViz"></div></div>
-    </div>
-    <div id="stackGroups" class="fade"></div>
+    <div id="skillsBoard" class="fade"></div>
   </div>
 </section>
 
@@ -348,7 +345,7 @@ footer{border-top:1px solid var(--line);padding:32px 0;text-align:center;font-si
   </div>
 </section>
 
-<script src="viz.js"></script>
+<script src="viz.js?v=4"></script>
 <script>
 /* ════════ DATA ════════ */
 
@@ -373,7 +370,7 @@ const ARC = [
    full:"Co-op at Danfoss mid-degree. Turned raw CNC machine audio into a predictive maintenance signal — the kind of engineering that protects $1.2M in weekly revenue per line. Replaced a linear forecasting model with an ensemble that cut error by 12%. Industrial ML with real tolerances and real stakes."},
   {year:"2023–Present", org:"Deloitte", title:"Leading at Scale",
    proved:"The best measure of a leader is the excellence of their team.",
-   full:"Not just building models — leading teams that build models. Across 7 engagements in 3 years: energy grid rerouting, battery demand forecasting, vaccine smart ordering, $120M patient care impact, causal ML on a $2B patient care portfolio, item planning, forecast explainability. The pattern: own the technical approach, earn stakeholder trust, build the team's capability so it outlasts the project."}
+   full:"Not just building models — leading teams that build models. Across 7 engagements in 3 years: energy grid rerouting, battery demand forecasting, vaccine smart ordering, $2B patient-care impact across 8 indications, causal ML and launch-readiness strategy, item planning, forecast explainability. The pattern: own the technical approach, earn stakeholder trust, build the team's capability so it outlasts the project."}
 ];
 
 /* Flow node: {t:title, s:[sub lines], b:[branch lines]} — last node rendered amber */
@@ -592,7 +589,7 @@ const ERAS = [
   { name:"Global Pharma Client | Patient Care Portfolio", year:"2024–2025", badge:"$2B GTM impact",
     p1:"HCP engagement was suboptimal across 8 therapy indications.",
     problem:"HCP engagement was suboptimal across 8 therapy indications — doctors weren't receiving the right signal at the right moment, at scale. AI-powered use cases fed directly into GTM strategy and launch readiness, generating $2B in business impact.",
-    impact:"$2B business impact from GTM & launch readiness strategies · $120M profit impact · 22% improvement in recommendation acceptance · 15% increase in patient adherence · 12 use cases · 8 indications",
+    impact:"$2B business impact from GTM & launch readiness strategies · 22% improvement in recommendation acceptance · 15% increase in patient adherence · 12 use cases · 8 indications",
     flow:[
       {t:"Multi-Source Patient & HCP Data Integration", s:["Claims data (Rx fills, procedure codes) + EMR (diagnosis, labs)","HCP engagement signals: rep visit cadence, channel response, sample uptake","Prescription history: brand switches, adherence gaps, formulary changes"]},
       {t:"Causal Inference Engine", s:["DoWhy framework: formal causal graph (DAG) defined per indication","Propensity score matching — controls for HCP selection bias","Double ML (Chernozhukov): nuisance function estimation separates confounders","Isolates true treatment effect: what actually drives HCP adoption — not correlation"]},
@@ -883,13 +880,11 @@ ERAS.forEach((era,i)=>{
   panelsEl.appendChild(panel);
 });
 
-/* ════════ RENDER: STACK ════════ */
-const sg=document.getElementById("stackGroups");
-STACK.forEach(g=>{
-  const d=document.createElement("div"); d.className="stack-group";
-  d.innerHTML=`<div class="stack-label">${g.label}</div><div class="pills">${g.items.map(x=>`<span class="pill">${x}</span>`).join("")}</div>`;
-  sg.appendChild(d);
-});
+/* ════════ RENDER: SKILLS BOARD ════════ */
+(function(){
+  const el=document.getElementById("skillsBoard");
+  if(el && typeof renderSkills==="function") el.innerHTML=renderSkills(STACK);
+})();
 
 /* ════════ BEHAVIOR ════════ */
 
@@ -954,17 +949,6 @@ const statObs=new IntersectionObserver(es=>es.forEach(e=>{
   if(e.isIntersecting){animateCounter(e.target);statObs.unobserve(e.target);}
 }),{threshold:0.5});
 document.querySelectorAll(".num").forEach(el=>statObs.observe(el));
-
-// skills marquee
-(()=>{
-  const allSkills=[...new Set(STACK.flatMap(g=>g.items))];
-  const doubled=[...allSkills,...allSkills];
-  const track=document.createElement("div"); track.className="marquee-track";
-  doubled.forEach(s=>{const p=document.createElement("span");p.className="marquee-pill";p.textContent=s;track.appendChild(p);});
-  const wrap=document.createElement("div"); wrap.className="marquee-wrap";
-  wrap.appendChild(track);
-  document.getElementById("stackGroups").after(wrap);
-})();
 
 // hero neural-network canvas — mouse-reactive, reduced-motion aware
 (function(){

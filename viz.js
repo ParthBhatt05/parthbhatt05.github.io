@@ -1191,12 +1191,14 @@ ${rBaseline}
 <text x="${PX(b2x + barW / 2)}" y="${PX(rBaseY + 30)}" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="#707070">LGBM+LSTM+TS</text>
 
 <g class="viz_salesForecast_callout">
-  <rect x="${PX((b1x + b2x) / 2 + barW / 2 - 48)}" y="86" width="96" height="22" rx="5" fill="#1A1A1A" stroke="#E8A838" stroke-width="1.2"/>
-  <text x="${PX((b1x + b2x) / 2 + barW / 2)}" y="101" text-anchor="middle" font-family="Inter,sans-serif" font-size="11.5" font-weight="700" fill="#E8A838">&#8722;12% error</text>
-  <line x1="${PX((b1x + b2x) / 2 + barW / 2 - 14)}" y1="108" x2="${PX(b1x + barW / 2)}" y2="${PX(enTopY - 9)}" stroke="#E8A838" stroke-width="1.3"/>
-  <path d="M${PX(b1x + barW / 2 - 4)},${PX(enTopY - 10)} L${PX(b1x + barW / 2)},${PX(enTopY - 2)} L${PX(b1x + barW / 2 + 4)},${PX(enTopY - 10)} Z" fill="#E8A838"/>
-  <line x1="${PX((b1x + b2x) / 2 + barW / 2 + 14)}" y1="108" x2="${PX(b2x + barW / 2)}" y2="${PX(ensTopY - 9)}" stroke="#E8A838" stroke-width="1.3"/>
-  <path d="M${PX(b2x + barW / 2 - 4)},${PX(ensTopY - 10)} L${PX(b2x + barW / 2)},${PX(ensTopY - 2)} L${PX(b2x + barW / 2 + 4)},${PX(ensTopY - 10)} Z" fill="#E8A838"/>
+  <rect x="${PX((b1x + b2x) / 2 + barW / 2 - 48)}" y="78" width="96" height="22" rx="5" fill="#1A1A1A" stroke="#E8A838" stroke-width="1.2"/>
+  <text x="${PX((b1x + b2x) / 2 + barW / 2)}" y="93" text-anchor="middle" font-family="Inter,sans-serif" font-size="11.5" font-weight="700" fill="#E8A838">&#8722;12% error</text>
+  <line x1="${PX((b1x + b2x) / 2 + barW / 2)}" y1="100" x2="${PX((b1x + b2x) / 2 + barW / 2)}" y2="110" stroke="#E8A838" stroke-width="1.2"/>
+  <line x1="${PX(b1x + barW / 2)}" y1="110" x2="${PX(b2x + barW / 2)}" y2="110" stroke="#E8A838" stroke-width="1.2"/>
+  <line x1="${PX(b1x + barW / 2)}" y1="110" x2="${PX(b1x + barW / 2)}" y2="${PX(enTopY - 8)}" stroke="#E8A838" stroke-width="1.2"/>
+  <path d="M${PX(b1x + barW / 2 - 4)},${PX(enTopY - 9)} L${PX(b1x + barW / 2)},${PX(enTopY - 2)} L${PX(b1x + barW / 2 + 4)},${PX(enTopY - 9)} Z" fill="#E8A838"/>
+  <line x1="${PX(b2x + barW / 2)}" y1="110" x2="${PX(b2x + barW / 2)}" y2="${PX(ensTopY - 8)}" stroke="#E8A838" stroke-width="1.2"/>
+  <path d="M${PX(b2x + barW / 2 - 4)},${PX(ensTopY - 9)} L${PX(b2x + barW / 2)},${PX(ensTopY - 2)} L${PX(b2x + barW / 2 + 4)},${PX(ensTopY - 9)} Z" fill="#E8A838"/>
 </g>
 
 <text x="${PX(rx0 - 6)}" y="${PX(lb + 50)}" font-family="Inter,sans-serif" font-size="10" fill="#707070">Bayesian hyperparameter optimization</text>
@@ -1321,165 +1323,75 @@ function viz_roboCar(){
 
 /* ==== crypto ==== */
 function viz_crypto(){
-  const W=760, H=400, pad=16;
-  // ---- color tokens ----
-  const C={bgOuter:"#141414",panel:"#1A1A1A",inset:"#101010",teal:"#0D7377",tealBright:"#14A8AD",tealFill:"rgba(13,115,119,0.2)",tealFillSoft:"rgba(13,115,119,0.12)",amber:"#E8A838",text:"#F0F0F0",muted:"#909090",tick:"#707070",grid:"#262626",faint:"rgba(255,255,255,0.06)"};
-
-  // ---- main chart geometry ----
-  const N=20;
-  const chL=pad+34, chR=W-200, chT=66, chB=H-44;            // plot box for main chart
-  const plotW=chR-chL, plotH=chB-chT;
-
-  // Sentiment leads price: sentiment turning points precede price by ~2 steps.
-  // Both normalized to 0..1. Fixed (reproducible) arrays.
-  const sentiment=[0.30,0.38,0.52,0.66,0.74,0.70,0.58,0.44,0.36,0.42,0.56,0.70,0.80,0.76,0.62,0.48,0.40,0.50,0.66,0.78];
-  const price    =[0.34,0.32,0.36,0.46,0.60,0.70,0.72,0.64,0.50,0.40,0.40,0.50,0.64,0.74,0.76,0.66,0.52,0.44,0.50,0.62];
-
-  const xAt=i=>chL + (plotW)*(i/(N-1));
-  const yAt=v=>chB - plotH*v;
-
-  const pathFrom=arr=>{
-    let d="";
-    for(let i=0;i<N;i++){ d += (i?"L":"M") + xAt(i).toFixed(1) + " " + yAt(arr[i]).toFixed(1); }
-    return d;
-  };
-  const areaFrom=arr=>{
-    let d="M"+chL.toFixed(1)+" "+chB.toFixed(1);
-    for(let i=0;i<N;i++){ d += "L"+xAt(i).toFixed(1)+" "+yAt(arr[i]).toFixed(1); }
-    d += "L"+chR.toFixed(1)+" "+chB.toFixed(1)+"Z";
-    return d;
-  };
-
-  // ---- inset cross-correlation bar chart geometry ----
-  const inL=chR+30, inR=W-pad-6, inT=110, inB=H-58;
-  const insW=inR-inL, insH=inB-inT;
-  // lag -3..+3 ; positive lag = sentiment leads price. Peak at +2 (amber).
-  const lags=[-3,-2,-1,0,1,2,3];
-  const corr=[-0.18,0.05,0.22,0.38,0.61,0.74,0.41];
-  const peak=5; // index of lag +2
-  const cMin=-0.3, cMax=0.8;
-  const zeroY = inB - insH*((0-cMin)/(cMax-cMin));
-  const barW = (insW/lags.length)*0.62;
-  const barGap = insW/lags.length;
-  const yC=v=> inB - insH*((v-cMin)/(cMax-cMin));
-
-  // gridlines main chart (horizontal at 0,.25,.5,.75,1)
-  let grid="";
-  [0,0.25,0.5,0.75,1].forEach(v=>{
-    const y=yAt(v).toFixed(1);
-    grid+=`<line x1="${chL}" y1="${y}" x2="${chR}" y2="${y}" stroke="${C.grid}" stroke-width="1"/>`;
-  });
-
-  // x ticks (every 4 steps) main chart
-  let xticks="";
-  for(let i=0;i<N;i+=4){
-    xticks+=`<text x="${xAt(i).toFixed(1)}" y="${chB+16}" font-size="10" fill="${C.tick}" text-anchor="middle">t${i}</text>`;
-  }
-
-  // y axis tick labels (price scale left, sentiment right hint)
-  let yticks="";
-  [["High",1],["",0.5],["Low",0]].forEach(([lab,v])=>{
-    if(lab) yticks+=`<text x="${chL-8}" y="${(yAt(v)+3).toFixed(1)}" font-size="10" fill="${C.tick}" text-anchor="end">${lab}</text>`;
-  });
-
-  // lead markers: vertical guides connecting a sentiment peak to the price peak it precedes
-  // sentiment peak at t4 -> price peak at t6 ; sentiment peak at t12 -> price peak at t14
-  const leadPairs=[[4,6],[12,14]];
-  let leads="";
-  leadPairs.forEach(([si,pi])=>{
-    const x1=xAt(si), x2=xAt(pi);
-    const ya=yAt(sentiment[si]);
-    // dashed connector across the lag at the top
-    const topY=chT+10;
-    leads+=`<line x1="${x1.toFixed(1)}" y1="${topY}" x2="${x1.toFixed(1)}" y2="${ya.toFixed(1)}" stroke="${C.amber}" stroke-width="1" stroke-dasharray="2 3" opacity="0.55"/>`;
-    leads+=`<line x1="${x2.toFixed(1)}" y1="${topY}" x2="${x2.toFixed(1)}" y2="${yAt(price[pi]).toFixed(1)}" stroke="${C.tealBright}" stroke-width="1" stroke-dasharray="2 3" opacity="0.55"/>`;
-    leads+=`<path d="M${x1.toFixed(1)} ${topY}L${x2.toFixed(1)} ${topY}" stroke="${C.amber}" stroke-width="1.2" fill="none" opacity="0.8"/>`;
-    leads+=`<path d="M${(x2-5).toFixed(1)} ${(topY-3).toFixed(1)}L${x2.toFixed(1)} ${topY}L${(x2-5).toFixed(1)} ${(topY+3).toFixed(1)}" stroke="${C.amber}" stroke-width="1.2" fill="none" opacity="0.8"/>`;
-    leads+=`<text x="${((x1+x2)/2).toFixed(1)}" y="${(topY-5).toFixed(1)}" font-size="9" fill="${C.amber}" text-anchor="middle">+2 lag</text>`;
-  });
-
-  // sentiment & price points (small dots)
-  let dots="";
-  for(let i=0;i<N;i++){
-    dots+=`<circle cx="${xAt(i).toFixed(1)}" cy="${yAt(sentiment[i]).toFixed(1)}" r="1.8" fill="${C.amber}"/>`;
-    dots+=`<circle cx="${xAt(i).toFixed(1)}" cy="${yAt(price[i]).toFixed(1)}" r="1.8" fill="${C.tealBright}"/>`;
-  }
-
-  // inset bars
-  let bars="";
-  for(let k=0;k<lags.length;k++){
-    const cx=inL + barGap*(k+0.5);
-    const v=corr[k];
-    const yTop=yC(Math.max(v,0));
-    const yBot=yC(Math.min(v,0));
-    const h=Math.max(1,yBot-yTop);
-    const isPeak=(k===peak);
-    const fill=isPeak?C.amber:(v<0?C.tealFillSoft:C.tealFill);
-    const stroke=isPeak?C.amber:C.teal;
-    bars+=`<g><title>lag ${lags[k]>0?"+":""}${lags[k]}: r=${v.toFixed(2)}</title>`+
-      `<rect x="${(cx-barW/2).toFixed(1)}" y="${yTop.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="1.5" fill="${fill}" stroke="${stroke}" stroke-width="1"/></g>`;
-    bars+=`<text x="${cx.toFixed(1)}" y="${(inB+13).toFixed(1)}" font-size="9" fill="${C.tick}" text-anchor="middle">${lags[k]>0?"+":""}${lags[k]}</text>`;
-    if(isPeak){
-      bars+=`<text x="${cx.toFixed(1)}" y="${(yTop-5).toFixed(1)}" font-size="10" font-weight="600" fill="${C.amber}" text-anchor="middle">.74</text>`;
+  var H=384;
+  var leftBoxX=16, leftBoxY=46, leftBoxW=420, leftBoxH=296;
+  var rightBoxX=472, rightBoxY=46, rightBoxW=272, rightBoxH=296;
+  var plotX0=72, plotX1=412, plotY0=82, plotY1=276;
+  var n=16;
+  var sent=[0.30,0.40,0.55,0.70,0.80,0.74,0.58,0.42,0.34,0.44,0.62,0.78,0.86,0.80,0.66,0.52];
+  var price=[0.26,0.30,0.34,0.45,0.60,0.72,0.79,0.72,0.56,0.42,0.36,0.46,0.62,0.76,0.83,0.77];
+  function xAt(i){ return plotX0+(plotX1-plotX0)*(i/(n-1)); }
+  function yAt(v){ return plotY1-(plotY1-plotY0)*v; }
+  function smooth(arr){
+    var pts=[],i;
+    for(i=0;i<n;i++) pts.push([xAt(i),yAt(arr[i])]);
+    var d="M"+pts[0][0].toFixed(1)+" "+pts[0][1].toFixed(1);
+    for(i=0;i<pts.length-1;i++){
+      var p0=pts[i>0?i-1:i], p1=pts[i], p2=pts[i+1], p3=pts[i+2<pts.length?i+2:i+1];
+      var c1x=p1[0]+(p2[0]-p0[0])/6, c1y=p1[1]+(p2[1]-p0[1])/6;
+      var c2x=p2[0]-(p3[0]-p1[0])/6, c2y=p2[1]-(p3[1]-p1[1])/6;
+      d+=" C"+c1x.toFixed(1)+" "+c1y.toFixed(1)+" "+c2x.toFixed(1)+" "+c2y.toFixed(1)+" "+p2[0].toFixed(1)+" "+p2[1].toFixed(1);
     }
+    return d;
   }
-  // inset zero line + frame
-  const insetZero=`<line x1="${inL}" y1="${zeroY.toFixed(1)}" x2="${inR}" y2="${zeroY.toFixed(1)}" stroke="${C.grid}" stroke-width="1"/>`;
-
-  // legend swatches (dual axis hint)
-  const legend=
-    `<g font-size="11" font-family="Inter,sans-serif">`+
-      `<rect x="${chL}" y="${chT-22}" width="11" height="3" rx="1" fill="${C.tealBright}"/>`+
-      `<text x="${chL+17}" y="${chT-18}" fill="${C.muted}">BTC price (left axis)</text>`+
-      `<rect x="${chL+150}" y="${chT-22}" width="11" height="3" rx="1" fill="${C.amber}"/>`+
-      `<text x="${chL+167}" y="${chT-18}" fill="${C.muted}">Twitter sentiment (right axis)</text>`+
-    `</g>`;
-
-  const svg=
-`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;max-width:760px;height:auto;display:block" role="img" aria-label="Line chart showing Twitter sentiment leading Bitcoin price turning points by about two time steps, with an inset cross-correlation bar chart peaking at lag plus two">
-<style>
-@keyframes viz_crypto_draw{from{stroke-dashoffset:1500}to{stroke-dashoffset:0}}
-@keyframes viz_crypto_fade{from{opacity:0}to{opacity:1}}
-.viz_crypto-price{stroke-dasharray:1500;stroke-dashoffset:0;animation:viz_crypto_draw 2.4s ease-out forwards}
-.viz_crypto-sent{opacity:1;animation:viz_crypto_fade 1s ease-out 1.1s both}
-.viz_crypto-late{opacity:1;animation:viz_crypto_fade 1s ease-out .9s both}
-.viz_crypto-bar:hover rect{filter:brightness(1.15)}
-</style>
-<rect x="0" y="0" width="${W}" height="${H}" rx="10" fill="${C.bgOuter}"/>
-<rect x="${pad}" y="${pad}" width="${W-2*pad}" height="${H-2*pad}" rx="8" fill="${C.panel}"/>
-
-<text x="${pad+12}" y="${pad+22}" font-family="Inter,sans-serif" font-size="13.5" font-weight="600" fill="${C.text}">Does sentiment lead price? Cross-correlation says yes</text>
-<text x="${pad+12}" y="${pad+39}" font-family="Inter,sans-serif" font-size="11" fill="${C.muted}">Sentiment-leads-price + cross-correlation</text>
-
-${legend}
-
-<g font-family="Inter,sans-serif">
-${grid}
-${yticks}
-${xticks}
-
-<path d="${areaFrom(price)}" fill="${C.tealFillSoft}" class="viz_crypto-late"/>
-<path class="viz_crypto-price" d="${pathFrom(price)}" fill="none" stroke="${C.tealBright}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
-<path class="viz_crypto-sent" d="${pathFrom(sentiment)}" fill="none" stroke="${C.amber}" stroke-width="2" stroke-dasharray="6 4" stroke-linejoin="round" stroke-linecap="round"/>
-
-<g class="viz_crypto-late">${leads}${dots}</g>
-</g>
-
-<text x="${chL}" y="${chB+34}" font-family="Inter,sans-serif" font-size="10" fill="${C.tick}">time step (≈20 windows)</text>
-
-<rect x="${inL-14}" y="${inT-30}" width="${(inR-inL)+22}" height="${(inB-inT)+66}" rx="6" fill="${C.inset}" stroke="${C.grid}" stroke-width="1"/>
-<text x="${inL-6}" y="${inT-16}" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="${C.text}">Cross-correlation by lag</text>
-<text x="${inL-6}" y="${inT-3}" font-family="Inter,sans-serif" font-size="9.5" fill="${C.muted}">+ = sentiment leads price</text>
-<g font-family="Inter,sans-serif">
-${insetZero}
-${bars}
-<text x="${inL-6}" y="${(zeroY-3).toFixed(1)}" font-size="9" fill="${C.tick}">0</text>
-<text x="${((inL+inR)/2).toFixed(1)}" y="${(inB+30).toFixed(1)}" font-size="9.5" fill="${C.muted}" text-anchor="middle">lag (steps)</text>
-</g>
-
-<text x="${pad+12}" y="${H-pad-4}" font-family="Inter,sans-serif" font-size="9.5" fill="${C.tick}">VADER vs TextBlob benchmarked; LSTM; Elephas on Spark</text>
-</svg>`;
-  return svg;
+  var sentPath=smooth(sent), pricePath=smooth(price);
+  var dayTicks=[0,3,6,9,12,15], dayLabels=["D1","D4","D7","D10","D13","D16"];
+  var lags=[-3,-2,-1,0,1,2,3], corr=[0.10,0.22,0.40,0.58,0.86,0.62,0.30], peakIdx=4;
+  var rPlotX0=rightBoxX+34, rPlotX1=rightBoxX+rightBoxW-18, rPlotY0=96, rPlotY1=250;
+  var bw=(rPlotX1-rPlotX0)/lags.length, barW=bw*0.62;
+  var s='';
+  s+='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 '+H+'" style="width:100%;max-width:760px;height:auto;display:block" role="img" aria-label="Twitter sentiment leads Bitcoin price; cross-correlation peaks at a positive lag of about two days.">';
+  s+='<rect x="0" y="0" width="760" height="'+H+'" fill="#101010"/>';
+  s+='<rect x="'+leftBoxX+'" y="'+leftBoxY+'" width="'+leftBoxW+'" height="'+leftBoxH+'" rx="6" fill="#1A1A1A" stroke="#262626"/>';
+  s+='<rect x="'+rightBoxX+'" y="'+rightBoxY+'" width="'+rightBoxW+'" height="'+rightBoxH+'" rx="6" fill="#141414" stroke="#262626"/>';
+  s+='<text x="16" y="24" font-family="Inter,sans-serif" font-size="13.5" font-weight="600" fill="#F0F0F0">Does sentiment lead Bitcoin price?</text>';
+  s+='<text x="16" y="40" font-family="Inter,sans-serif" font-size="11" fill="#909090">Cross-correlation confirms a short lead</text>';
+  s+='<text x="'+(leftBoxX+16)+'" y="'+(leftBoxY+20)+'" font-family="Inter,sans-serif" font-size="11" fill="#909090">Normalized series over 16 days</text>';
+  var lgX=268, lgY=leftBoxY+16;
+  s+='<line x1="'+lgX+'" y1="'+lgY+'" x2="'+(lgX+16)+'" y2="'+lgY+'" stroke="#14A8AD" stroke-width="2.5"/>';
+  s+='<text x="'+(lgX+22)+'" y="'+(lgY+3.5)+'" font-family="Inter,sans-serif" font-size="10" fill="#F0F0F0">BTC price</text>';
+  s+='<line x1="'+(lgX+84)+'" y1="'+lgY+'" x2="'+(lgX+100)+'" y2="'+lgY+'" stroke="#E8A838" stroke-width="2.5"/>';
+  s+='<text x="'+(lgX+106)+'" y="'+(lgY+3.5)+'" font-family="Inter,sans-serif" font-size="10" fill="#F0F0F0">Sentiment</text>';
+  s+='<line x1="'+plotX0+'" y1="'+plotY1+'" x2="'+plotX1+'" y2="'+plotY1+'" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>';
+  for(var i=0;i<dayTicks.length;i++){
+    var tx=xAt(dayTicks[i]);
+    s+='<line x1="'+tx.toFixed(1)+'" y1="'+plotY1+'" x2="'+tx.toFixed(1)+'" y2="'+(plotY1+4)+'" stroke="#262626" stroke-width="1"/>';
+    s+='<text x="'+tx.toFixed(1)+'" y="'+(plotY1+16)+'" font-family="Inter,sans-serif" font-size="10" fill="#707070" text-anchor="middle">'+dayLabels[i]+'</text>';
+  }
+  s+='<path d="'+sentPath+'" fill="none" stroke="#E8A838" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity="0.92"/>';
+  s+='<path d="'+pricePath+'" fill="none" stroke="#14A8AD" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round"/>';
+  var sPeakX=xAt(4), pPeakX=xAt(6), brkY=plotY0+2;
+  s+='<line x1="'+sPeakX.toFixed(1)+'" y1="'+brkY+'" x2="'+pPeakX.toFixed(1)+'" y2="'+brkY+'" stroke="#909090" stroke-width="1"/>';
+  s+='<line x1="'+sPeakX.toFixed(1)+'" y1="'+brkY+'" x2="'+sPeakX.toFixed(1)+'" y2="'+(brkY+5)+'" stroke="#909090" stroke-width="1"/>';
+  s+='<line x1="'+pPeakX.toFixed(1)+'" y1="'+brkY+'" x2="'+pPeakX.toFixed(1)+'" y2="'+(brkY+5)+'" stroke="#909090" stroke-width="1"/>';
+  s+='<text x="'+((sPeakX+pPeakX)/2).toFixed(1)+'" y="'+(brkY-5)+'" font-family="Inter,sans-serif" font-size="10" fill="#E8A838" text-anchor="middle">sentiment leads ~2 days</text>';
+  s+='<text x="'+(rightBoxX+16)+'" y="'+(rightBoxY+20)+'" font-family="Inter,sans-serif" font-size="11.5" font-weight="600" fill="#F0F0F0">Cross-correlation by lag</text>';
+  s+='<line x1="'+rPlotX0+'" y1="'+rPlotY1+'" x2="'+rPlotX1+'" y2="'+rPlotY1+'" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>';
+  for(var j=0;j<lags.length;j++){
+    var cx=rPlotX0+bw*j+bw/2, bh=(rPlotY1-rPlotY0)*corr[j], by=rPlotY1-bh;
+    var isPk=(j===peakIdx);
+    var fillc=isPk?'rgba(232,168,56,0.35)':'rgba(13,115,119,0.35)';
+    var stroke=isPk?'#E8A838':'#14A8AD';
+    s+='<rect x="'+(cx-barW/2).toFixed(1)+'" y="'+by.toFixed(1)+'" width="'+barW.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="2" fill="'+fillc+'" stroke="'+stroke+'" stroke-width="1.2"/>';
+    var lab=(lags[j]>0?'+':'')+lags[j];
+    s+='<text x="'+cx.toFixed(1)+'" y="'+(rPlotY1+15)+'" font-family="Inter,sans-serif" font-size="10" fill="#707070" text-anchor="middle">'+lab+'</text>';
+  }
+  var pkCx=rPlotX0+bw*peakIdx+bw/2, pkBy=rPlotY1-(rPlotY1-rPlotY0)*corr[peakIdx];
+  s+='<text x="'+pkCx.toFixed(1)+'" y="'+(pkBy-6).toFixed(1)+'" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="#E8A838" text-anchor="middle">peak</text>';
+  s+='<text x="'+(rightBoxX+rightBoxW/2)+'" y="'+(rPlotY1+34)+'" font-family="Inter,sans-serif" font-size="10" fill="#909090" text-anchor="middle">+lag = sentiment leads price</text>';
+  s+='<text x="16" y="'+(H-12)+'" font-family="Inter,sans-serif" font-size="10" fill="#707070">VADER / TextBlob · LSTM · Elephas on Spark</text>';
+  s+='</svg>';
+  return s;
 }
 
 /* ==== nlToPython ==== */
@@ -2438,8 +2350,8 @@ function viz_patientCare(){
   s += `<rect x="${sx}" y="${sy.toFixed(1)}" width="${sideW}" height="${sH.toFixed(1)}" rx="6" fill="#101010" stroke="#262626"/>`;
   s += `<rect x="${sx}" y="${sy.toFixed(1)}" width="3" height="${sH.toFixed(1)}" rx="1.5" fill="#E8A838"/>`;
 
-  s += `<text x="${sx+16}" y="${(sy+22).toFixed(1)}" font-family="Inter,sans-serif" font-size="11" fill="#909090">Profit impact</text>`;
-  s += `<text x="${sx+16}" y="${(sy+52).toFixed(1)}" font-family="Inter,sans-serif" font-size="30" font-weight="600" fill="#E8A838">~$120M</text>`;
+  s += `<text x="${sx+16}" y="${(sy+22).toFixed(1)}" font-family="Inter,sans-serif" font-size="11" fill="#909090">Business impact</text>`;
+  s += `<text x="${sx+16}" y="${(sy+52).toFixed(1)}" font-family="Inter,sans-serif" font-size="30" font-weight="600" fill="#E8A838">~$2B</text>`;
   s += `<text x="${sx+16}" y="${(sy+69).toFixed(1)}" font-family="Inter,sans-serif" font-size="10" fill="#707070">delivered across portfolio</text>`;
 
   // divider
@@ -3307,6 +3219,58 @@ function viz_skillsMap(){
   return svg;
 }
 
+/* ==== renderSkills — skills board (HTML) ==== */
+function renderSkills(groups){
+  var accents = [
+    {dot:'#14A8AD', tintBg:'rgba(20,168,173,0.10)', tintBorder:'rgba(20,168,173,0.28)', tintText:'#7fd6da'},
+    {dot:'#0D7377', tintBg:'rgba(13,115,119,0.12)', tintBorder:'rgba(13,115,119,0.30)', tintText:'#5db8bb'},
+    {dot:'#2BB9A4', tintBg:'rgba(43,185,164,0.10)', tintBorder:'rgba(43,185,164,0.28)', tintText:'#8ad8cc'},
+    {dot:'#E8A838', tintBg:'rgba(232,168,56,0.10)', tintBorder:'rgba(232,168,56,0.26)', tintText:'#e8c587'},
+    {dot:'#1C8F9E', tintBg:'rgba(28,143,158,0.11)', tintBorder:'rgba(28,143,158,0.29)', tintText:'#74c2cd'},
+    {dot:'#3FC9C2', tintBg:'rgba(63,201,194,0.10)', tintBorder:'rgba(63,201,194,0.27)', tintText:'#94ddd9'}
+  ];
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  var css = ''
+    + '.sk_board{font-family:inherit;color:#F0F0F0;box-sizing:border-box;}'
+    + '.sk_board *{box-sizing:border-box;}'
+    + '.sk_grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;width:100%;max-width:852px;margin:0 auto;}'
+    + '.sk_card{position:relative;background:#1A1A1A;border:1px solid #262626;border-radius:14px;padding:18px 18px 16px 20px;overflow:hidden;}'
+    + '.sk_card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--sk_acc);}'
+    + '.sk_head{display:flex;align-items:center;gap:9px;margin:0 0 14px;}'
+    + '.sk_dot{width:9px;height:9px;border-radius:50%;background:var(--sk_acc);flex:0 0 auto;box-shadow:0 0 0 4px rgba(255,255,255,0.03);}'
+    + '.sk_label{font-size:13px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:#F0F0F0;line-height:1.3;}'
+    + '.sk_chips{display:flex;flex-wrap:wrap;gap:7px;}'
+    + '.sk_chip{font-size:12.5px;line-height:1.35;font-weight:500;color:var(--sk_ct);background:var(--sk_cbg);border:1px solid var(--sk_cbd);border-radius:7px;padding:5px 10px;white-space:normal;word-break:break-word;}'
+    + '@media (prefers-reduced-motion: no-preference){'
+    +   '.sk_card{opacity:0;transform:translateY(8px);animation:sk_rise .5s cubic-bezier(.2,.7,.3,1) forwards;}'
+    +   '.sk_chip{transition:transform .18s ease,background .18s ease,border-color .18s ease;}'
+    +   '.sk_chip:hover{transform:translateY(-2px);}'
+    +   '@keyframes sk_rise{to{opacity:1;transform:translateY(0);}}'
+    + '}'
+    + '@media (max-width:680px){'
+    +   '.sk_grid{grid-template-columns:1fr;gap:12px;}'
+    +   '.sk_card{padding:16px 16px 14px 18px;}'
+    +   '.sk_label{font-size:12px;}'
+    +   '.sk_chip{font-size:12px;}'
+    + '}';
+  var html = '<div class="sk_board"><style>' + css + '</style><div class="sk_grid">';
+  for(var g=0; g<groups.length; g++){
+    var grp = groups[g];
+    var a = accents[g % accents.length];
+    var st = '--sk_acc:'+a.dot+';--sk_cbg:'+a.tintBg+';--sk_cbd:'+a.tintBorder+';--sk_ct:'+a.tintText+';';
+    html += '<div class="sk_card" style="'+st+'animation-delay:'+(g*0.07)+'s;">';
+    html += '<div class="sk_head"><span class="sk_dot"></span><span class="sk_label">'+esc(grp.label)+'</span></div>';
+    html += '<div class="sk_chips">';
+    var items = grp.items || [];
+    for(var i=0; i<items.length; i++){
+      html += '<span class="sk_chip">'+esc(items[i])+'</span>';
+    }
+    html += '</div></div>';
+  }
+  html += '</div></div>';
+  return html;
+}
+
 /* ==== registry + wiring ==== */
 var NAME2KEY = {"Voice & Sensor Home Automation":"homeAuto","Library Book Recommendation System":"libraryRec","Major US Retailer | Item Plan & Demand Forecasting":"itemPlan","License Plate Recognition": "licensePlate", "RoboCar": "roboCar", "Music Mood Recommendation System": "musicMood", "Gujarati/Hindi → English Transliteration": "transliteration", "Natural Language → Python Platform": "nlToPython", "Plug & Predict — Treatment Pathway Predictor": "plugPredict", "Depression Detection via Social Media": "depression", "NYC Cab Demand Prediction + Dynamic Routing": "cabDemand", "Crypto Sentiment Analysis — Twitter → Bitcoin Price": "crypto", "PARTH — Predictive Analytics & Real-Time Heuristics": "parth", "Annual Sales Forecasting Revamp": "salesForecast", "Major US Energy Utility | Distribution Fault Prediction & Rerouting": "energyGrid", "Global Battery Manufacturer | Demand Forecasting": "battery", "Global Pharma Client | Patient Care Portfolio": "patientCare", "Global Pharma Client | Vaccine Smart Ordering": "vaccine", "CPG Manufacturer | Forecast Explainability": "forecastExplain"};
 var VIZ = {skillsMap:viz_skillsMap,homeAuto:viz_homeAuto,libraryRec:viz_libraryRec,itemPlan:viz_itemPlan,licensePlate:viz_licensePlate, musicMood:viz_musicMood, depression:viz_depression, parth:viz_parth, energyGrid:viz_energyGrid, causalML:viz_causalML, forecastExplain:viz_forecastExplain, salesForecast:viz_salesForecast, roboCar:viz_roboCar, crypto:viz_crypto, nlToPython:viz_nlToPython, transliteration:viz_transliteration, cabDemand:viz_cabDemand, battery:viz_battery, plugPredict:viz_plugPredict, vaccine:viz_vaccine, patientCare:viz_patientCare, impactDashboard:viz_impactDashboard, skillsRadar:viz_skillsRadar, domainDonut:viz_domainDonut};
@@ -3317,7 +3281,7 @@ var VIZ = {skillsMap:viz_skillsMap,homeAuto:viz_homeAuto,libraryRec:viz_libraryR
     if(el && typeof fn==='function'){ try{ el.innerHTML=fn(); }catch(e){ console.error('viz '+id+' failed', e); } }
   }
   function init(){
-    put('skillsMapViz', typeof viz_skillsMap==='function' ? viz_skillsMap : null);
+    // skills rendered as an HTML board (renderSkills) from index.html
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
