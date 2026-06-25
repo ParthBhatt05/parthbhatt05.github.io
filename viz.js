@@ -3195,7 +3195,6 @@ var VIZ = {homeAuto:viz_homeAuto,libraryRec:viz_libraryRec,itemPlan:viz_itemPlan
   }
   function init(){
     put('skillsRadarViz', typeof viz_skillsRadar==='function' ? viz_skillsRadar : null);
-    put('domainDonutViz', typeof viz_domainDonut==='function' ? viz_domainDonut : null);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
